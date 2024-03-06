@@ -18,7 +18,7 @@ namespace Momentum.Pixel.DynamoDb.PageViews.Models
         public Guid CookieId { get; set; }
 
         /// <summary>
-        /// Gets or sets the timestamp.
+        /// Gets or sets the timestamp in milliseconds since epoch.
         /// </summary>
         public long UtcTimestamp { get; set; }
 
