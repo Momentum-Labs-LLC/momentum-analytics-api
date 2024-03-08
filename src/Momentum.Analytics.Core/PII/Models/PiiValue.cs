@@ -1,0 +1,28 @@
+namespace Momentum.Analytics.Core.PII.Models
+{
+    /// <summary>
+    /// A way to capture pii without directly associating it with the user it came from.
+    /// </summary>
+    public class PiiValue
+    {
+        /// <summary>
+        /// Gets or sets the identifier.
+        /// </summary>
+        public Guid Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the hashed pii value.
+        /// </summary>
+        public string Value { get; set; }
+
+        /// <summary>
+        /// Gets or sets the algorith used to hash the PII.
+        /// </summary>
+        public HashAlgorithmEnum HashAlgorithm { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the type of pii.
+        /// </summary>
+        public PiiTypeEnum PiiType { get; set; }
+    } // end class
+} // end namespace
