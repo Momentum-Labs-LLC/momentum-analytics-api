@@ -1,15 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Net;
 using Microsoft.Extensions.Logging;
+using Momentum.Analytics.Core.Interfaces;
+using Momentum.Analytics.Core.Models;
 using Momentum.Analytics.Core.PageViews.Interfaces;
 using Momentum.Analytics.Core.PageViews.Models;
 using Momentum.Analytics.Core.PII.Interfaces;
 using Momentum.Analytics.Core.PII.Models;
-using Momentum.Analytics.Core.Visits;
 using Momentum.Analytics.Core.Visits.Interfaces;
+using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.Pii;
 using Moq;
 
@@ -17,22 +15,16 @@ namespace Momentum.Analytics.Processing.Tests.Pii
 {
     public class CollectedPiiProcessorTests
     {
-        private Mock<IPageViewService> _pageViewService;
-        private Mock<IPiiService> _piiService;
-        private Mock<IIdentifiedVisitService> _visitService;        
+        private Mock<IVisitService> _visitService;        
         private Mock<ILogger<CollectedPiiProcessor>> _logger;
         private CollectedPiiProcessor _processor;
 
         public CollectedPiiProcessorTests()
         {
-            _pageViewService = new Mock<IPageViewService>();
-            _piiService = new Mock<IPiiService>();
-            _visitService = new Mock<IIdentifiedVisitService>();
+            _visitService = new Mock<IVisitService>();
             _logger = new Mock<ILogger<CollectedPiiProcessor>>();
 
             _processor = new CollectedPiiProcessor(
-                _pageViewService.Object,
-                _piiService.Object,
                 _visitService.Object,
                 _logger.Object);
         } // end method
@@ -70,125 +62,127 @@ namespace Momentum.Analytics.Processing.Tests.Pii
             };
         } // end method
 
-        protected PageView BuildPageView(CollectedPii collectedPii, DateTime utcTimestamp)
+        protected Visit BuildVisit(Guid cookieId, DateTime utcTimestamp)
         {
-            return new PageView()
+            return new Visit()
             {
-                RequestId = Guid.NewGuid().ToString(),
-                CookieId = collectedPii.CookieId,
-                UtcTimestamp = utcTimestamp,
-                Domain = "test.com",
-                Path = "index",
-                ReferrerDomain = "google.com",
+                Id = Guid.NewGuid(),
+                CookieId = cookieId,
+                UtcStart = utcTimestamp,
+                Referrer = "test.com",
                 FunnelStep = 0
             };
         } // end method
 
         [Fact]
-        public async Task ProcessAsync_NoPii_NewUserId_NewIdentifiedVisit()
+        public async Task ProcessAsync_NoActiveVisit_NoUnidentifiedVisits()
         {
             var userId = BuildUserId("12345");
             var collectedPii = BuildCollectedPii(userId);
-            _piiService.Setup(x => x.GetByCookieIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PiiValue>() { userId });
             
-            var pageView = BuildPageView(collectedPii, collectedPii.UtcTimestamp.AddMinutes(-1));
-            _pageViewService.Setup(x => x.GetByCookieAsync(collectedPii.CookieId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PageView>() 
-                {
-                    pageView
+            _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Visit)null);
+
+            _visitService.Setup(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            _visitService.Setup(x => x.SearchAsync(It.IsAny<IVisitSearchRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new SearchResponse<Visit>() { Total = 0, HasMore = false, Data = null });            
+
+            await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
+            
+            _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
+            _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);
+            _visitService.Verify(x => x.SearchAsync(It.IsAny<IVisitSearchRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+        } // end method
+
+        [Fact]
+        public async Task ProcessAsync_ActiveVisit_Identified_Improved()
+        {
+            var userId = BuildUserId("12345");
+            var collectedPii = BuildCollectedPii(userId);
+            
+            var activeVisit = BuildVisit(collectedPii.CookieId, collectedPii.UtcTimestamp);
+            activeVisit.PiiType = PiiTypeEnum.Email;
+            activeVisit.PiiValue = "asdfasdfasdf";
+            activeVisit.UtcIdentifiedTimestamp = DateTime.UtcNow.AddMinutes(-5);
+            _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(activeVisit);
+
+            _visitService.Setup(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            _visitService.Setup(x => x.SearchAsync(It.IsAny<IVisitSearchRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new SearchResponse<Visit>() { Total = 0, HasMore = false, Data = null });            
+
+            await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
+            
+            _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
+            _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);
+            _visitService.Verify(x => x.SearchAsync(It.IsAny<IVisitSearchRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+        } // end method
+
+        [Fact]
+        public async Task ProcessAsync_ActiveUnidentified_OldUnidentified()
+        {
+            var userId = BuildUserId("12345");
+            var collectedPii = BuildCollectedPii(userId);
+            
+            var activeVisit = BuildVisit(collectedPii.CookieId, collectedPii.UtcTimestamp);
+            activeVisit.PiiType = PiiTypeEnum.Email;
+            activeVisit.PiiValue = "asdfasdfasdf";
+            activeVisit.UtcIdentifiedTimestamp = DateTime.UtcNow.AddMinutes(-5);
+            _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(activeVisit);
+
+            _visitService.Setup(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            _visitService.SetupSequence(x => x.SearchAsync(It.IsAny<IVisitSearchRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new SearchResponse<Visit>() 
+                { 
+                    Total = 2, 
+                    HasMore = true, 
+                    Data = new List<Visit>() { activeVisit } 
+                })
+                .ReturnsAsync(new SearchResponse<Visit>() 
+                { 
+                    Total = 2,
+                    HasMore = false, 
+                    Data = new List<Visit>() { BuildVisit(collectedPii.CookieId, DateTime.UtcNow.AddDays(-2)) } 
                 });
 
-            _visitService.Setup(x => x.CreateVisitAsync(collectedPii.Pii, It.IsAny<IEnumerable<PageView>>(), It.IsAny<CancellationToken>()))
+            await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
+            
+            _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
+            _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+            _visitService.Verify(x => x.SearchAsync(It.IsAny<IVisitSearchRequest>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+        } // end method
+    
+        [Fact]
+        public async Task ProcessAsync_ActiveIdentified_NotImproved()
+        {
+            var userId = BuildEmail("abc@123.com");
+            var collectedPii = BuildCollectedPii(userId);
+            
+            var activeVisit = BuildVisit(collectedPii.CookieId, collectedPii.UtcTimestamp);
+            activeVisit.PiiType = PiiTypeEnum.UserId;
+            activeVisit.PiiValue = "12345";
+            activeVisit.UtcIdentifiedTimestamp = DateTime.UtcNow.AddMinutes(-5);
+            _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(activeVisit);
+
+            _visitService.Setup(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
-            
-            _piiService.Verify(x => x.GetByCookieIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Once);
-            _pageViewService.Verify(x => x.GetByCookieAsync(collectedPii.CookieId, It.IsAny<CancellationToken>()), Times.Once);
-            _visitService.Verify(x => x.CreateVisitAsync(collectedPii.Pii, It.IsAny<IEnumerable<PageView>>(), It.IsAny<CancellationToken>()), Times.Once);
-            _visitService.Verify(x => x.GetActiveVisitAsync(It.IsAny<PiiValue>(), It.IsAny<CancellationToken>()), Times.Never);
-            _visitService.Verify(x => x.UpdatePiiAsync(It.IsAny<IdentifiedVisit>(), It.IsAny<PiiValue>(), It.IsAny<CancellationToken>()), Times.Never);
-        } // end method
-
-        [Fact]
-        public async Task ProcessAsync_NoPii_NewUserId_NoPageViews()
-        {
-            var userId = BuildUserId("12345");
-            var collectedPii = BuildCollectedPii(userId);
-            _piiService.Setup(x => x.GetByCookieIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PiiValue>() { userId });
-            
-            _pageViewService.Setup(x => x.GetByCookieAsync(collectedPii.CookieId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PageView>() {});
-
-            _visitService.Setup(x => x.CreateVisitAsync(collectedPii.Pii, It.IsAny<IEnumerable<PageView>>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
+            _visitService.Setup(x => x.SearchAsync(It.IsAny<IVisitSearchRequest>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new SearchResponse<Visit>() { Total = 0, HasMore = false, Data = null });            
 
             await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
             
-            _piiService.Verify(x => x.GetByCookieIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Once);
-            _pageViewService.Verify(x => x.GetByCookieAsync(collectedPii.CookieId, It.IsAny<CancellationToken>()), Times.Once);
-            _visitService.Verify(x => x.CreateVisitAsync(collectedPii.Pii, It.IsAny<IEnumerable<PageView>>(), It.IsAny<CancellationToken>()), Times.Never);
-            _visitService.Verify(x => x.GetActiveVisitAsync(It.IsAny<PiiValue>(), It.IsAny<CancellationToken>()), Times.Never);
-            _visitService.Verify(x => x.UpdatePiiAsync(It.IsAny<IdentifiedVisit>(), It.IsAny<PiiValue>(), It.IsAny<CancellationToken>()), Times.Never);
-        } // end method
-
-        [Fact]
-        public async Task ProcessAsync_ExistingValue()
-        {
-            var userId = BuildUserId("12345");
-            var sameUserId = BuildUserId("12345");
-            var collectedPii = BuildCollectedPii(userId);
-            _piiService.Setup(x => x.GetByCookieIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PiiValue>() { userId, sameUserId });
-
-            await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
-            
-            _piiService.Verify(x => x.GetByCookieIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Once);
-            _pageViewService.Verify(x => x.GetByCookieAsync(collectedPii.CookieId, It.IsAny<CancellationToken>()), Times.Never);
-            _visitService.Verify(x => x.CreateVisitAsync(collectedPii.Pii, It.IsAny<IEnumerable<PageView>>(), It.IsAny<CancellationToken>()), Times.Never);
-            _visitService.Verify(x => x.GetActiveVisitAsync(It.IsAny<PiiValue>(), It.IsAny<CancellationToken>()), Times.Never);
-            _visitService.Verify(x => x.UpdatePiiAsync(It.IsAny<IdentifiedVisit>(), It.IsAny<PiiValue>(), It.IsAny<CancellationToken>()), Times.Never);
-        } // end method
-
-        [Fact]
-        public async Task ProcessAsync_NewUserId_UpdatedPii()
-        {
-            var email = BuildEmail("abc@test.com");
-            var userId = BuildUserId("12345");
-
-            var collectedPii = BuildCollectedPii(userId);
-            _piiService.Setup(x => x.GetByCookieIdAsync(collectedPii.CookieId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PiiValue>() { userId, email });
-            
-            var pageView = BuildPageView(collectedPii, collectedPii.UtcTimestamp.AddMinutes(-1));
-            _pageViewService.Setup(x => x.GetByCookieAsync(collectedPii.CookieId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PageView>() 
-                {
-                    pageView
-                });
-
-            var visit = new IdentifiedVisit()
-                {
-                    PiiValue = email.Value,
-                    PiiType = email.PiiType,
-                    UtcVisitStart = pageView.UtcTimestamp,
-                    UtcTimestamp = pageView.UtcTimestamp
-                };
-            _visitService.Setup(x => x.GetActiveVisitAsync(email, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(visit);
-
-            _visitService.Setup(x => x.UpdatePiiAsync(visit, userId, It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
-
-            await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
-            
-            _piiService.Verify(x => x.GetByCookieIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Once);
-            _pageViewService.Verify(x => x.GetByCookieAsync(collectedPii.CookieId, It.IsAny<CancellationToken>()), Times.Never);
-            _visitService.Verify(x => x.CreateVisitAsync(collectedPii.Pii, It.IsAny<IEnumerable<PageView>>(), It.IsAny<CancellationToken>()), Times.Never);
-            _visitService.Verify(x => x.GetActiveVisitAsync(It.IsAny<PiiValue>(), It.IsAny<CancellationToken>()), Times.Once);
-            _visitService.Verify(x => x.UpdatePiiAsync(It.IsAny<IdentifiedVisit>(), It.IsAny<PiiValue>(), It.IsAny<CancellationToken>()), Times.Once);
+            _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
+            _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Never);
+            _visitService.Verify(x => x.SearchAsync(It.IsAny<IVisitSearchRequest>(), It.IsAny<CancellationToken>()), Times.Once);
         } // end method
     } // end class
 } // end namespace

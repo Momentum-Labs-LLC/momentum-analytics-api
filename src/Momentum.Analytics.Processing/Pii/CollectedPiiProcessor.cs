@@ -1,87 +1,94 @@
 using Microsoft.Extensions.Logging;
+using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.PageViews.Interfaces;
+using Momentum.Analytics.Core.PageViews.Models;
 using Momentum.Analytics.Core.PII.Interfaces;
 using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits;
 using Momentum.Analytics.Core.Visits.Interfaces;
+using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.Pii.Interfaces;
 
 namespace Momentum.Analytics.Processing.Pii
 {
     public class CollectedPiiProcessor : ICollectedPiiProcessor
     {
-        protected readonly IPageViewService _pageViewService;
-        protected readonly IPiiService _piiService;
-        protected readonly IIdentifiedVisitService _visitService;        
+        protected readonly IVisitService _visitService;        
         protected readonly ILogger _logger;
 
         public CollectedPiiProcessor(
-            IPageViewService pageViewService,
-            IPiiService piiService,
-            IIdentifiedVisitService visitService,            
+            IVisitService visitService,            
             ILogger<CollectedPiiProcessor> logger)
         {
-            _pageViewService = pageViewService ?? throw new ArgumentNullException(nameof(pageViewService));
-            _piiService = piiService ?? throw new ArgumentNullException(nameof(piiService));
             _visitService = visitService ?? throw new ArgumentNullException(nameof(visitService));            
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
         public async Task ProcessAsync(CollectedPii collectedPii, CancellationToken token = default)
         {
-            var doesPiiAlreadyExistForThisCookie = false;
-            var existingPii = await _piiService.GetByCookieIdAsync(collectedPii.CookieId, token).ConfigureAwait(false);            
-
-            if(existingPii != null && existingPii.Any())
+            var activeVisit = await _visitService.GetByActivityAsync(collectedPii, token).ConfigureAwait(false);
+            if(activeVisit == null)
             {
-                // remove the Pii we are doing processing for as it is "new"
-                existingPii = existingPii.Where(x => x.Id != collectedPii.Pii.Id);
+                // create a new visit
+                activeVisit = new Visit()
+                {
+                    Id = Guid.NewGuid(),
+                    CookieId = collectedPii.CookieId,
+                    UtcStart = collectedPii.UtcTimestamp,
+                    PiiType = collectedPii.Pii.PiiType,
+                    PiiValue = collectedPii.Pii.Value,
+                    UtcIdentifiedTimestamp = collectedPii.UtcTimestamp,
+                };
+
+                await _visitService.UpsertAsync(activeVisit, token).ConfigureAwait(false);
+            }
+            else if(activeVisit.PiiType != null && activeVisit.PiiType >= collectedPii.Pii.PiiType)
+            {
+                activeVisit.PiiType = collectedPii.Pii.PiiType;
+                activeVisit.PiiValue = collectedPii.Pii.Value;
+                activeVisit.UtcIdentifiedTimestamp = collectedPii.UtcTimestamp;
+                
+                await _visitService.UpsertAsync(activeVisit, token).ConfigureAwait(false);
             } // end if
 
-            if(existingPii == null || !existingPii.Any())
+            // are there any unidentified visits for this cookie?
+            var identifiedVisits = await HandleUnidentifiedVisitsAsync(collectedPii, token);
+            _logger.LogDebug("Identified {Count} visits.", identifiedVisits);
+        } // end method
+    
+        protected async Task<int> HandleUnidentifiedVisitsAsync(CollectedPii collectedPii, CancellationToken token = default)
+        {
+            var result = 0;
+            var visitSearch = new VisitSearchRequest() 
+            { 
+                CookieId = collectedPii.CookieId,
+                IsIdentified = false
+            };
+            ISearchResponse<Visit> visits = null;
+            do
             {
-                // this is the first pii received for this cookie
-                var pageViews = await _pageViewService.GetByCookieAsync(collectedPii.CookieId, token).ConfigureAwait(false);
+                // fill the visit searchResponse
+                visits = await _visitService.SearchAsync(visitSearch, token).ConfigureAwait(false);
 
-                // are there any pageviews?
-                if(pageViews != null && pageViews.Any())
+                if(visits != null && visits.Data != null && visits.Data.Any())
                 {
-                    // group by visit periods
-                    var visitGroups = pageViews.GroupBy(x => x.UtcTimestamp.Date);
-                    foreach(var visitGroup in visitGroups)
+                    foreach(var visit in visits.Data.Where(x => string.IsNullOrWhiteSpace(x.PiiValue)))
                     {
-                        // create a visit for each group
-                        await _visitService.CreateVisitAsync(collectedPii.Pii, visitGroup, token).ConfigureAwait(false);
-                    } // end method
+                        visit.PiiValue = collectedPii.Pii.Value;
+                        visit.PiiType = collectedPii.Pii.PiiType;
+                        visit.UtcIdentifiedTimestamp = DateTime.UtcNow;
+
+                        // TODO: move to a batch upsert?
+                        await _visitService.UpsertAsync(visit, token).ConfigureAwait(false);
+                        result++;
+                    } // end foreach                        
                 } // end if
-            }
-            else if(!existingPii.Any(x => x.Value.Equals(collectedPii.Pii.Value)))
-            {
-                // this is new pii for a cookie that already has other pii
-                // get the most important pii that we currently have
-                var orderedPii = existingPii.OrderBy(x => x.PiiType);
 
-                IdentifiedVisit activeVisit = null;
+                // increment visitsearch page before next loop.
+                visitSearch.Page += 1;
+            } while(visits.HasMore);
 
-                // foreach piece of pii that already exists
-                foreach(var pii in orderedPii)
-                {
-                    // get the visit currently being recorded under the pii
-                    activeVisit = await _visitService.GetActiveVisitAsync(pii, token).ConfigureAwait(false);
-
-                    // if there is an active visit associated with this 
-                    if(activeVisit != null
-                        // and the collected pii we are processing is more important than the pii associated with the active visit.
-                      && collectedPii.Pii.PiiType <= activeVisit.PiiType)
-                    {
-                        await _visitService.UpdatePiiAsync(activeVisit, collectedPii.Pii, token).ConfigureAwait(false);
-                    } // end if
-                } // end foreach
-            }
-            else
-            {
-                _logger.LogDebug("This pii already exists with this cookie.");
-            } // end if
+            return result;
         } // end method
     } // end class
 } // end namespace

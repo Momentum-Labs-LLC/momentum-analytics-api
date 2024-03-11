@@ -1,24 +1,17 @@
+using Momentum.Analytics.Core.Interfaces;
+using Momentum.Analytics.Core.Models;
+
 namespace Momentum.Analytics.Core.PageViews.Models
 {
     /// <summary>
     /// A class representing a users viewing of a specific web page.
     /// </summary>
-    public class PageView
+    public class PageView : UserActivity
     {
         /// <summary>
         /// Gets or sets the request id.
         /// </summary>
         public string RequestId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the cookie id.
-        /// </summary>
-        public Guid CookieId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the timestamp.
-        /// </summary>
-        public DateTime UtcTimestamp { get; set; }
 
         /// <summary>
         /// Gets or sets the domain of the page being viewed.

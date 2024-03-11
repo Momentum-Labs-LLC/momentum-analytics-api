@@ -1,8 +1,7 @@
 using Microsoft.Extensions.Logging;
-using Momentum.Analytics.Core.PageViews.Interfaces;
 using Momentum.Analytics.Core.PageViews.Models;
 using Momentum.Analytics.Core.PII.Interfaces;
-using Momentum.Analytics.Core.Visits;
+using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Processing.PageViews.Interfaces;
 
@@ -11,12 +10,12 @@ namespace Momentum.Analytics.Processing.PageViews
     public class PageViewProcessor : IPageViewProcessor
     {
         protected readonly IPiiService _piiService;
-        protected readonly IIdentifiedVisitService _visitService;
+        protected readonly IVisitService _visitService;
         protected readonly ILogger _logger;
 
         public PageViewProcessor(
             IPiiService piiService,
-            IIdentifiedVisitService visitService,
+            IVisitService visitService,
             ILogger<PageViewProcessor> logger)
         {
             _piiService = piiService ?? throw new ArgumentNullException(nameof(piiService));
@@ -25,24 +24,65 @@ namespace Momentum.Analytics.Processing.PageViews
         } // end method
 
         public virtual async Task ProcessAsync(PageView pageView, CancellationToken token = default)
-        {
-            var piiValues = await _piiService.GetByCookieIdAsync(pageView.CookieId, token).ConfigureAwait(false);
-            
-            if(piiValues != null && piiValues.Any())
+        {   
+            var hasUpsert = false;
+            var activeVisit = await _visitService.GetByActivityAsync(pageView, token).ConfigureAwait(false);
+            if(activeVisit == null)
             {
-                var preferredPii = piiValues.OrderBy(x => x.PiiType).First();
-                var activeVisit = await _visitService.GetActiveVisitAsync(preferredPii, token).ConfigureAwait(false);
-                if(activeVisit != null)
+                hasUpsert = true;
+                activeVisit = new Core.Visits.Models.Visit()
                 {
-                    if(activeVisit.FunnelStep < pageView.FunnelStep)
+                    Id = Guid.NewGuid(),
+                    CookieId = pageView.CookieId,
+                    UtcStart = pageView.UtcTimestamp,
+                    UtcExpiration = DateTime.UtcNow.AddDays(1).Date,
+                    FunnelStep = pageView.FunnelStep                    
+                };
+            }
+
+            if(activeVisit.UtcStart > pageView.UtcTimestamp)
+            {
+                activeVisit.UtcStart = pageView.UtcTimestamp;
+                hasUpsert = true;
+            } // end if
+
+            if(activeVisit.FunnelStep < pageView.FunnelStep)
+            {
+                activeVisit.FunnelStep = pageView.FunnelStep;
+                hasUpsert = true;
+            } // end if
+
+            if(string.IsNullOrWhiteSpace(activeVisit.Referrer)
+                && !string.IsNullOrWhiteSpace(pageView.ReferrerDomain))
+            {
+                activeVisit.Referrer = pageView.ReferrerDomain;
+                activeVisit.Source = pageView.UtmParameters?.FirstOrDefault(x => x.Parameter == UrchinParameterEnum.Source)?.Value;
+                activeVisit.Medium = pageView.UtmParameters?.FirstOrDefault(x => x.Parameter == UrchinParameterEnum.Medium)?.Value;
+
+                hasUpsert = true;
+            } // end if
+            
+            if(activeVisit.PiiType == null || activeVisit.PiiType > PiiTypeEnum.UserId)
+            {
+                var piiValues = await _piiService.GetByCookieIdAsync(pageView.CookieId, token).ConfigureAwait(false);
+                if(piiValues != null && piiValues.Any())
+                {
+                    var preferredPii = piiValues.OrderBy(x => x.PiiType).First();
+                    
+                    if(preferredPii.PiiType < activeVisit.PiiType)
                     {
-                        await _visitService.UpdateFunnelStepAsync(activeVisit, pageView.FunnelStep, token).ConfigureAwait(false);
+                        activeVisit.PiiValue = preferredPii.Value;
+                        activeVisit.PiiType = preferredPii.PiiType;
+                        activeVisit.UtcIdentifiedTimestamp = DateTime.UtcNow;
+
+                        hasUpsert = true;
                     } // end if
-                } 
-                else
-                {
-                    await _visitService.CreateVisitAsync(preferredPii, new List<PageView>() { pageView }, token).ConfigureAwait(false);
                 } // end if
+            } // end if
+
+            if(hasUpsert)
+            {
+                await _visitService.UpsertAsync(activeVisit, token).ConfigureAwait(false);
             } // end if
         } // end method
     } // end class

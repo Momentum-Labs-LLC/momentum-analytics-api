@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.PageViews.Models;
 using Momentum.Analytics.Core.PII.Interfaces;
 using Momentum.Analytics.Core.PII.Models;
-using Momentum.Analytics.Core.Visits;
 using Momentum.Analytics.Core.Visits.Interfaces;
+using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.PageViews;
 using Moq;
 
@@ -16,14 +13,14 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
     public class PageViewProcessorTests
     {
         private Mock<IPiiService> _piiService;
-        private Mock<IIdentifiedVisitService> _visitService;
+        private Mock<IVisitService> _visitService;
         private Mock<ILogger<PageViewProcessor>> _logger;
         private PageViewProcessor _processor;
 
         public PageViewProcessorTests()
         {
             _piiService = new Mock<IPiiService>();
-            _visitService = new Mock<IIdentifiedVisitService>();
+            _visitService = new Mock<IVisitService>();
             _logger = new Mock<ILogger<PageViewProcessor>>();
             _processor = new PageViewProcessor(_piiService.Object, _visitService.Object, _logger.Object);
         } // end method
@@ -43,9 +40,20 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
         } // end method
 
         [Fact]
-        public async Task ProcessAsync_NoPii()
+        public async Task ProcessAsync_VisitExists_NoPii()
         {
             var pageView = BuildPageView();
+
+            _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new Visit()
+                {
+                    Id = Guid.NewGuid(),
+                    CookieId = pageView.CookieId,
+                    Referrer = pageView.ReferrerDomain,
+                    FunnelStep = pageView.FunnelStep,
+                    UtcStart = pageView.UtcTimestamp.AddMinutes(-1),
+                    UtcExpiration = DateTime.UtcNow.Date.AddDays(1)
+                });
 
             _piiService.Setup(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<PiiValue>());
@@ -53,9 +61,8 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
             await _processor.ProcessAsync(pageView).ConfigureAwait(false);
 
             _piiService.Verify(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()), Times.Once);
-            _visitService.Verify(x => x.GetActiveVisitAsync(It.IsAny<PiiValue>(), It.IsAny<CancellationToken>()), Times.Never);
-            _visitService.Verify(x => x.UpdateFunnelStepAsync(It.IsAny<IdentifiedVisit>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
-            _visitService.Verify(x => x.CreateVisitAsync(It.IsAny<PiiValue>(), It.IsAny<IEnumerable<PageView>>(), It.IsAny<CancellationToken>()), Times.Never);
+            _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
+            _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Never);
         } // end method
 
         [Fact]
@@ -76,18 +83,17 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     userId
                 });
 
-            _visitService.Setup(x => x.GetActiveVisitAsync(userId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync((IdentifiedVisit)null);
+            _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Visit)null);
 
-            _visitService.Setup(x => x.CreateVisitAsync(userId, It.IsAny<IEnumerable<PageView>>(), It.IsAny<CancellationToken>()))
+            _visitService.Setup(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             await _processor.ProcessAsync(pageView).ConfigureAwait(false);
 
             _piiService.Verify(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()), Times.Once);
-            _visitService.Verify(x => x.GetActiveVisitAsync(It.IsAny<PiiValue>(), It.IsAny<CancellationToken>()), Times.Once);
-            _visitService.Verify(x => x.UpdateFunnelStepAsync(It.IsAny<IdentifiedVisit>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
-            _visitService.Verify(x => x.CreateVisitAsync(It.IsAny<PiiValue>(), It.IsAny<IEnumerable<PageView>>(), It.IsAny<CancellationToken>()), Times.Once);
+            _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
+            _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);
         } // end method
 
         [Fact]
@@ -108,21 +114,22 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     userId
                 });
 
-            _visitService.Setup(x => x.GetActiveVisitAsync(userId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new IdentifiedVisit()
+            _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new Visit()
                 {
+                    Id = Guid.NewGuid(),
+                    CookieId = Guid.NewGuid(),
                     PiiValue = userId.Value,
                     PiiType = userId.PiiType,
-                    UtcTimestamp = pageView.UtcTimestamp.AddMinutes(-2),
+                    UtcIdentifiedTimestamp = pageView.UtcTimestamp.AddMinutes(-2),
                     FunnelStep = 0
                 });
 
             await _processor.ProcessAsync(pageView).ConfigureAwait(false);
-
-            _piiService.Verify(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()), Times.Once);
-            _visitService.Verify(x => x.GetActiveVisitAsync(It.IsAny<PiiValue>(), It.IsAny<CancellationToken>()), Times.Once);
-            _visitService.Verify(x => x.UpdateFunnelStepAsync(It.IsAny<IdentifiedVisit>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
-            _visitService.Verify(x => x.CreateVisitAsync(It.IsAny<PiiValue>(), It.IsAny<IEnumerable<PageView>>(), It.IsAny<CancellationToken>()), Times.Never);
+            
+            _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
+            _piiService.Verify(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()), Times.Never);
+            _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);            
         } // end method
 
         [Fact]
@@ -143,21 +150,50 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     userId
                 });
 
-            _visitService.Setup(x => x.GetActiveVisitAsync(userId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new IdentifiedVisit()
+            _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new Visit()
                 {
+                    Id= Guid.NewGuid(),
+                    CookieId = Guid.NewGuid(),
                     PiiValue = userId.Value,
                     PiiType = userId.PiiType,
-                    UtcTimestamp = pageView.UtcTimestamp.AddMinutes(-2),
-                    FunnelStep = 0
+                    UtcIdentifiedTimestamp = pageView.UtcTimestamp.AddMinutes(-2),
                 });
 
             await _processor.ProcessAsync(pageView).ConfigureAwait(false);
 
-            _piiService.Verify(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()), Times.Once);
-            _visitService.Verify(x => x.GetActiveVisitAsync(It.IsAny<PiiValue>(), It.IsAny<CancellationToken>()), Times.Once);
-            _visitService.Verify(x => x.UpdateFunnelStepAsync(It.IsAny<IdentifiedVisit>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
-            _visitService.Verify(x => x.CreateVisitAsync(It.IsAny<PiiValue>(), It.IsAny<IEnumerable<PageView>>(), It.IsAny<CancellationToken>()), Times.Never);
+            _piiService.Verify(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()), Times.Never);
+            _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
+            _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);
+        } // end method
+
+        [Fact]
+        public async Task ProcessAsync_ExistingVisit_WithUserId()
+        {
+            var pageView = BuildPageView();
+
+            _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new Visit()
+                {
+                    Id = Guid.NewGuid(),
+                    CookieId = pageView.CookieId,
+                    Referrer = pageView.ReferrerDomain,
+                    FunnelStep = pageView.FunnelStep,
+                    UtcStart = pageView.UtcTimestamp.AddMinutes(-1),
+                    UtcExpiration = DateTime.UtcNow.Date.AddDays(1),
+                    PiiType = PiiTypeEnum.UserId,
+                    PiiValue = "12345",
+                    UtcIdentifiedTimestamp = DateTime.UtcNow.AddMinutes(-1)
+                });
+
+            _piiService.Setup(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new List<PiiValue>());
+
+            await _processor.ProcessAsync(pageView).ConfigureAwait(false);
+
+            _piiService.Verify(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()), Times.Never);
+            _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
+            _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Never);
         } // end method
     } // end class
 } // end namespace

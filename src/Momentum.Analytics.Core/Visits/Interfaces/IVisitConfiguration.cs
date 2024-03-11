@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace Momentum.Analytics.Core.Visits.Interfaces
 {
     public interface IVisitConfiguration
@@ -18,8 +13,8 @@ namespace Momentum.Analytics.Core.Visits.Interfaces
         TimeSpan WindowLength { get; }
 
         /// <summary>
-        /// An offset of the day to start queries from.
+        /// Gets the time to cache locally.
         /// </summary>
-        TimeSpan FixedOffset { get; }
+        TimeSpan LocalCacheExpiration { get; }
     } // end interface
 } // end namespace
