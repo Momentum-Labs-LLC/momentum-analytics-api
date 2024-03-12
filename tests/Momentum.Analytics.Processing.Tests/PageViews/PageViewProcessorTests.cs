@@ -34,7 +34,7 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                 UtcTimestamp = DateTime.UtcNow,
                 Domain = "test.com",
                 Path = "index",
-                ReferrerDomain = "google.com",
+                Referer = "google.com",
                 FunnelStep = funnelStep
             };
         } // end method
@@ -49,7 +49,7 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                 {
                     Id = Guid.NewGuid(),
                     CookieId = pageView.CookieId,
-                    Referrer = pageView.ReferrerDomain,
+                    Referer = pageView.Referer,
                     FunnelStep = pageView.FunnelStep,
                     UtcStart = pageView.UtcTimestamp.AddMinutes(-1),
                     UtcExpiration = DateTime.UtcNow.Date.AddDays(1)
@@ -177,7 +177,7 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                 {
                     Id = Guid.NewGuid(),
                     CookieId = pageView.CookieId,
-                    Referrer = pageView.ReferrerDomain,
+                    Referer = pageView.Referer,
                     FunnelStep = pageView.FunnelStep,
                     UtcStart = pageView.UtcTimestamp.AddMinutes(-1),
                     UtcExpiration = DateTime.UtcNow.Date.AddDays(1),

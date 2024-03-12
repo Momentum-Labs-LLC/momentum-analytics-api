@@ -33,7 +33,7 @@ namespace Momentum.Analytics.Core.Visits.Models
         /// <summary>
         /// Gets or sets the referrer domain
         /// </summary>
-        public string? Referrer { get; set; }
+        public string? Referer { get; set; }
 
         /// <summary>
         /// Gets or sets the utm_source value of the visit.

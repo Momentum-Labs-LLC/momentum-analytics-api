@@ -52,10 +52,10 @@ namespace Momentum.Analytics.Processing.PageViews
                 hasUpsert = true;
             } // end if
 
-            if(string.IsNullOrWhiteSpace(activeVisit.Referrer)
-                && !string.IsNullOrWhiteSpace(pageView.ReferrerDomain))
+            if(string.IsNullOrWhiteSpace(activeVisit.Referer)
+                && !string.IsNullOrWhiteSpace(pageView.Referer))
             {
-                activeVisit.Referrer = pageView.ReferrerDomain;
+                activeVisit.Referer = pageView.Referer;
                 activeVisit.Source = pageView.UtmParameters?.FirstOrDefault(x => x.Parameter == UrchinParameterEnum.Source)?.Value;
                 activeVisit.Medium = pageView.UtmParameters?.FirstOrDefault(x => x.Parameter == UrchinParameterEnum.Medium)?.Value;
 

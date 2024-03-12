@@ -36,7 +36,7 @@ namespace Momentum.Analytics.Core.PageViews.Models
         /// <summary>
         /// Gets or sets the referrer for the page being viewed.
         /// </summary>
-        public string? ReferrerDomain { get; set; }
+        public string? Referer { get; set; }
 
         /// <summary>
         /// Gets or sets teh urchin tracking parameters.

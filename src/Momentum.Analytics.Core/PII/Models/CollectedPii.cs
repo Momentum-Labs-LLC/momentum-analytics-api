@@ -7,7 +7,7 @@ namespace Momentum.Analytics.Core.PII.Models
     /// </summary>
     public class CollectedPii : UserActivity
     {
-        public Guid Id { get; set; }
-        public PiiValue Pii { get; set; }
+        public Guid PiiId { get; set; }
+        public PiiValue? Pii { get; set; }
     } // end class
 } // end namespace

@@ -24,5 +24,10 @@ namespace Momentum.Analytics.Core.PII.Models
         /// Gets or sets the type of pii.
         /// </summary>
         public PiiTypeEnum PiiType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the timestamp.
+        /// </summary>
+        public DateTime UtcTimestamp { get; set; }
     } // end class
 } // end namespace

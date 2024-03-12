@@ -1,0 +1,19 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Momentum.Analytics.DynamoDb.Pii
+{
+    public static class PiiValueConstants
+    {
+        public const string TABLE_NAME = "PII_VALUE_TABLE";
+        public const string TABLE_NAME_DEFAULT = "pii_values";
+
+        public const string PII_ID = "PiiId";
+        public const string VALUE = "Value";
+        public const string PII_TYPE = "PiiType";
+        public const string HASH_ALGORITHM = "HashAlgorithm";        
+        public const string UTC_TIMESTAMP = "UtcTimestamp";
+    } // end class
+} // end namespace

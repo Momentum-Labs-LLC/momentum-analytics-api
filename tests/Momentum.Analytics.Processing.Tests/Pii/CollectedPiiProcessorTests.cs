@@ -55,7 +55,7 @@ namespace Momentum.Analytics.Processing.Tests.Pii
         {
             return new CollectedPii()
             {
-                Id = Guid.NewGuid(),
+                PiiId = Guid.NewGuid(),
                 CookieId = Guid.NewGuid(),
                 UtcTimestamp = DateTime.UtcNow,
                 Pii = piiValue,
@@ -69,7 +69,7 @@ namespace Momentum.Analytics.Processing.Tests.Pii
                 Id = Guid.NewGuid(),
                 CookieId = cookieId,
                 UtcStart = utcTimestamp,
-                Referrer = "test.com",
+                Referer = "test.com",
                 FunnelStep = 0
             };
         } // end method

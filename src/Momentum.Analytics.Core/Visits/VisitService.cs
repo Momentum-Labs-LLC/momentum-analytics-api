@@ -1,8 +1,6 @@
-using System.Data;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core.Interfaces;
-using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 
@@ -10,18 +8,15 @@ namespace Momentum.Analytics.Core.Visits
 {
     public class VisitService : IVisitService
     {
-        protected readonly IVisitConfiguration _visitConfiguration;
         protected readonly IVisitStorage _visitStorage;
         protected readonly IMemoryCache _memoryCache;
         protected readonly ILogger _logger;
 
         public VisitService(
-            IVisitConfiguration visitConfiguration, 
             IVisitStorage visitStorage,
             IMemoryCache memoryCache,
             ILogger<VisitService> logger)
         {
-            _visitConfiguration = visitConfiguration ?? throw new ArgumentNullException(nameof(visitConfiguration));
             _visitStorage = visitStorage ?? throw new ArgumentNullException(nameof(visitStorage));
             _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
