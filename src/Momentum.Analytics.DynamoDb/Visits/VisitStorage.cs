@@ -56,6 +56,10 @@ namespace Momentum.Analytics.DynamoDb.Visits
             if(request.CookieId.HasValue)
             {
                 indexName = _tableConfiguration.VisitExpirationIndex;
+                var keyFilter = new Dictionary<string, AttributeValue>()
+                {
+
+                };
             }
             else if(request.IsIdentified.HasValue)
             {
@@ -66,7 +70,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
             {
                 TableName = _tableConfiguration.TableName,
                 IndexName = indexName,
-
+                //Key
                 // TODO: Build Query
             };
 
@@ -76,7 +80,8 @@ namespace Momentum.Analytics.DynamoDb.Visits
             if(response.Items != null && response.Items.Any())
             {
                 result.Data = response.Items.Select(x => x.ToVisit());
-                // TODO: populated other fields
+                result.HasMore = response.LastEvaluatedKey != null && response.LastEvaluatedKey.Any();
+                // TODO: have a way to pass down the last evaluated key for paging
             } // end if
 
             return result;
