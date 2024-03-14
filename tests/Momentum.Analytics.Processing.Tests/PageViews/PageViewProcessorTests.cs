@@ -13,16 +13,16 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
     public class PageViewProcessorTests
     {
         private Mock<IPiiService> _piiService;
-        private Mock<IVisitService> _visitService;
-        private Mock<ILogger<PageViewProcessor>> _logger;
-        private PageViewProcessor _processor;
+        private Mock<ITestVisitService> _visitService;
+        private Mock<ILogger<TestPageViewProcessor>> _logger;
+        private TestPageViewProcessor _processor;
 
         public PageViewProcessorTests()
         {
             _piiService = new Mock<IPiiService>();
-            _visitService = new Mock<IVisitService>();
-            _logger = new Mock<ILogger<PageViewProcessor>>();
-            _processor = new PageViewProcessor(_piiService.Object, _visitService.Object, _logger.Object);
+            _visitService = new Mock<ITestVisitService>();
+            _logger = new Mock<ILogger<TestPageViewProcessor>>();
+            _processor = new TestPageViewProcessor(_piiService.Object, _visitService.Object, _logger.Object);
         } // end method
 
         protected PageView BuildPageView(string? path = null, string? referrer = null, int funnelStep = 0)

@@ -4,10 +4,11 @@ using Amazon.Lambda.DynamoDBEvents;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using Momentum.Analytics.DynamoDb.PageViews;
 using Momentum.Analytics.Core.PageViews.Models;
-using Momentum.Analytics.Processing.PageViews;
-using Momentum.Analytics.Processing.PageViews.Interfaces;
+using Momentum.Analytics.DynamoDb.PageViews;
+using Momentum.Analytics.Processing.DynamoDb.PageViews;
+using Momentum.Analytics.Processing.DynamoDb.PageViews.Interfaces;
+
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -29,7 +30,7 @@ namespace Momentum.Analytics.PageViews.Lambda
                 .AddMemoryCache()
                 .AddLogging()
                 .AddSingleton<IConfiguration>(config)
-                .AddPageViewProcessor()
+                .AddDynamoDbPageViewProcessor()
                 .BuildServiceProvider();
 
             _logger = _serviceProvider.GetRequiredService<ILogger<Function>>();
@@ -46,7 +47,7 @@ namespace Momentum.Analytics.PageViews.Lambda
             
             if(dynamoEvent != null && dynamoEvent.Records != null && dynamoEvent.Records.Any())
             {
-                var pageViewProcessor = _serviceProvider.GetRequiredService<IPageViewProcessor>();
+                var pageViewProcessor = _serviceProvider.GetRequiredService<IDynamoDbPageViewProcessor>();
 
                 foreach (var record in dynamoEvent.Records)
                 {

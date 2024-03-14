@@ -1,24 +1,22 @@
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core.Interfaces;
-using Momentum.Analytics.Core.PageViews.Interfaces;
-using Momentum.Analytics.Core.PageViews.Models;
-using Momentum.Analytics.Core.PII.Interfaces;
 using Momentum.Analytics.Core.PII.Models;
-using Momentum.Analytics.Core.Visits;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.Pii.Interfaces;
 
 namespace Momentum.Analytics.Processing.Pii
 {
-    public class CollectedPiiProcessor : ICollectedPiiProcessor
+    public class CollectedPiiProcessor<TPage, TVisitSearchResponse, TVisitService> : ICollectedPiiProcessor
+        where TVisitSearchResponse : ISearchResponse<Visit, TPage>
+        where TVisitService : IVisitService<TPage, TVisitSearchResponse>
     {
-        protected readonly IVisitService _visitService;        
+        protected readonly TVisitService _visitService;        
         protected readonly ILogger _logger;
 
         public CollectedPiiProcessor(
-            IVisitService visitService,            
-            ILogger<CollectedPiiProcessor> logger)
+            TVisitService visitService,            
+            ILogger<CollectedPiiProcessor<TPage, TVisitSearchResponse, TVisitService>> logger)
         {
             _visitService = visitService ?? throw new ArgumentNullException(nameof(visitService));            
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -59,16 +57,12 @@ namespace Momentum.Analytics.Processing.Pii
         protected async Task<int> HandleUnidentifiedVisitsAsync(CollectedPii collectedPii, CancellationToken token = default)
         {
             var result = 0;
-            var visitSearch = new VisitSearchRequest() 
-            { 
-                CookieId = collectedPii.CookieId,
-                IsIdentified = false
-            };
-            ISearchResponse<Visit> visits = null;
+            TPage page = default(TPage);
+            TVisitSearchResponse visits;
             do
             {
                 // fill the visit searchResponse
-                visits = await _visitService.SearchAsync(visitSearch, token).ConfigureAwait(false);
+                visits = await _visitService.GetUnidentifiedAsync(collectedPii.CookieId, page, token).ConfigureAwait(false);
 
                 if(visits != null && visits.Data != null && visits.Data.Any())
                 {
@@ -85,7 +79,7 @@ namespace Momentum.Analytics.Processing.Pii
                 } // end if
 
                 // increment visitsearch page before next loop.
-                visitSearch.Page += 1;
+                page = visits.NextPage;
             } while(visits.HasMore);
 
             return result;

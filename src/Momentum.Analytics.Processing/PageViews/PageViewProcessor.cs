@@ -1,22 +1,26 @@
 using Microsoft.Extensions.Logging;
+using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.PageViews.Models;
 using Momentum.Analytics.Core.PII.Interfaces;
 using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
+using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.PageViews.Interfaces;
 
 namespace Momentum.Analytics.Processing.PageViews
 {
-    public class PageViewProcessor : IPageViewProcessor
+    public class PageViewProcessor<TPage, TVisitSearchResponse, TVisitService> : IPageViewProcessor
+        where TVisitSearchResponse : ISearchResponse<Visit, TPage>
+        where TVisitService : IVisitService<TPage, TVisitSearchResponse>
     {
         protected readonly IPiiService _piiService;
-        protected readonly IVisitService _visitService;
+        protected readonly TVisitService _visitService;
         protected readonly ILogger _logger;
 
         public PageViewProcessor(
             IPiiService piiService,
-            IVisitService visitService,
-            ILogger<PageViewProcessor> logger)
+            TVisitService visitService,
+            ILogger<PageViewProcessor<TPage, TVisitSearchResponse, TVisitService>> logger)
         {
             _piiService = piiService ?? throw new ArgumentNullException(nameof(piiService));
             _visitService = visitService ?? throw new ArgumentNullException(nameof(visitService));

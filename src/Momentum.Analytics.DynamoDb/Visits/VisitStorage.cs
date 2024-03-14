@@ -1,16 +1,17 @@
 using Amazon.DynamoDBv2.Model;
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core.Interfaces;
-using Momentum.Analytics.Core.Models;
-using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.DynamoDb.Abstractions;
 using Momentum.Analytics.DynamoDb.Client.Interfaces;
+using Momentum.Analytics.DynamoDb.Models;
 using Momentum.Analytics.DynamoDb.Visits.Interfaces;
 
 namespace Momentum.Analytics.DynamoDb.Visits
 {
-    public class VisitStorage : ResourceStorageBase<IVisitTableConfiguration>, IVisitStorage
+    public class VisitStorage : 
+            ResourceStorageBase<IVisitTableConfiguration>, 
+            IDynamoDbVisitStorage
     {
         public VisitStorage(
                 IDynamoDBClientFactory clientFactory, 
@@ -48,9 +49,87 @@ namespace Momentum.Analytics.DynamoDb.Visits
             return response.Item?.ToVisit();
         } // end method
 
-        public virtual async Task<ISearchResponse<Visit>> SearchAsync(IVisitSearchRequest request, CancellationToken token = default)
+        public virtual async Task<Visit?> GetByActivityAsync(Guid cookieId, DateTime utcTimestamp, CancellationToken token = default)
         {
-            var result = new SearchResponse<Visit>();
+            Visit? result = null;
+            var queryRequest = new QueryRequest()
+            {
+                TableName = _tableConfiguration.TableName,
+                IndexName = _tableConfiguration.VisitExpirationIndex,
+                //Key
+                // TODO: Build Query
+            };
+
+            var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
+            var response = await client.QueryAsync(queryRequest, token).ConfigureAwait(false);
+
+            if(response.Items != null && response.Items.Any())
+            {
+                result = response.Items.First().ToVisit();                
+            } // end if
+
+            return result;
+        } // end method
+
+        public virtual async Task<IDynamoSearchResponse<Visit>> GetIdentifiedAsync(
+            ITimeRange timeRange, 
+            Dictionary<string, AttributeValue> page, 
+            CancellationToken token = default)
+        {
+            var result = new DynamoSearchResponse<Visit>();
+            var queryRequest = new QueryRequest()
+            {
+                TableName = _tableConfiguration.TableName,
+                IndexName = _tableConfiguration.IdentifiedIndex,
+                ExclusiveStartKey = page,
+                //Key
+                // TODO: Build Query
+            };
+
+            var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
+            var response = await client.QueryAsync(queryRequest, token).ConfigureAwait(false);
+
+            if(response.Items != null && response.Items.Any())
+            {
+                result.Data = response.Items.Select(x => x.ToVisit());
+                result.HasMore = response.LastEvaluatedKey != null && response.LastEvaluatedKey.Any();
+                result.NextPage = response.LastEvaluatedKey;
+            } // end if
+
+            return result;
+        } // end method
+
+        public virtual async Task<IDynamoSearchResponse<Visit>> GetUnidentifiedAsync(
+            Guid cookieId, 
+            Dictionary<string, AttributeValue> page, 
+            CancellationToken token = default)
+        {
+            var result = new DynamoSearchResponse<Visit>();
+            var queryRequest = new QueryRequest()
+            {
+                TableName = _tableConfiguration.TableName,
+                IndexName = _tableConfiguration.VisitExpirationIndex,
+                ExclusiveStartKey = page
+                //Key
+                // TODO: Build Query
+            };
+
+            var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
+            var response = await client.QueryAsync(queryRequest, token).ConfigureAwait(false);
+
+            if(response.Items != null && response.Items.Any())
+            {
+                result.Data = response.Items.Select(x => x.ToVisit());
+                result.HasMore = response.LastEvaluatedKey != null && response.LastEvaluatedKey.Any();
+                result.NextPage = response.LastEvaluatedKey;
+            } // end if
+
+            return result;
+        } // end method
+
+        public virtual async Task<IDynamoSearchResponse<Visit>> SearchAsync(IDynamoVisitSearch request, CancellationToken token = default)
+        {
+            var result = new DynamoSearchResponse<Visit>();
 
             string? indexName = null;
             if(request.CookieId.HasValue)
@@ -81,7 +160,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
             {
                 result.Data = response.Items.Select(x => x.ToVisit());
                 result.HasMore = response.LastEvaluatedKey != null && response.LastEvaluatedKey.Any();
-                // TODO: have a way to pass down the last evaluated key for paging
+                result.NextPage = response.LastEvaluatedKey;
             } // end if
 
             return result;

@@ -3,7 +3,7 @@ using Momentum.Analytics.Core.PII.Models;
 
 namespace Momentum.Analytics.Core.Visits.Interfaces
 {
-    public interface IVisitSearchRequest : ISearchRequest
+    public interface IVisitSearchRequest<TPage> : ISearchRequest<TPage>
     {
         Guid? CookieId { get; }
         DateTime? UtcActivityTimestamp { get; }
@@ -12,4 +12,6 @@ namespace Momentum.Analytics.Core.Visits.Interfaces
         PiiTypeEnum? PiiType { get; }
         ITimeRange? IdentifiedTimeRange { get; }
     } // end interface
+
+    public interface IVisitSearchRequest : IVisitSearchRequest<int> {} // end interface
 } // end namespace

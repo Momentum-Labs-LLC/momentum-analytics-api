@@ -20,7 +20,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Momentum.Analytics.Processing\Momentum.Analytics.Processing.csproj" />
-    <ProjectReference Include="..\Momentum.Analytics.DynamoDb\Momentum.Analytics.DynamoDb.csproj" />
+    <ProjectReference Include="..\Momentum.Analytics.Processing.DynamoDb\Momentum.Analytics.Processing.DynamoDb.csproj" />
   </ItemGroup>
 </Project>

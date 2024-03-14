@@ -2,9 +2,17 @@ using Momentum.Analytics.Core.Interfaces;
 
 namespace Momentum.Analytics.Core.Models
 {
-    public class SearchRequest : ISearchRequest
+    public class SearchRequest<TPage> : ISearchRequest<TPage>
     {
-        public int Page { get; set; } = 1;
+        public TPage Page { get; set; }
         public int Size { get; set; } = 10;
+    } // end class
+
+    public class SearchRequest : SearchRequest<int>, ISearchRequest 
+    {
+        public SearchRequest()
+        {
+            Page = 1;
+        } // end method
     } // end class
 } // end namespace
