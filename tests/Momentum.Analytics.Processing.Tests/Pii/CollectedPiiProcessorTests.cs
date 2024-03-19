@@ -35,8 +35,7 @@ namespace Momentum.Analytics.Processing.Tests.Pii
             {
                 Id = Guid.NewGuid(),
                 Value = userId,
-                PiiType = PiiTypeEnum.UserId,
-                HashAlgorithm = HashAlgorithmEnum.None
+                PiiType = PiiTypeEnum.UserId
             };
         } // end method
 
@@ -46,8 +45,7 @@ namespace Momentum.Analytics.Processing.Tests.Pii
             {
                 Id = Guid.NewGuid(),
                 Value = emailHash,
-                PiiType = PiiTypeEnum.Email,
-                HashAlgorithm = HashAlgorithmEnum.SHA256
+                PiiType = PiiTypeEnum.Email
             };
         } // end method
 

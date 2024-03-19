@@ -14,11 +14,6 @@ namespace Momentum.Analytics.Core.PII.Models
         /// Gets or sets the hashed pii value.
         /// </summary>
         public string Value { get; set; }
-
-        /// <summary>
-        /// Gets or sets the algorith used to hash the PII.
-        /// </summary>
-        public HashAlgorithmEnum HashAlgorithm { get; set; }
         
         /// <summary>
         /// Gets or sets the type of pii.

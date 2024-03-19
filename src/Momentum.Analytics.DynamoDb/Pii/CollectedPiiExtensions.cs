@@ -13,8 +13,7 @@ namespace Momentum.Analytics.DynamoDb.Pii
         {
             return new Dictionary<string, AttributeValue>()
                 .AddField(CollectedPiiConstants.COOKIE_ID, collectedPii.CookieId)
-                .AddField(CollectedPiiConstants.UTC_TIMESTAMP, collectedPii.UtcTimestamp)
-                .AddField(CollectedPiiConstants.PII_ID, collectedPii.PiiId);
+                .AddField(CollectedPiiConstants.UTC_TIMESTAMP, collectedPii.UtcTimestamp);
         } // end method
 
         public static CollectedPii ReadCollectedPii(this Dictionary<string, AttributeValue> fields)

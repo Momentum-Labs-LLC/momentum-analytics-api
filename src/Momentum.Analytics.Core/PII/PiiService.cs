@@ -12,15 +12,18 @@ namespace Momentum.Analytics.Core.PII
     {
         protected readonly ICollectedPiiStorage _collectedPiiStorage;
         protected readonly IPiiValueStorage _piiValueStorage;
+        protected readonly IEmailHasher _emailHasher;
         protected readonly ILogger _logger;
 
         public PiiService(
             ICollectedPiiStorage collectedPiiStorage,
             IPiiValueStorage piiValueStorage,
+            IEmailHasher emailHasher,
             ILogger<PiiService> logger)
         {
             _collectedPiiStorage = collectedPiiStorage ?? throw new ArgumentNullException(nameof(collectedPiiStorage));
             _piiValueStorage = piiValueStorage ?? throw new ArgumentNullException(nameof(piiValueStorage));
+            _emailHasher = emailHasher ?? throw new ArgumentNullException(nameof(emailHasher));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
@@ -29,14 +32,40 @@ namespace Momentum.Analytics.Core.PII
             throw new NotImplementedException();
         } // end method
 
-        public Task<PiiValue?> GetPiiAsync(string value, CancellationToken token = default)
+        public async Task<PiiValue?> GetPiiAsync(string value, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            return await _piiValueStorage.GetByValueAsync(value, token).ConfigureAwait(false);
         } // end method
 
-        public Task RecordAsync(CollectedPii collectedPii, CancellationToken token = default)
+        public async Task RecordAsync(CollectedPii collectedPii, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if(collectedPii.Pii.PiiType == PiiTypeEnum.Email)
+            {
+                collectedPii.Pii.Value = await _emailHasher.HashEmailAsync(collectedPii.Pii.Value, token).ConfigureAwait(false);
+            } // end mkethod
+
+            var pii = await _piiValueStorage.GetByValueAsync(collectedPii.Pii.Value, token).ConfigureAwait(false);
+            if(pii != null)
+            {
+                collectedPii.Pii = pii;
+                collectedPii.PiiId = pii.Id;
+            }
+            
+            if(!collectedPii.PiiId.HasValue)
+            {
+                var piiValue = new PiiValue()
+                {
+                    Id = Guid.NewGuid(),
+                    Value = collectedPii.Pii.Value,
+                    PiiType = collectedPii.Pii.PiiType,
+                    UtcTimestamp = collectedPii.UtcTimestamp
+                };
+                await _piiValueStorage.InsertAsync(piiValue, token).ConfigureAwait(false);
+
+                collectedPii.PiiId = piiValue.Id;
+            } // end if
+
+            await _collectedPiiStorage.InsertAysnc(collectedPii, token).ConfigureAwait(false);
         } // end method
     } // end class
 } // end namespace

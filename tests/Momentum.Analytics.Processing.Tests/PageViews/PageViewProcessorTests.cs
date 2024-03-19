@@ -74,8 +74,7 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                 {
                     Id = Guid.NewGuid(),
                     PiiType = PiiTypeEnum.UserId,
-                    Value = "12345",
-                    HashAlgorithm = HashAlgorithmEnum.None
+                    Value = "12345"
                 };
             _piiService.Setup(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<PiiValue>() 
@@ -105,8 +104,7 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                 {
                     Id = Guid.NewGuid(),
                     PiiType = PiiTypeEnum.UserId,
-                    Value = "12345",
-                    HashAlgorithm = HashAlgorithmEnum.None
+                    Value = "12345"
                 };
             _piiService.Setup(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<PiiValue>() 
@@ -141,8 +139,7 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                 {
                     Id = Guid.NewGuid(),
                     PiiType = PiiTypeEnum.UserId,
-                    Value = "12345",
-                    HashAlgorithm = HashAlgorithmEnum.None
+                    Value = "12345"
                 };
             _piiService.Setup(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<PiiValue>() 

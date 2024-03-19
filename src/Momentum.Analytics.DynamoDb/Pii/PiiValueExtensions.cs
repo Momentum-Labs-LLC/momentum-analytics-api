@@ -16,7 +16,6 @@ namespace Momentum.Analytics.DynamoDb.Pii
                 .AddField(PiiValueConstants.PII_ID, piiValue.Id)
                 .AddField(PiiValueConstants.VALUE, piiValue.Value)
                 .AddField(PiiValueConstants.PII_TYPE, (int)piiValue.PiiType)
-                .AddField(PiiValueConstants.HASH_ALGORITHM, (int)piiValue.HashAlgorithm)
                 .AddField(PiiValueConstants.UTC_TIMESTAMP, piiValue.UtcTimestamp);
         } // end method
 
@@ -35,7 +34,6 @@ namespace Momentum.Analytics.DynamoDb.Pii
 
             result.Value = fields.ReadString(PiiValueConstants.VALUE);
             result.PiiType = (PiiTypeEnum)fields.ReadInteger(PiiValueConstants.PII_TYPE);
-            result.HashAlgorithm = (HashAlgorithmEnum)fields.ReadInteger(PiiValueConstants.HASH_ALGORITHM);
             var timestamp = fields.ReadDateTime(PiiValueConstants.UTC_TIMESTAMP);
             if(timestamp.HasValue)
             {
