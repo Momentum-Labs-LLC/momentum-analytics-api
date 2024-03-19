@@ -1,0 +1,66 @@
+{
+    "TableName": "momentum-prd-visits",
+    "KeySchema": [
+        {
+            "AttributeName": "Id",
+            "KeyType": "HASH"
+        }
+    ],
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "Id",
+            "AttributeType": "S"
+        },
+        {
+            "AttributeName": "CookieId",
+            "AttributeType": "S"
+        },
+        {
+            "AttributeName": "UtcExpiration",
+            "AttributeType": "N"
+        },
+        {
+            "AttributeName": "IsIdentified",
+            "AttributeType": "N"
+        },
+        {
+            "AttributeName": "UtcIdentifiedTimestamp",
+            "AttributeType": "N"
+        }
+    ],
+    "GlobalSecondaryIndexes": [
+        {
+            "IndexName": "VisitExpirationIndex",
+            "KeySchema": [
+                {
+                    "AttributeName": "CookieId",
+                    "KeyType": "HASH"
+                },
+                {
+                    "AttributeName": "UtcExpiration",
+                    "KeyType": "RANGE"
+                }
+            ],
+            "Projection": {
+                "ProjectionType": "ALL"
+            }
+        },
+        {
+            "IndexName": "IdentifiedIndex",
+            "KeySchema": [
+                {
+                    "AttributeName": "IsIdentified",
+                    "KeyType": "HASH"
+                },
+                {
+                    "AttributeName": "UtcIdentifiedTimestamp",
+                    "KeyType": "RANGE"
+                }
+            ],
+            "Projection": {
+                "ProjectionType": "ALL"
+            }
+        }
+    ],
+    "BillingMode": "PAY_PER_REQUEST"
+}

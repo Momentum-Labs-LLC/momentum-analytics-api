@@ -7,7 +7,9 @@ namespace Momentum.Analytics.DynamoDb.Client
     {
         public static IServiceCollection AddDynamoDbClientFactory(this IServiceCollection services)
         {
-            return services.AddSingleton<IDynamoDBClientFactory, DynamoDbClientFactory>();
+            return services            
+                .AddSingleton<IDynamoClientConfiguration, DynamoClientConfiguration>()
+                .AddSingleton<IDynamoDBClientFactory, DynamoDbClientFactory>();
         } // end method
     } // end class
 } // end namespace

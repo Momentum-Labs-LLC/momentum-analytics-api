@@ -1,0 +1,46 @@
+{
+    "TableName": "momentum-prd-collected-pii",
+    "KeySchema": [
+        {
+            "AttributeName": "PiiId",
+            "KeyType": "HASH"
+        },
+        {
+            "AttributeName": "UtcTimestamp",
+            "KeyType": "RANGE"
+        }
+    ],
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "PiiId",
+            "AttributeType": "S"
+        },
+        {
+            "AttributeName": "UtcTimestamp",
+            "AttributeType": "N"
+        },
+        {
+            "AttributeName": "CookieId",
+            "AttributeType": "S"
+        }
+    ],
+    "GlobalSecondaryIndexes": [
+        {
+            "IndexName": "CookieTimestampIndex",
+            "KeySchema": [
+                {
+                    "AttributeName": "CookieId",
+                    "KeyType": "HASH"
+                },
+                {
+                    "AttributeName": "UtcTimestamp",
+                    "KeyType": "RANGE"
+                }
+            ],
+            "Projection": {
+                "ProjectionType": "ALL"
+            }
+        }
+    ],
+    "BillingMode": "PAY_PER_REQUEST"
+}

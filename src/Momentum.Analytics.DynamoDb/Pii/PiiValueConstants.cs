@@ -8,7 +8,7 @@ namespace Momentum.Analytics.DynamoDb.Pii
     public static class PiiValueConstants
     {
         public const string TABLE_NAME = "PII_VALUE_TABLE";
-        public const string TABLE_NAME_DEFAULT = "pii_values";
+        public const string TABLE_NAME_DEFAULT = "momentum-prd-pii-values";
 
         public const string PII_ID = "PiiId";
         public const string VALUE = "Value";

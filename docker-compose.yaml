@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    ports:
+      - "9876:8000"
+    volumes:
+      - "./.docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+  analytics-api:
+    image: analytics-api
+    build: 
+      dockerfile: local/Dockerfile_api
+      args:
+        GITHUB_USER: $GITHUB_USER
+        GITHUB_TOKEN: $GITHUB_TOKEN
+    ports:
+      - "3500:8080"
+    depends_on:
+      - "dynamodb-local"
+    links:
+      - "dynamodb-local"
+    environment:
+      AWS_ACCESS_KEY_ID: 'DUMMYIDEXAMPLE'
+      AWS_SECRET_ACCESS_KEY: 'DUMMYEXAMPLEKEY'
+      REGION: 'us-east-1'
+      DYNAMO_SERVICE_URL: 'http://dynamodb-local:8000'
+
+    

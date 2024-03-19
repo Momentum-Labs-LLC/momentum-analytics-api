@@ -1,0 +1,16 @@
+{
+    "TableName": "momentum-prd-pii-values",
+    "KeySchema": [
+        {
+            "AttributeName": "Value",
+            "KeyType": "HASH"
+        }
+    ],
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "Value",
+            "AttributeType": "S"
+        }
+    ],
+    "BillingMode": "PAY_PER_REQUEST"
+}

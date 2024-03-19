@@ -20,6 +20,7 @@ namespace Momentum.Analytics.DynamoDb.Pii
                 .AddTransient<ICollectedPiiStorage, CollectedPiiStorage>()
                 .AddSingleton<IPiiValueTableConfiguration, PiiValueTableConfiguration>()
                 .AddTransient<IPiiValueStorage, PiiValueStorage>()
+                .AddTransient<IEmailHasher, EmailHasher>()
                 .AddTransient<IPiiService, PiiService>();
         } // end method
     } // end class

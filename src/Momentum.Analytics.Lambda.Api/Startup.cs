@@ -24,10 +24,10 @@ public class Startup
         services
             .AddLogging()
             .AddMemoryCache()
-            //.AddPageViewService()
-            .AddNoopPageViewService()
-            //.AddDynamoDbPiiService()
-            .AddNoopPiiService()
+            .AddPageViewService()
+            //.AddNoopPageViewService()
+            .AddDynamoDbPiiService()
+            //.AddNoopPiiService()
             .AddDynamoDbVisitService()
             .AddHttpContextAccessor()
             .AddTransient<ICookieWriter, CookieWriter>();

@@ -27,6 +27,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
         public const string MEDIUM = "Medium";
         public const string PII_VALUE = "PiiValue";
         public const string PII_TYPE = "PiiType";
+        public const string IS_IDENTIFIED = "IsIdentified";
         public const string UTC_IDENTIFIED_TIMESTAMP = "UtcIdentifiedTimestamp";
     } // end class
 } // end namespace

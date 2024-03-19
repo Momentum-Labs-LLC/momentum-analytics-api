@@ -1,0 +1,42 @@
+{
+    "TableName": "momentum-prd-page-views",
+    "KeySchema": [
+        {
+            "AttributeName": "RequestId",
+            "KeyType": "HASH"
+        }
+    ],
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "RequestId",
+            "AttributeType": "S"
+        },
+        {
+            "AttributeName": "CookieId",
+            "AttributeType": "S"
+        },
+        {
+            "AttributeName": "UtcTimestamp",
+            "AttributeType": "N"
+        }
+    ],
+    "GlobalSecondaryIndexes": [
+        {
+            "IndexName": "CookieTimestampIndex",
+            "KeySchema": [
+                {
+                    "AttributeName": "CookieId",
+                    "KeyType": "HASH"
+                },
+                {
+                    "AttributeName": "UtcTimestamp",
+                    "KeyType": "RANGE"
+                }
+            ],
+            "Projection": {
+                "ProjectionType": "ALL"
+            }
+        }
+    ],
+    "BillingMode": "PAY_PER_REQUEST"
+}

@@ -193,7 +193,7 @@ namespace Momentum.Analytics.DynamoDb
 
             fields.Add(name, new AttributeValue()
             {
-                BOOL = value
+                N = value ? 1.ToString() : 0.ToString()
             });
 
             return fields;
@@ -209,7 +209,14 @@ namespace Momentum.Analytics.DynamoDb
                 && fields.TryGetValue(name, out AttributeValue attr)
                 && attr != null)
             {
-                result = attr.BOOL;
+                if(attr.N == "1")
+                {
+                    result = true;
+                }
+                else
+                {
+                    result = false;
+                } // end if
             } // end if
 
             return result;
