@@ -36,7 +36,6 @@ namespace Momentum.Analytics.Lambda.Api.Cookies
                         x => x.Split(CookieConstants.COOKIE_VALUE_DELIMITER)[0], 
                         x => x.Split(CookieConstants.COOKIE_VALUE_DELIMITER)[1]);
 
-                
                 result = new Cookie()
                 {
                     Id = Guid.Parse(cookieDict[CookieConstants.COOKIE_ID]),

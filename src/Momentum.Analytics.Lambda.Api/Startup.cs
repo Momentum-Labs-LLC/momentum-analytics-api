@@ -1,10 +1,7 @@
-﻿using Momentum.Analytics.Core.PageViews.Interfaces;
-using Momentum.Analytics.DynamoDb.PageViews;
+﻿using Momentum.Analytics.DynamoDb.PageViews;
 using Momentum.Analytics.DynamoDb.Pii;
 using Momentum.Analytics.DynamoDb.Visits;
 using Momentum.Analytics.Lambda.Api.Cookies;
-using Momentum.Analytics.Lambda.Api.PageViews;
-using Momentum.Analytics.Lambda.Api.Pii;
 using Momentum.FromCookie;
 
 namespace Momentum.Analytics.Lambda.Api;
@@ -22,7 +19,12 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddLogging()
+            .AddLogging(config => 
+            {
+                config.AddFilter("Microsoft", LogLevel.Warning);
+                config.AddFilter("System", LogLevel.Warning);
+                config.SetMinimumLevel(LogLevel.Debug);
+            })
             .AddMemoryCache()
             .AddPageViewService()
             //.AddNoopPageViewService()

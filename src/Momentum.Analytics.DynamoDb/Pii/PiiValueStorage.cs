@@ -18,9 +18,29 @@ namespace Momentum.Analytics.DynamoDb.Pii
         {
         } // end method
 
-        public virtual async Task<IEnumerable<PiiValue>?> GetByIdAsync(IEnumerable<Guid> ids, CancellationToken token = default)
+        public virtual async Task<PiiValue>? GetByIdAsync(Guid id, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            PiiValue? result = null;
+            var key = new Dictionary<string, AttributeValue>().AddField(PiiValueConstants.PII_ID, id);
+            var request = new QueryRequest()
+            {
+                TableName = _tableConfiguration.TableName,
+                IndexName = _tableConfiguration.IdIndexName,
+                QueryFilter = new Dictionary<string, Condition>()
+                {
+
+                },
+            };
+
+            var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
+            var queryResult = await client.QueryAsync(request, token).ConfigureAwait(false);
+
+            if(queryResult != null && queryResult.Items != null && queryResult.Items.Any())
+            {
+                result = queryResult.Items.First().ReadPiiValue();
+            } // end if
+
+            return result;
         } // end method
 
         public virtual async Task<PiiValue?> GetByValueAsync(string value, CancellationToken token = default)

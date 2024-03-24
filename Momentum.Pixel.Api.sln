@@ -23,6 +23,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Momentum.Analytics.DynamoDb
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Momentum.Analytics.Processing.DynamoDb", "src\Momentum.Analytics.Processing.DynamoDb\Momentum.Analytics.Processing.DynamoDb.csproj", "{898188FF-AD8B-4576-8BAA-F3260C0D7F3A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Momentum.Analytics.Pii.Lambda", "src\Momentum.Analytics.Pii.Lambda\Momentum.Analytics.Pii.Lambda.csproj", "{2E148773-CAE2-417C-A1E6-508095367663}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Momentum.Analytics.Visits.Lambda", "src\Momentum.Analytics.Visits.Lambda\Momentum.Analytics.Visits.Lambda.csproj", "{7B7E1EC8-A373-4B86-A8BA-62886240203B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Momentum.Analytics.Visits.Lambda.Tests", "tests\Momentum.Analytics.Visits.Lambda.Tests\Momentum.Analytics.Visits.Lambda.Tests.csproj", "{DCF6476B-2980-4BAB-84AA-2996015BB048}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +70,18 @@ Global
 		{898188FF-AD8B-4576-8BAA-F3260C0D7F3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{898188FF-AD8B-4576-8BAA-F3260C0D7F3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{898188FF-AD8B-4576-8BAA-F3260C0D7F3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E148773-CAE2-417C-A1E6-508095367663}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E148773-CAE2-417C-A1E6-508095367663}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E148773-CAE2-417C-A1E6-508095367663}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E148773-CAE2-417C-A1E6-508095367663}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B7E1EC8-A373-4B86-A8BA-62886240203B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B7E1EC8-A373-4B86-A8BA-62886240203B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B7E1EC8-A373-4B86-A8BA-62886240203B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B7E1EC8-A373-4B86-A8BA-62886240203B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCF6476B-2980-4BAB-84AA-2996015BB048}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCF6476B-2980-4BAB-84AA-2996015BB048}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCF6476B-2980-4BAB-84AA-2996015BB048}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCF6476B-2980-4BAB-84AA-2996015BB048}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{32E1A33B-0E7E-4F84-B1CE-67095162320A} = {58673451-9B2A-4F1D-86F6-A05B2EA1A6E5}
@@ -74,5 +92,8 @@ Global
 		{EB7B0A1C-50CE-40A6-8F36-5FC8A3E8E457} = {58673451-9B2A-4F1D-86F6-A05B2EA1A6E5}
 		{BCD2161A-A3C4-4BBD-91F3-C3E3E245C38B} = {6144075E-5978-4F0C-937B-24D1990DD255}
 		{898188FF-AD8B-4576-8BAA-F3260C0D7F3A} = {58673451-9B2A-4F1D-86F6-A05B2EA1A6E5}
+		{2E148773-CAE2-417C-A1E6-508095367663} = {58673451-9B2A-4F1D-86F6-A05B2EA1A6E5}
+		{7B7E1EC8-A373-4B86-A8BA-62886240203B} = {58673451-9B2A-4F1D-86F6-A05B2EA1A6E5}
+		{DCF6476B-2980-4BAB-84AA-2996015BB048} = {6144075E-5978-4F0C-937B-24D1990DD255}
 	EndGlobalSection
 EndGlobal

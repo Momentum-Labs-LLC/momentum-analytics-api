@@ -5,6 +5,7 @@ using Momentum.Analytics.DynamoDb.Abstractions;
 using Momentum.Analytics.DynamoDb.Visits.Interfaces;
 using Momentum.Analytics.Processing.DynamoDb.Visits.Interfaces;
 using Momentum.Analytics.Processing.Visits;
+using Momentum.Analytics.Processing.Visits.Interfaces;
 
 namespace Momentum.Analytics.Processing.DynamoDb.Visits
 {
@@ -14,8 +15,9 @@ namespace Momentum.Analytics.Processing.DynamoDb.Visits
     {
         public DynamoDbIdentifiedVisitProcessor(
                 IDynamoDbVisitService visitService, 
+                IIdentifiedVisitWriter writer,
                 ILogger<DynamoDbIdentifiedVisitProcessor> logger)
-            : base(visitService, logger)
+            : base(visitService, writer, logger)
         {
         } // end method
     } // end class

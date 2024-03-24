@@ -9,7 +9,7 @@ namespace Momentum.Analytics.Lambda.Api.Pii
 {
     public class NoopPiiValueStorage : IPiiValueStorage
     {
-        public Task<IEnumerable<PiiValue>?> GetByIdAsync(IEnumerable<Guid> ids, CancellationToken token = default)
+        public Task<PiiValue?> GetByIdAsync(Guid id, CancellationToken token = default)
         {
             throw new NotImplementedException();
         } // end method

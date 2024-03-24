@@ -32,6 +32,11 @@ namespace Momentum.Analytics.Core.PII
             throw new NotImplementedException();
         } // end method
 
+        public async Task<PiiValue?> GetPiiAsync(Guid id, CancellationToken token = default)
+        {
+            return await _piiValueStorage.GetByIdAsync(id, token).ConfigureAwait(false);
+        } // end method
+
         public async Task<PiiValue?> GetPiiAsync(string value, CancellationToken token = default)
         {
             return await _piiValueStorage.GetByValueAsync(value, token).ConfigureAwait(false);
@@ -41,18 +46,21 @@ namespace Momentum.Analytics.Core.PII
         {
             if(collectedPii.Pii.PiiType == PiiTypeEnum.Email)
             {
+                _logger.LogDebug("Hashing email provided as pii.");
                 collectedPii.Pii.Value = await _emailHasher.HashEmailAsync(collectedPii.Pii.Value, token).ConfigureAwait(false);
             } // end mkethod
 
             var pii = await _piiValueStorage.GetByValueAsync(collectedPii.Pii.Value, token).ConfigureAwait(false);
             if(pii != null)
             {
+                _logger.LogDebug("Pii value already exists in the dataset.");
                 collectedPii.Pii = pii;
                 collectedPii.PiiId = pii.Id;
             }
             
             if(!collectedPii.PiiId.HasValue)
             {
+                _logger.LogDebug("Pii value did not exist in the dataset.");
                 var piiValue = new PiiValue()
                 {
                     Id = Guid.NewGuid(),

@@ -11,13 +11,16 @@ namespace Momentum.Analytics.Processing.Visits
         where TVisitService : IVisitService<TPage, TSearchResponse>
     {
         protected readonly TVisitService _visitService;
+        protected readonly IIdentifiedVisitWriter _writer;
         protected readonly ILogger _logger;
 
         public IdentifiedVisitProcessor(
             TVisitService visitService,
+            IIdentifiedVisitWriter writer,
             ILogger<IdentifiedVisitProcessor<TPage, TSearchResponse, TVisitService>> logger)
         {
             _visitService = visitService ?? throw new ArgumentNullException(nameof(visitService));
+            _writer = writer ?? throw new ArgumentNullException(nameof(writer));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
@@ -26,7 +29,7 @@ namespace Momentum.Analytics.Processing.Visits
             var identifiedVisits = new List<Visit>();
             TSearchResponse searchResponse = default(TSearchResponse);
             do 
-            { 
+            {
                 searchResponse = await _visitService.GetIdentifiedAsync(timeRange, searchResponse.NextPage, token).ConfigureAwait(false);
 
                 if(searchResponse != null && searchResponse.Data != null && searchResponse.Data.Any())
@@ -37,10 +40,8 @@ namespace Momentum.Analytics.Processing.Visits
 
             if(identifiedVisits.Any())
             {
-                await WriteAsync(identifiedVisits, token).ConfigureAwait(false);
+                await _writer.WriteAsync(timeRange, identifiedVisits, token).ConfigureAwait(false);
             } // end if
         } // end method
-        
-        protected abstract Task WriteAsync(IEnumerable<Visit> identifiedVisits, CancellationToken token = default);
     } // end class
 } // end namespace

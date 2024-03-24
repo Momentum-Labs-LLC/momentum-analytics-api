@@ -1,18 +1,19 @@
-using Amazon.DynamoDBv2.Model;
+using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
+using Amazon.DynamoDBv2.Model;
+using Momentum.Analytics.Core.PII.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Momentum.Analytics.Core.PageViews.Models;
-using Momentum.Analytics.DynamoDb.PageViews;
-using Momentum.Analytics.Processing.DynamoDb.PageViews;
-using Momentum.Analytics.Processing.DynamoDb.PageViews.Interfaces;
-
+using Momentum.Analytics.DynamoDb.Pii;
+using Momentum.Analytics.Processing.DynamoDb.Pii.Interfaces;
+using Momentum.Analytics.Processing.DynamoDb.Pii;
+using Momentum.Analytics.Core.PII.Interfaces;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
-[assembly: Amazon.Lambda.Core.LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
+[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
-namespace Momentum.Analytics.PageViews.Lambda
+namespace Momentum.Analytics.Pii.Lambda
 {
     public class Function
     {
@@ -27,14 +28,10 @@ namespace Momentum.Analytics.PageViews.Lambda
             IServiceCollection services = new ServiceCollection();
             _serviceProvider = services
                 .AddMemoryCache()
-                .AddLogging(config => 
-                    {
-                        config.AddFilter("Microsoft", LogLevel.Warning);
-                        config.AddFilter("System", LogLevel.Warning);
-                        config.SetMinimumLevel(LogLevel.Debug);
-                    })
+                .AddLogging()
                 .AddSingleton<IConfiguration>(config)
-                .AddDynamoDbPageViewProcessor()
+                .AddDynamoDbPiiService()
+                .AddTransient<IDynamoDbCollectedPiiProcessor, DynamoDbCollectedPiiProcessor>()
                 .BuildServiceProvider();
 
             _logger = _serviceProvider.GetRequiredService<ILogger<Function>>();
@@ -45,13 +42,14 @@ namespace Momentum.Analytics.PageViews.Lambda
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         } // end method
 
-        public async Task FunctionHandler(DynamoDBEvent dynamoEvent)
+        public async void FunctionHandler(DynamoDBEvent dynamoEvent, ILambdaContext context)
         {
             _logger.LogInformation($"Beginning to process {dynamoEvent.Records.Count} records...");
             
             if(dynamoEvent != null && dynamoEvent.Records != null && dynamoEvent.Records.Any())
             {
-                var pageViewProcessor = _serviceProvider.GetRequiredService<IDynamoDbPageViewProcessor>();
+                var piiProcessor = _serviceProvider.GetRequiredService<IDynamoDbCollectedPiiProcessor>();
+                var piiService = _serviceProvider.GetRequiredService<IPiiService>();
 
                 foreach (var record in dynamoEvent.Records)
                 {
@@ -60,12 +58,23 @@ namespace Momentum.Analytics.PageViews.Lambda
                     
                     try
                     {
-                        var pageView = BuildPageView(record.Dynamodb);
-                        await pageViewProcessor.ProcessAsync(pageView).ConfigureAwait(false);
+                        var collectedPii = BuildCollectedPii(record.Dynamodb);
+
+                        var piiValue = await piiService.GetPiiAsync(collectedPii.PiiId.Value).ConfigureAwait(false);
+
+                        if(piiValue != null)
+                        {
+                            collectedPii.Pii = piiValue;
+                            await piiProcessor.ProcessAsync(collectedPii).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            throw new Exception($"Unable to retrieve pii by identifier: {collectedPii.PiiId}.");
+                        } // end if
                     }
                     catch(Exception ex)
                     {
-                        _logger.LogError("Unable to process page view in event: {EventId}.", record.EventID);
+                        _logger.LogError(new EventId(0), ex, "Unable to process collected pii in event: {EventId}.", record.EventID);
                     } // end try/catch                    
                 } // end foreach
             } // end if
@@ -73,12 +82,12 @@ namespace Momentum.Analytics.PageViews.Lambda
             _logger.LogInformation("Stream processing complete.");
         } // end method
 
-        protected PageView? BuildPageView(StreamRecord streamRecord)
+        protected CollectedPii? BuildCollectedPii(StreamRecord streamRecord)
         {            
-            PageView? result = null;
+            CollectedPii? result = null;
             if(streamRecord != null && streamRecord.NewImage != null && streamRecord.NewImage.Any())
             {
-                result = streamRecord.NewImage.ToPageView();
+                result = streamRecord.NewImage.ReadCollectedPii();
             }
             else
             {
@@ -89,4 +98,3 @@ namespace Momentum.Analytics.PageViews.Lambda
         } // end method
     } // end class
 } // end namespace
-
