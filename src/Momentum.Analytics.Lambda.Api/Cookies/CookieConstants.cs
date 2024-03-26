@@ -9,6 +9,6 @@ namespace Momentum.Analytics.Lambda.Api.Cookies
         public const string MAX_FUNNEL_STEP = "fs";
         public const string COOKIE_VALUE_DELIMITER = "=";
 
-        public static TimeSpan COOKIE_EXPIRATION = TimeSpan.FromDays(30);
+        public static TimeSpan COOKIE_EXPIRATION = TimeSpan.FromDays(365);
     } // end class
 } // end namespace
