@@ -42,14 +42,6 @@ jobs:
       
       - name: Test
         run: dotnet test --no-build --verbosity normal
-
-      - name: Build lambda package
-        run: dotnet lambda package --project-location src/Momentum.Analytics.Lambda.Api --configuration Release
-      
-      - name: Do files exist
-        run: |
-          cd src/Momentum.Analytics.Lambda.Api/bin/Release
-          ls -a 
             
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -69,5 +61,5 @@ jobs:
           REPOSITORY: momentum-analytics-api-repo
           IMAGE_TAG: 1.0.${{ github.run_number }}
         run: |
-          dotnet lambda package --project-location src/Momentum.Analytics.Lambda.Api --configuration Release --package-type image -dockerfile src/Momentum.Analytics.Lambda.Api/Dockerfile --region us-east-1 --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          dotnet lambda package --project-location src/Momentum.Analytics.Lambda.Api --configuration Release --docker-host-build-output-dir bin/Release/lambda-publish --package-type image -dockerfile src/Momentum.Analytics.Lambda.Api/Dockerfile --region us-east-1 --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
