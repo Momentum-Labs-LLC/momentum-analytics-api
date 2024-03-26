@@ -29,7 +29,7 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version }}
       
       - name: Setup Github Package Nuget Source
-        run: dotnet nuget add source --username ${{ secrets.GITHUB_USER }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ vars.ORG_NAMESPACE }}/index.json"
+        run: dotnet nuget add source --username ${{ secrets.GH_USER }} --password ${{ secrets.GH_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ vars.ORG_NAMESPACE }}/index.json"
       
       - name: Install Lambda Tools
         run: dotnet tool install -g Amazon.Lambda.Tools
