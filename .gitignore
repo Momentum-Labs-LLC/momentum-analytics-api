@@ -400,4 +400,6 @@ FodyWeavers.xsd
 # ignore test report directory
 tests/report/
 
-.docker/
+.docker
+
+**/.terraform/

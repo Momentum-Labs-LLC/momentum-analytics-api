@@ -1,0 +1,65 @@
+name: Build and Deploy
+
+on: 
+  push:
+    branches:
+      - main
+  
+env:
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_DEFAULT_OUTPUT: json
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: 
+        dotnet-version: [ '8.0.x' ]
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      
+      - name: Setup Github Package Nuget Source
+        run: dotnet nuget add source --username ${{ secrets.GH_USER }} --password ${{ secrets.GH_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ vars.ORG_NAMESPACE }}/index.json"
+      
+      - name: Install Lambda Tools
+        run: dotnet tool install -g Amazon.Lambda.Tools
+      
+      - name: Restore dependencies
+        run: dotnet restore
+      
+      - name: Build
+        run: dotnet build --no-restore
+      
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+            
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          ## the following creates an ARN based on the values entered into github secrets
+          role-to-assume: arn:aws:iam::${{ secrets.PRD_AWS_ACCOUNT_ID }}:role/${{ secrets.PRD_DEPLOY_ROLE }}
+          role-session-name: GithubAction-DeployTrackingApi
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+  
+      - name: Build, tag, and push docker image to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: momentum-analytics-api-repo
+          IMAGE_TAG: 1.0.${{ github.run_number }}
+        run: |
+          dotnet lambda package --project-location src/Momentum.Analytics.Lambda.Api --configuration Release --package-type image -dockerfile src/Momentum.Analytics.Lambda.Api/Dockerfile --region us-east-1 --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
