@@ -45,6 +45,18 @@ data "aws_ecr_repository" "this_ecr" {
   name = "${local.corp}-${local.project}-api-repo"
 }
 
+data "aws_ecr_repository" "this_pg_ecr" {
+  name = "${local.corp}-${local.project}-page-views-processing-repo"
+}
+
+data "aws_ecr_repository" "this_pii_ecr" {
+  name = "${local.corp}-${local.project}-pii-processing-repo"
+}
+
+data "aws_ecr_repository" "this_visit_ecr" {
+  name = "${local.corp}-${local.project}-visit-reporting-repo"
+}
+
 resource "aws_iam_policy" "this-ecr-policy" {
   policy = jsonencode({
     "Version" : "2012-10-17",
@@ -58,7 +70,12 @@ resource "aws_iam_policy" "this-ecr-policy" {
           "ecr:BatchCheckLayerAvailability",
           "ecr:PutImage"
         ],
-        "Resource" : data.aws_ecr_repository.this_ecr.arn
+        "Resource": [
+          data.aws_ecr_repository.this_ecr.arn,
+          data.aws_ecr_repository.this_pg_ecr.arn,
+          data.aws_ecr_repository.this_pii_ecr.arn,
+          data.aws_ecr_repository.this_visit_ecr.arn
+        ]
       },
       {
         "Effect" : "Allow",

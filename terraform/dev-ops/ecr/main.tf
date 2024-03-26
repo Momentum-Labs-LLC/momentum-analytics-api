@@ -30,3 +30,39 @@ resource "aws_ecr_repository" "this-api-repository" {
     })
   )
 }
+
+resource "aws_ecr_repository" "this-page-views-repository" {
+  name                 = "${local.name_prefix}-page-views-processing-repo"
+  image_tag_mutability = "MUTABLE"
+
+  tags = merge(local.tags,
+    tomap(
+      {
+        "Name" : "${local.name_prefix}-page-views-processing-repo"
+    })
+  )
+}
+
+resource "aws_ecr_repository" "this-pii-repository" {
+  name                 = "${local.name_prefix}-pii-processing-repo"
+  image_tag_mutability = "MUTABLE"
+
+  tags = merge(local.tags,
+    tomap(
+      {
+        "Name" : "${local.name_prefix}-pii-processing-repo"
+    })
+  )
+}
+
+resource "aws_ecr_repository" "this-visits-repository" {
+  name                 = "${local.name_prefix}-visit-reporting-repo"
+  image_tag_mutability = "MUTABLE"
+
+  tags = merge(local.tags,
+    tomap(
+      {
+        "Name" : "${local.name_prefix}-visit-reporting-repo"
+    })
+  )
+}
