@@ -57,9 +57,13 @@ jobs:
   
       - name: Build, tag, and push docker image to Amazon ECR
         env:
+          REGION: us-east-1
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: momentum-analytics-api-repo
           IMAGE_TAG: 1.0.${{ github.run_number }}
+          PROJECT_DIRECTORY: src/Momentum.Analytics.Lambda.Api
+          DOCKERFILE: src/Momentum.Analytics.Lambda.Api/Dockerfile
+          OUTPUT_DIR: bin/Release/lambda-publish
         run: |
-          dotnet lambda package --project-location src/Momentum.Analytics.Lambda.Api --configuration Release --docker-host-build-output-dir bin/Release/lambda-publish --package-type image -dockerfile src/Momentum.Analytics.Lambda.Api/Dockerfile --region us-east-1 --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          dotnet lambda package --project-location $PROJECT_DIRECTORY --configuration Release --docker-host-build-output-dir $OUTPUT_DIR --package-type image -dockerfile $DOCKERFILE --region $REGION --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
