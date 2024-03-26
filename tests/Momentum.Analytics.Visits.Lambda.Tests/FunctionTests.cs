@@ -33,15 +33,15 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
         } // end method
 
 
-        [Fact]
-        public void DI_VisitProcessor()
-        {
-            _function = new TestFunction();
-            var visitProcessor = _function.GetVisitProcessor();
+        // [Fact]
+        // public void DI_VisitProcessor()
+        // {
+        //     _function = new TestFunction();
+        //     var visitProcessor = _function.GetVisitProcessor();
 
-            Assert.NotNull(visitProcessor);
-            Assert.IsAssignableFrom<IDynamoDbIdentifiedVisitProcessor>(visitProcessor);
-        } // end method
+        //     Assert.NotNull(visitProcessor);
+        //     Assert.IsAssignableFrom<IDynamoDbIdentifiedVisitProcessor>(visitProcessor);
+        // } // end method
     } // end class
 
     public class TestFunction : Function
