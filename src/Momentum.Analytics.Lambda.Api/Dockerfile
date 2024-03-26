@@ -12,4 +12,4 @@ WORKDIR /var/task
 # For more information on this approach checkout the project's README.md file.
 COPY "bin/Release/lambda-publish"  .
 
-ENTRYPOINT [ "dotnet", "Momentum.Analytics.Lambda.Api.dll" ]
+ENTRYPOINT [ "dotnet", "exec", "--depsfile", "Momentum.Analytics.Lambda.Api.deps.json", "--runtimeconfig", "Momentum.Analytics.Lambda.Api.runtimeconfig.json", "/var/runtime/Amazon.Lambda.RuntimeSupport.dll", "Momentum.Analytics.Lambda.Api::Momentum.Analytics.Lambda.Api.LambdaEntryPoint::FunctionHandlerAsync" ]
