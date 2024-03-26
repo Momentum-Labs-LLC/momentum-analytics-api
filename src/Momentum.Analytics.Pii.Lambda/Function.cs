@@ -42,7 +42,7 @@ namespace Momentum.Analytics.Pii.Lambda
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         } // end method
 
-        public async void FunctionHandler(DynamoDBEvent dynamoEvent, ILambdaContext context)
+        public async void FunctionHandlerAsync(DynamoDBEvent dynamoEvent, ILambdaContext context)
         {
             _logger.LogInformation($"Beginning to process {dynamoEvent.Records.Count} records...");
             

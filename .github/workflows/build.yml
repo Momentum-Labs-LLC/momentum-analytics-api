@@ -55,7 +55,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
   
-      - name: Build, tag, and push docker image to Amazon ECR
+      - name: Build, tag, and push Api Image
         env:
           REGION: us-east-1
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -65,5 +65,41 @@ jobs:
           DOCKERFILE: src/Momentum.Analytics.Lambda.Api/Dockerfile
           OUTPUT_DIR: bin/Release/lambda-publish
         run: |
-          dotnet lambda package --project-location $PROJECT_DIRECTORY --configuration Release --docker-host-build-output-dir $OUTPUT_DIR --package-type image -dockerfile $DOCKERFILE --region $REGION --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          dotnet lambda package --project-location $PROJECT_DIRECTORY --configuration Release --m --docker-host-build-output-dir $OUTPUT_DIR --package-type image -dockerfile $DOCKERFILE --region $REGION --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG --msbuild-parameters -p:runtime=linux-x64
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+      - name: Build, tag, and push Page View Processing Image
+        env:
+          REGION: us-east-1
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: momentum-analytics-page-views-processing-repo
+          IMAGE_TAG: 1.0.${{ github.run_number }}
+          PROJECT_DIRECTORY: src/Momentum.Analytics.PageViews.Lambda
+          DOCKERFILE: src/Momentum.Analytics.PageViews.Lambda/Dockerfile
+          OUTPUT_DIR: bin/Release/lambda-publish
+        run: |
+          dotnet lambda package --project-location $PROJECT_DIRECTORY --configuration Release --m --docker-host-build-output-dir $OUTPUT_DIR --package-type image -dockerfile $DOCKERFILE --region $REGION --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG --msbuild-parameters -p:runtime=linux-x64
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+      - name: Build, tag, and push Pii Processing Image
+        env:
+          REGION: us-east-1
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: momentum-analytics-pii-processing-repo
+          IMAGE_TAG: 1.0.${{ github.run_number }}
+          PROJECT_DIRECTORY: src/Momentum.Analytics.Pii.Lambda
+          DOCKERFILE: src/Momentum.Analytics.Pii.Lambda/Dockerfile
+          OUTPUT_DIR: bin/Release/lambda-publish
+        run: |
+          dotnet lambda package --project-location $PROJECT_DIRECTORY --configuration Release --m --docker-host-build-output-dir $OUTPUT_DIR --package-type image -dockerfile $DOCKERFILE --region $REGION --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG --msbuild-parameters -p:runtime=linux-x64
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+      - name: Build, tag, and push Visit Reporting Image
+        env:
+          REGION: us-east-1
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: momentum-analytics-visit-reporting-repo
+          IMAGE_TAG: 1.0.${{ github.run_number }}
+          PROJECT_DIRECTORY: src/Momentum.Analytics.Visits.Lambda
+          DOCKERFILE: src/Momentum.Analytics.Visits.Lambda/Dockerfile
+          OUTPUT_DIR: bin/Release/lambda-publish
+        run: |
+          dotnet lambda package --project-location $PROJECT_DIRECTORY --configuration Release --m --docker-host-build-output-dir $OUTPUT_DIR --package-type image -dockerfile $DOCKERFILE --region $REGION --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG --msbuild-parameters -p:runtime=linux-x64
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG

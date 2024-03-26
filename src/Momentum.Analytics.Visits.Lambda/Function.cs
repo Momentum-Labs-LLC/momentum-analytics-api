@@ -55,7 +55,7 @@ namespace Momentum.Analytics.Visits.Lambda
         /// <param name="input"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public async Task FunctionHandler(Stream input)
+        public async Task FunctionHandlerAsync(Stream input)
         {
             var timeRangeProvider = _serviceProvider.GetRequiredService<IVisitTimeRangeProvider>();
             var visitProcessor = _serviceProvider.GetRequiredService<IDynamoDbIdentifiedVisitProcessor>();

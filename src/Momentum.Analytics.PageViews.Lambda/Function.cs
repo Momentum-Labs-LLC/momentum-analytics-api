@@ -45,7 +45,7 @@ namespace Momentum.Analytics.PageViews.Lambda
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         } // end method
 
-        public async Task FunctionHandler(DynamoDBEvent dynamoEvent)
+        public async Task FunctionHandlerAsync(DynamoDBEvent dynamoEvent)
         {
             _logger.LogInformation($"Beginning to process {dynamoEvent.Records.Count} records...");
             
