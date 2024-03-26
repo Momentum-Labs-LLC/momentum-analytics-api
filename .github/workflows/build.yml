@@ -42,6 +42,14 @@ jobs:
       
       - name: Test
         run: dotnet test --no-build --verbosity normal
+
+      - name: Build lambda package
+        run: dotnet lambda package --project-location src/Momentum.Analytics.Lambda.Api --configuration Release
+      
+      - name: Do files exist
+        run: |
+          cd src/Momentum.Analytics.Lambda.Api/bin/Release
+          ls -a 
             
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

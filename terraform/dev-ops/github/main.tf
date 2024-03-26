@@ -9,7 +9,7 @@ locals {
   corp        = "momentum"
   iteration   = 0
   region      = "us-east-1"
-  project     = "tracking"
+  project     = "analytics"
   subproject  = "api"
   name_prefix = "${local.corp}-${local.env}-${local.project}-${local.subproject}"
 
@@ -42,7 +42,7 @@ module "iam_github_ecr_role" {
 }
 
 data "aws_ecr_repository" "this_ecr" {
-  name = "${local.corp}-${local.env}-api-repo"
+  name = "${local.corp}-${local.project}-api-repo"
 }
 
 resource "aws_iam_policy" "this-ecr-policy" {
@@ -53,13 +53,19 @@ resource "aws_iam_policy" "this-ecr-policy" {
         "Effect" : "Allow",
         "Action" : [
           "ecr:CompleteLayerUpload",
-          "ecr:GetAuthorizationToken",
           "ecr:UploadLayerPart",
           "ecr:InitiateLayerUpload",
           "ecr:BatchCheckLayerAvailability",
           "ecr:PutImage"
         ],
         "Resource" : data.aws_ecr_repository.this_ecr.arn
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ecr:GetAuthorizationToken"
+        ],
+        "Resource" : "*"
       }
     ]
   })
