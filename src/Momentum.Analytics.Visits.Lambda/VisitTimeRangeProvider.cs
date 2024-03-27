@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Momentum.Analytics.Core.Extensions;
 using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Models;
 
@@ -21,14 +22,6 @@ namespace Momentum.Analytics.Visits.Lambda
                 UtcStart = utcHour.AddHours(hoursLookback * -1),
                 UtcEnd = utcHour
             };
-        } // end method
-    } // end class
-
-    public static class DateTimeExtensions
-    {
-        public static DateTime Trim(this DateTime dateTime, long intervalTicks)
-        {
-            return new DateTime(dateTime.Ticks - (dateTime.Ticks % intervalTicks), dateTime.Kind);
         } // end method
     } // end class
 } // end namespace

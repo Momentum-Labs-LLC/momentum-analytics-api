@@ -13,5 +13,8 @@ namespace Momentum.Analytics.DynamoDb.Pii
         public const string PII_ID = "PiiId";
         public const string COOKIE_ID = "CookieId";
         public const string UTC_TIMESTAMP = "UtcTimestamp";
+
+        public const string COOKIE_TIMESTAMP_INDEX = "COOKIE_TIMESTAMP_INDEX";
+        public const string COOKIE_TIMESTAMP_INDEX_DEFAULT = "CookieTimestampIndex";
     } // end class
 } // end namespace

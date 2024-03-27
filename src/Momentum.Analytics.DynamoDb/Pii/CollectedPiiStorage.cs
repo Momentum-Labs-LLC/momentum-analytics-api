@@ -22,9 +22,27 @@ namespace Momentum.Analytics.DynamoDb.Pii
         {
         } // end method
 
-        public Task<IEnumerable<CollectedPii>?> GetByCookieIdAsync(Guid cookieId, CancellationToken token = default)
+        public virtual async Task<IEnumerable<CollectedPii>?> GetByCookieIdAsync(Guid cookieId, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            IEnumerable<CollectedPii>? result = null;
+            var request = new QueryRequest()
+            {
+                TableName = _tableConfiguration.TableName,
+                IndexName = _tableConfiguration.CookieTimestampIndexName,
+                KeyConditionExpression = $"{CollectedPiiConstants.COOKIE_ID} = :cookie_id",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                    .AddField(":cookie_id", cookieId)
+            };
+
+            var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
+            var queryResult = await client.QueryAsync(request, token).ConfigureAwait(false);
+
+            if(queryResult != null && queryResult.Items != null && queryResult.Items.Any())
+            {
+                result = queryResult.Items.Select(x => x.ReadCollectedPii());
+            } // end if
+
+            return result;
         } // end method
 
         public virtual async Task InsertAysnc(CollectedPii collectedPii, CancellationToken token = default)

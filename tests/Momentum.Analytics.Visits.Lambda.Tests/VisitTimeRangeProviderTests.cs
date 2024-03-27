@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Momentum.Analytics.DynamoDb.Visits;
+using Momentum.Analytics.Core.Extensions;
 using Moq;
 
 namespace Momentum.Analytics.Visits.Lambda.Tests

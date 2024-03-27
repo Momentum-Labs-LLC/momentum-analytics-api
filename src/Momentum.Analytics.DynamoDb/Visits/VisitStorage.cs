@@ -1,5 +1,6 @@
 using Amazon.DynamoDBv2.Model;
 using Microsoft.Extensions.Logging;
+using Momentum.Analytics.Core.Extensions;
 using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.DynamoDb.Abstractions;
@@ -52,12 +53,18 @@ namespace Momentum.Analytics.DynamoDb.Visits
         public virtual async Task<Visit?> GetByActivityAsync(Guid cookieId, DateTime utcTimestamp, CancellationToken token = default)
         {
             Visit? result = null;
+
+            var utcToday = DateTime.UtcNow.Trim(TimeSpan.FromDays(1).Ticks);
+            var utcTomorrow = utcToday.AddDays(1);
             var queryRequest = new QueryRequest()
             {
                 TableName = _tableConfiguration.TableName,
                 IndexName = _tableConfiguration.VisitExpirationIndex,
-                //Key
-                // TODO: Build Query
+                KeyConditionExpression = $"{VisitConstants.COOKIE_ID} = :cookie_id and {VisitConstants.UTC_EXPIRATION} > :today and {VisitConstants.UTC_EXPIRATION} < :tommorrow",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                    .AddField(":cookie_id", cookieId)
+                    .AddField(":today", utcToday)
+                    .AddField(":tomorrow", utcTomorrow)
             };
 
             var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
@@ -82,8 +89,10 @@ namespace Momentum.Analytics.DynamoDb.Visits
                 TableName = _tableConfiguration.TableName,
                 IndexName = _tableConfiguration.IdentifiedIndex,
                 ExclusiveStartKey = page,
-                //Key
-                // TODO: Build Query
+                KeyConditionExpression = $"{VisitConstants.IS_IDENTIFIED} = 1 and {VisitConstants.UTC_IDENTIFIED_TIMESTAMP} >= :start and {VisitConstants.UTC_IDENTIFIED_TIMESTAMP} < :end",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                    .AddField(":start", timeRange.UtcStart)
+                    .AddField(":end", timeRange.UtcEnd)
             };
 
             var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
@@ -109,48 +118,10 @@ namespace Momentum.Analytics.DynamoDb.Visits
             {
                 TableName = _tableConfiguration.TableName,
                 IndexName = _tableConfiguration.VisitExpirationIndex,
-                ExclusiveStartKey = page
-                //Key
-                // TODO: Build Query
-            };
-
-            var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
-            var response = await client.QueryAsync(queryRequest, token).ConfigureAwait(false);
-
-            if(response.Items != null && response.Items.Any())
-            {
-                result.Data = response.Items.Select(x => x.ToVisit());
-                result.HasMore = response.LastEvaluatedKey != null && response.LastEvaluatedKey.Any();
-                result.NextPage = response.LastEvaluatedKey;
-            } // end if
-
-            return result;
-        } // end method
-
-        public virtual async Task<IDynamoSearchResponse<Visit>> SearchAsync(IDynamoVisitSearch request, CancellationToken token = default)
-        {
-            var result = new DynamoSearchResponse<Visit>();
-
-            string? indexName = null;
-            if(request.CookieId.HasValue)
-            {
-                indexName = _tableConfiguration.VisitExpirationIndex;
-                var keyFilter = new Dictionary<string, AttributeValue>()
-                {
-
-                };
-            }
-            else if(request.IsIdentified.HasValue)
-            {
-                indexName = _tableConfiguration.IdentifiedIndex;
-            } // end if
-
-            var queryRequest = new QueryRequest()
-            {
-                TableName = _tableConfiguration.TableName,
-                IndexName = indexName,
-                //Key
-                // TODO: Build Query
+                ExclusiveStartKey = page,
+                KeyConditionExpression = $"{VisitConstants.COOKIE_ID} = :cookie_id and is_identified = 0",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                    .AddField(":cookie_id", cookieId)
             };
 
             var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);

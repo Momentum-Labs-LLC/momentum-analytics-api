@@ -38,6 +38,7 @@ namespace Momentum.Analytics.PageViews.Lambda
                 .BuildServiceProvider();
 
             _logger = _serviceProvider.GetRequiredService<ILogger<Function>>();
+            _logger.LogInformation("Page View Processing Lambda Created.");
         } // end method
 
         public Function(IServiceProvider serviceProvider)
@@ -65,7 +66,7 @@ namespace Momentum.Analytics.PageViews.Lambda
                     }
                     catch(Exception ex)
                     {
-                        _logger.LogError("Unable to process page view in event: {EventId}.", record.EventID);
+                        _logger.LogError(new EventId(0), ex, "Unable to process page view in event: {EventId}.", record.EventID);
                     } // end try/catch                    
                 } // end foreach
             } // end if

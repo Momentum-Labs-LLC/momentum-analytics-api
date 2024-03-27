@@ -21,15 +21,13 @@ namespace Momentum.Analytics.DynamoDb.Pii
         public virtual async Task<PiiValue>? GetByIdAsync(Guid id, CancellationToken token = default)
         {
             PiiValue? result = null;
-            var key = new Dictionary<string, AttributeValue>().AddField(PiiValueConstants.PII_ID, id);
             var request = new QueryRequest()
             {
                 TableName = _tableConfiguration.TableName,
                 IndexName = _tableConfiguration.IdIndexName,
-                QueryFilter = new Dictionary<string, Condition>()
-                {
-
-                },
+                KeyConditionExpression = "Id = :id",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                    .AddField(":id", id)
             };
 
             var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
