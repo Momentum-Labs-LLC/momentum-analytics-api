@@ -1,3 +1,5 @@
+using NodaTime;
+
 namespace Momentum.Analytics.Core.PII.Models
 {
     /// <summary>
@@ -23,6 +25,6 @@ namespace Momentum.Analytics.Core.PII.Models
         /// <summary>
         /// Gets or sets the timestamp.
         /// </summary>
-        public DateTime UtcTimestamp { get; set; }
+        public Instant UtcTimestamp { get; set; }
     } // end class
 } // end namespace

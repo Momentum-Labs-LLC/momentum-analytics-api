@@ -2,9 +2,8 @@ using NodaTime;
 
 namespace Momentum.Analytics.Core.Interfaces
 {
-    public interface IUserActivity
+    public interface IClockService
     {
-        Guid CookieId { get; }
-        Instant UtcTimestamp { get; }
+        Instant Now { get; }
     } // end interface
 } // end namespace

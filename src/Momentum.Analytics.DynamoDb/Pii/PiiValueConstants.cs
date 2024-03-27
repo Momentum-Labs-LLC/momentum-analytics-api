@@ -12,7 +12,7 @@ namespace Momentum.Analytics.DynamoDb.Pii
         public const string ID_INDEX_NAME = "PII_ID_INDEX_NAME";
         public const string ID_INDEX_NAME_DEFAULT = "IdIndex";
 
-        public const string PII_ID = "PiiId";
+        public const string PII_ID = "Id";
         public const string VALUE = "Value";
         public const string PII_TYPE = "PiiType";
         public const string HASH_ALGORITHM = "HashAlgorithm";        

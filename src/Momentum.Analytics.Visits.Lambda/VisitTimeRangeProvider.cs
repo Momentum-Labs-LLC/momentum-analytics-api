@@ -1,7 +1,8 @@
 using Microsoft.Extensions.Configuration;
-using Momentum.Analytics.Core.Extensions;
 using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Models;
+using Momentum.Analytics.Core.Visits.Interfaces;
+using NodaTime;
 
 namespace Momentum.Analytics.Visits.Lambda
 {
@@ -11,16 +12,30 @@ namespace Momentum.Analytics.Visits.Lambda
         public const int HOURS_LOOKBACK_DEFAULT = 24;
         public ITimeRange TimeRange { get; protected set; }
 
-        public VisitTimeRangeProvider(IConfiguration configuration)
+        public VisitTimeRangeProvider(IConfiguration configuration, IVisitConfiguration visitConfiguration, IClockService clockService)
         {
-            var utcHour = DateTime.UtcNow.Trim(TimeSpan.FromHours(1).Ticks);
-            
+            var now = clockService.Now;
             var hoursLookback = configuration.GetValue<int>(HOURS_LOOKBACK, HOURS_LOOKBACK_DEFAULT);
+
+            var zoned = now.InUtc();
+            if(visitConfiguration.TimeZone != null)
+            {
+                zoned = now.InZone(visitConfiguration.TimeZone);
+            } // end if
+
+            // get the time of day trimed to hour
+            var specificHour = zoned.TimeOfDay.With(TimeAdjusters.TruncateToHour);
+
+            // get the zoned time trimed to the hour
+            var zonedHour = zoned.Minus(Duration.FromNanoseconds((zoned.TimeOfDay - specificHour).Nanoseconds));
+
+            // get the instant from the current time trimed to the hour
+            var endInstant = zonedHour.ToInstant();
 
             TimeRange = new TimeRange()
             {
-                UtcStart = utcHour.AddHours(hoursLookback * -1),
-                UtcEnd = utcHour
+                UtcStart = endInstant.Minus(Duration.FromHours(hoursLookback)),
+                UtcEnd = endInstant
             };
         } // end method
     } // end class

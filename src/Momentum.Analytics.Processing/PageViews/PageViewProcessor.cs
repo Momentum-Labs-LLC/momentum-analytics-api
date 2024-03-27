@@ -6,6 +6,7 @@ using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.PageViews.Interfaces;
+using NodaTime;
 
 namespace Momentum.Analytics.Processing.PageViews
 {
@@ -15,15 +16,18 @@ namespace Momentum.Analytics.Processing.PageViews
     {
         protected readonly IPiiService _piiService;
         protected readonly TVisitService _visitService;
+        protected readonly IClockService _clockService;
         protected readonly ILogger _logger;
 
         public PageViewProcessor(
             IPiiService piiService,
             TVisitService visitService,
+            IClockService clockService,
             ILogger<PageViewProcessor<TPage, TVisitSearchResponse, TVisitService>> logger)
         {
             _piiService = piiService ?? throw new ArgumentNullException(nameof(piiService));
             _visitService = visitService ?? throw new ArgumentNullException(nameof(visitService));
+            _clockService = clockService ?? throw new ArgumentNullException(nameof(clockService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
@@ -31,6 +35,8 @@ namespace Momentum.Analytics.Processing.PageViews
         {   
             var hasUpsert = false;
             var activeVisit = await _visitService.GetByActivityAsync(pageView, token).ConfigureAwait(false);
+
+            var visitExpiration = await _visitService.CalculateVisitExpirationAsync(pageView.UtcTimestamp, token).ConfigureAwait(false);
             if(activeVisit == null)
             {
                 hasUpsert = true;
@@ -39,10 +45,16 @@ namespace Momentum.Analytics.Processing.PageViews
                     Id = Guid.NewGuid(),
                     CookieId = pageView.CookieId,
                     UtcStart = pageView.UtcTimestamp,
-                    UtcExpiration = DateTime.UtcNow.AddDays(1).Date,
+                    UtcExpiration = visitExpiration,
                     FunnelStep = pageView.FunnelStep                    
                 };
             }
+
+            if(activeVisit.UtcExpiration < visitExpiration)
+            {
+                activeVisit.UtcExpiration = visitExpiration;
+                hasUpsert = true;
+            } // end if
 
             if(activeVisit.UtcStart > pageView.UtcTimestamp)
             {
@@ -77,7 +89,7 @@ namespace Momentum.Analytics.Processing.PageViews
                     {
                         activeVisit.PiiValue = preferredPii.Value;
                         activeVisit.PiiType = preferredPii.PiiType;
-                        activeVisit.UtcIdentifiedTimestamp = DateTime.UtcNow;
+                        activeVisit.UtcIdentifiedTimestamp = _clockService.Now;
 
                         hasUpsert = true;
                     } // end if

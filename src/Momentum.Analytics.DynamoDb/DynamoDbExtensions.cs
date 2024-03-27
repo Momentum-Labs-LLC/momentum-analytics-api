@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2.Model;
+using NodaTime;
 
 namespace Momentum.Analytics.DynamoDb
 {
@@ -68,6 +69,27 @@ namespace Momentum.Analytics.DynamoDb
         public static Dictionary<string, AttributeValue> AddField(
             this Dictionary<string, AttributeValue> fields, 
             string name, 
+            int? value)
+        {
+            if(fields == null)
+            {
+                fields = new Dictionary<string, AttributeValue>();
+            } // end if
+
+            if(value.HasValue)
+            {
+                fields.Add(name, new AttributeValue()
+                {
+                    N = value.ToString()
+                });
+            } // end if            
+
+            return fields;
+        } // end method
+
+        public static Dictionary<string, AttributeValue> AddField(
+            this Dictionary<string, AttributeValue> fields, 
+            string name, 
             int value)
         {
             if(fields == null)
@@ -78,7 +100,7 @@ namespace Momentum.Analytics.DynamoDb
             fields.Add(name, new AttributeValue()
             {
                 N = value.ToString()
-            });
+            });           
 
             return fields;
         } // end method
@@ -106,7 +128,8 @@ namespace Momentum.Analytics.DynamoDb
             int? result = null;
             if(fields != null 
                 && fields.TryGetValue(name, out AttributeValue attr)
-                && attr != null)
+                && attr != null
+                && attr.N != null)
             {
                 result = int.Parse(attr.N);
             } // end if
@@ -132,17 +155,17 @@ namespace Momentum.Analytics.DynamoDb
             return fields;
         } // end method
 
-        public static double ReadDouble(
+        public static long ReadLong(
             this Dictionary<string, AttributeValue> fields,
             string name,
-            double defaultValue = 0)
+            long defaultValue = 0)
         {
             var result = defaultValue;
             if(fields != null 
                 && fields.TryGetValue(name, out AttributeValue attr)
                 && attr != null)
             {
-                result = double.Parse(attr.N);
+                result = long.Parse(attr.N);
             } // end if
 
             return result;
@@ -151,27 +174,27 @@ namespace Momentum.Analytics.DynamoDb
         public static Dictionary<string, AttributeValue> AddField(
             this Dictionary<string, AttributeValue> fields, 
             string name, 
-            DateTime? value)
+            Instant? value)
         {
             if(value.HasValue)
             {
-                var msSinceEpoch = (value.Value - DateTime.UnixEpoch).TotalMilliseconds;
+                var msSinceEpoch = value.Value.ToUnixTimeMilliseconds();
                 fields = fields.AddField(name, msSinceEpoch);
             } // end if            
 
             return fields;
         } // end method
 
-        public static DateTime? ReadDateTime(
+        public static Instant? ReadDateTime(
             this Dictionary<string, AttributeValue> fields,
             string name,
             bool throwExceptionOnNull = false)
         {
-            DateTime? result = null;
-            var msSinceEpoch = fields.ReadDouble(name);
+            Instant? result = null;
+            var msSinceEpoch = fields.ReadLong(name);
             if(msSinceEpoch != 0)
             {
-                result = DateTime.UnixEpoch.AddMilliseconds(msSinceEpoch);
+                result = Instant.FromUnixTimeMilliseconds(msSinceEpoch);
             }
             else if(throwExceptionOnNull)
             {

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.PII.Interfaces;
 using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Lambda.Api.Cookies;
@@ -13,15 +14,18 @@ namespace Momentum.Analytics.Lambda.Api.Pii
     {
         protected readonly IPiiService _piiService;
         protected readonly ICookieWriter _cookieWriter;
+        protected readonly IClockService _clockService;
         protected readonly ILogger _logger;
 
         public PiiController(
             IPiiService piiService, 
             ICookieWriter cookieWriter,
+            IClockService clockService,
             ILogger<PiiController> logger)
         {
             _piiService = piiService ?? throw new ArgumentNullException(nameof(piiService));
             _cookieWriter = cookieWriter ?? throw new ArgumentNullException(nameof(cookieWriter));
+            _clockService = clockService ?? throw new ArgumentNullException(nameof(clockService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
@@ -36,7 +40,7 @@ namespace Momentum.Analytics.Lambda.Api.Pii
             var collectedPii = new CollectedPii()
             {
                 CookieId = cookie.Id,
-                UtcTimestamp = DateTime.UtcNow,
+                UtcTimestamp = _clockService.Now,
                 Pii = new PiiValue()
                 {
                     Value = piiViewModel.Value,
@@ -54,6 +58,45 @@ namespace Momentum.Analytics.Lambda.Api.Pii
             await _cookieWriter.SetCookieAsync(cookie, token).ConfigureAwait(false);
 
             return Ok();            
+        } // end method
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAsync(
+            [FromRoute] Guid id,
+            CancellationToken token = default)
+        {
+            IActionResult result = NotFound();
+
+            var pii = await _piiService.GetPiiAsync(id, token).ConfigureAwait(false);
+            if(pii != null)
+            {
+                result = Ok(pii);
+            } // end if
+
+            return result;
+        } // end method
+
+        [HttpGet]
+        public async Task<IActionResult> GetByCookieAsync(
+            [FromCookie(Name = CookieConstants.NAME)] string? cookieValue = null,
+            [FromQuery(Name = "cookieId")] Guid? cookieId = null,
+            CancellationToken token = default)
+        {
+            IActionResult result = NotFound();
+
+            var cookie = cookieValue.ToCookieModel();
+            if(cookieId.HasValue)
+            {
+                cookie.Id = cookieId.Value;
+            }
+
+            var cookiePiis = await _piiService.GetByCookieIdAsync(cookie.Id, token).ConfigureAwait(false);
+            if(cookiePiis != null && cookiePiis.Any())
+            {
+                result = Ok(cookiePiis);
+            } // end if
+
+            return result;
         } // end method
     } // end class
 } // end namespace

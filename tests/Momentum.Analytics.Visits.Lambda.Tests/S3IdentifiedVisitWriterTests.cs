@@ -5,14 +5,18 @@ using System.Threading.Tasks;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.Extensions.Logging;
+using Momentum.Analytics.Core;
+using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Models;
 using Momentum.Analytics.Core.Visits.Models;
 using Moq;
+using NodaTime;
 
 namespace Momentum.Analytics.Visits.Lambda.Tests
 {
     public class S3IdentifiedVisitWriterTests
     {
+        private IClockService _clockService;
         private Mock<IS3ClientFactory> _s3ClientFactory;
         private Mock<IS3OutputConfiguration> _outputConfiguration;
         private Mock<ILogger<S3IdentifiedVisitWriter>> _logger;
@@ -23,6 +27,7 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
 
         public S3IdentifiedVisitWriterTests()
         {
+            _clockService = new ClockService();
             _s3ClientFactory = new Mock<IS3ClientFactory>();
             _outputConfiguration = new Mock<IS3OutputConfiguration>();
             _logger = new Mock<ILogger<S3IdentifiedVisitWriter>>();
@@ -40,25 +45,26 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
         [Fact]
         public async Task WriteAsync_Simple()
         {
+            var now = _clockService.Now;
             var visits = new List<Visit>() 
             { 
                 new Visit()
                 {
                     Id = Guid.NewGuid(),
                     CookieId = Guid.NewGuid(),
-                    UtcStart = DateTime.UtcNow.AddDays(-1),
-                    UtcExpiration = DateTime.UtcNow.Date,
+                    UtcStart = now.Minus(Duration.FromDays(1)),
+                    UtcExpiration = now,
                     FunnelStep = 0,
                     PiiValue = "12345",
                     PiiType = Core.PII.Models.PiiTypeEnum.UserId,
-                    UtcIdentifiedTimestamp = DateTime.UtcNow.AddDays(-1)
+                    UtcIdentifiedTimestamp = now.Minus(Duration.FromDays(1))
                 }
             };
 
             var timeRange = new TimeRange()
             {
-                UtcStart = DateTime.UtcNow.AddDays(-1),
-                UtcEnd = DateTime.UtcNow.Date
+                UtcStart = now.Minus(Duration.FromDays(1)),
+                UtcEnd = now
             };
 
             var putResponse = new PutObjectResponse()

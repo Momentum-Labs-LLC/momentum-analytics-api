@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core.Interfaces;
+using Momentum.Analytics.Core.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
+using NodaTime;
 
 namespace Momentum.Analytics.Core.Visits
 {
@@ -11,18 +13,26 @@ namespace Momentum.Analytics.Core.Visits
         where TSearchResponse : ISearchResponse<Visit, TPage>
         where TStorage : IVisitStorage<TPage, TSearchResponse>
     {
+        protected readonly IVisitConfiguration _visitConfiguration;
         protected readonly TStorage _visitStorage;
-        protected readonly IMemoryCache _memoryCache;
+        protected readonly IMemoryCache _memoryCache;        
         protected readonly ILogger _logger;
 
         public VisitService(
+            IVisitConfiguration visitConfiguration,
             TStorage visitStorage,
             IMemoryCache memoryCache,
             ILogger<VisitService<TPage, TSearchResponse, TStorage>> logger)
         {
+            _visitConfiguration = visitConfiguration ?? throw new ArgumentNullException(nameof(visitConfiguration));
             _visitStorage = visitStorage ?? throw new ArgumentNullException(nameof(visitStorage));
             _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        } // end method
+
+        public virtual async Task<Instant> CalculateVisitExpirationAsync(Instant utcActivity, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
         } // end method
 
         public virtual async Task<Visit?> GetAsync(Guid id, CancellationToken token = default)
@@ -41,9 +51,14 @@ namespace Momentum.Analytics.Core.Visits
             return result;
         } // end method
 
-        public virtual async Task<Visit?> GetByActivityAsync(IUserActivity userActivity,CancellationToken token = default)
+        public virtual async Task<Visit?> GetByActivityAsync(IUserActivity userActivity, CancellationToken token = default)
         {
-            Visit? result = await _visitStorage.GetByActivityAsync(userActivity.CookieId, userActivity.UtcTimestamp, token).ConfigureAwait(false);
+            var timeRange = new TimeRange()
+            {
+                UtcStart = userActivity.UtcTimestamp,
+                UtcEnd = await CalculateVisitExpirationAsync(userActivity.UtcTimestamp, token).ConfigureAwait(false)
+            };
+            Visit? result = await _visitStorage.GetByActivityAsync(userActivity.CookieId, timeRange, token).ConfigureAwait(false);
 
             if(result != null)
             {

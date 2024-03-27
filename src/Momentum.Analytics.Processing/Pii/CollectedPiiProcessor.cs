@@ -4,6 +4,7 @@ using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.Pii.Interfaces;
+using NodaTime;
 
 namespace Momentum.Analytics.Processing.Pii
 {
@@ -11,14 +12,17 @@ namespace Momentum.Analytics.Processing.Pii
         where TVisitSearchResponse : ISearchResponse<Visit, TPage>
         where TVisitService : IVisitService<TPage, TVisitSearchResponse>
     {
-        protected readonly TVisitService _visitService;        
+        protected readonly TVisitService _visitService;
+        protected readonly IClockService _clockService;
         protected readonly ILogger _logger;
 
         public CollectedPiiProcessor(
-            TVisitService visitService,            
+            TVisitService visitService,
+            IClockService clockService,
             ILogger<CollectedPiiProcessor<TPage, TVisitSearchResponse, TVisitService>> logger)
         {
-            _visitService = visitService ?? throw new ArgumentNullException(nameof(visitService));            
+            _visitService = visitService ?? throw new ArgumentNullException(nameof(visitService));
+            _clockService = clockService ?? throw new ArgumentNullException(nameof(clockService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
@@ -70,7 +74,7 @@ namespace Momentum.Analytics.Processing.Pii
                     {
                         visit.PiiValue = collectedPii.Pii.Value;
                         visit.PiiType = collectedPii.Pii.PiiType;
-                        visit.UtcIdentifiedTimestamp = DateTime.UtcNow;
+                        visit.UtcIdentifiedTimestamp = _clockService.Now;
 
                         // TODO: move to a batch upsert?
                         await _visitService.UpsertAsync(visit, token).ConfigureAwait(false);

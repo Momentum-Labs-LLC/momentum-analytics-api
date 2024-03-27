@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using Momentum.Analytics.Core;
+using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.PageViews.Interfaces;
 using Momentum.Analytics.Lambda.Api.Cookies;
 using Momentum.Analytics.Lambda.Api.PageViews.ViewModels;
 using Momentum.FromCookie;
+using NodaTime;
 
 namespace Momentum.Analytics.Lambda.Api.PageViews
 {
@@ -12,17 +15,20 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
     {
         protected readonly IPageViewService _pageViewService;
         protected readonly ICookieWriter _cookieWriter;
+        protected readonly IClockService _clockService;
         protected readonly IHttpContextAccessor _httpContextAccessor;
         protected readonly ILogger _logger;
 
         public PageViewsController(
             IPageViewService pageViewService, 
             ICookieWriter cookieWriter, 
+            IClockService clockService,
             IHttpContextAccessor httpContextAccessor,
             ILogger<PageViewsController> logger)
         {
             _pageViewService = pageViewService ?? throw new ArgumentNullException(nameof(pageViewService));
             _cookieWriter = cookieWriter ?? throw new ArgumentNullException(nameof(cookieWriter));
+            _clockService = clockService ?? throw new ArgumentNullException(nameof(clockService));
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
@@ -34,7 +40,8 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
             CancellationToken token = default)
         {
             var cookie = cookieValue.ToCookieModel();
-            var domainModel = pageView.ToDomain(cookie, _httpContextAccessor.HttpContext.TraceIdentifier);
+            var now = _clockService.Now;
+            var domainModel = pageView.ToDomain(cookie, now);
             await _pageViewService.RecordAsync(domainModel, token).ConfigureAwait(false);
 
             if(cookie.MaxFunnelStep < pageView.FunnelStep)

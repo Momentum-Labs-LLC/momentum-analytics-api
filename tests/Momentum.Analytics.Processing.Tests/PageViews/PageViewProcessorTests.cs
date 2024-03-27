@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Momentum.Analytics.Core;
 using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.PageViews.Models;
 using Momentum.Analytics.Core.PII.Interfaces;
@@ -7,11 +8,13 @@ using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.PageViews;
 using Moq;
+using NodaTime;
 
 namespace Momentum.Analytics.Processing.Tests.PageViews
 {
     public class PageViewProcessorTests
     {
+        private IClockService _clockService;
         private Mock<IPiiService> _piiService;
         private Mock<ITestVisitService> _visitService;
         private Mock<ILogger<TestPageViewProcessor>> _logger;
@@ -19,19 +22,19 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
 
         public PageViewProcessorTests()
         {
+            _clockService = new ClockService();
             _piiService = new Mock<IPiiService>();
             _visitService = new Mock<ITestVisitService>();
             _logger = new Mock<ILogger<TestPageViewProcessor>>();
-            _processor = new TestPageViewProcessor(_piiService.Object, _visitService.Object, _logger.Object);
+            _processor = new TestPageViewProcessor(_piiService.Object, _visitService.Object, _clockService, _logger.Object);
         } // end method
 
         protected PageView BuildPageView(string? path = null, string? referrer = null, int funnelStep = 0)
         {
             return new PageView()
             {
-                RequestId = Guid.NewGuid().ToString(),
                 CookieId = Guid.NewGuid(),
-                UtcTimestamp = DateTime.UtcNow,
+                UtcTimestamp = _clockService.Now,
                 Domain = "test.com",
                 Path = "index",
                 Referer = "google.com",
@@ -51,8 +54,8 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     CookieId = pageView.CookieId,
                     Referer = pageView.Referer,
                     FunnelStep = pageView.FunnelStep,
-                    UtcStart = pageView.UtcTimestamp.AddMinutes(-1),
-                    UtcExpiration = DateTime.UtcNow.Date.AddDays(1)
+                    UtcStart = pageView.UtcTimestamp.Minus(Duration.FromMinutes(1)),
+                    UtcExpiration = pageView.UtcTimestamp.Plus(Duration.FromDays(1))
                 });
 
             _piiService.Setup(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()))
@@ -119,7 +122,7 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     CookieId = Guid.NewGuid(),
                     PiiValue = userId.Value,
                     PiiType = userId.PiiType,
-                    UtcIdentifiedTimestamp = pageView.UtcTimestamp.AddMinutes(-2),
+                    UtcIdentifiedTimestamp = pageView.UtcTimestamp.Minus(Duration.FromMinutes(2)),
                     FunnelStep = 0
                 });
 
@@ -154,7 +157,7 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     CookieId = Guid.NewGuid(),
                     PiiValue = userId.Value,
                     PiiType = userId.PiiType,
-                    UtcIdentifiedTimestamp = pageView.UtcTimestamp.AddMinutes(-2),
+                    UtcIdentifiedTimestamp = pageView.UtcTimestamp.Minus(Duration.FromMinutes(2)),
                 });
 
             await _processor.ProcessAsync(pageView).ConfigureAwait(false);
@@ -176,11 +179,11 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     CookieId = pageView.CookieId,
                     Referer = pageView.Referer,
                     FunnelStep = pageView.FunnelStep,
-                    UtcStart = pageView.UtcTimestamp.AddMinutes(-1),
-                    UtcExpiration = DateTime.UtcNow.Date.AddDays(1),
+                    UtcStart = pageView.UtcTimestamp.Minus(Duration.FromMinutes(1)),
+                    UtcExpiration = pageView.UtcTimestamp.Plus(Duration.FromDays(1)),
                     PiiType = PiiTypeEnum.UserId,
                     PiiValue = "12345",
-                    UtcIdentifiedTimestamp = DateTime.UtcNow.AddMinutes(-1)
+                    UtcIdentifiedTimestamp = pageView.UtcTimestamp.Minus(Duration.FromMinutes(1))
                 });
 
             _piiService.Setup(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()))

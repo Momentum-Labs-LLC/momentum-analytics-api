@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Momentum.Analytics.Core.Interfaces;
+using Momentum.Analytics.Core;
+using Momentum.Analytics.Core.Visits;
 using Momentum.Analytics.DynamoDb.Visits;
-using Momentum.Analytics.Processing.DynamoDb.Visits;
 using Momentum.Analytics.Processing.DynamoDb.Visits.Interfaces;
 using Momentum.Analytics.Processing.Visits.Interfaces;
 
@@ -32,6 +32,8 @@ namespace Momentum.Analytics.Visits.Lambda
                     })
                 .AddMemoryCache()
                 .AddSingleton<IConfiguration>(configuration)
+                .AddNodaTime()
+                .AddVisitConfiguration()
                 .AddSingleton<IVisitTimeRangeProvider, VisitTimeRangeProvider>()
                 .AddDynamoDbVisitService()
                 .AddSingleton<IS3ClientFactory, S3ClientFactory>()
@@ -61,24 +63,6 @@ namespace Momentum.Analytics.Visits.Lambda
             var visitProcessor = _serviceProvider.GetRequiredService<IDynamoDbIdentifiedVisitProcessor>();
 
             await visitProcessor.ExportAsync(timeRangeProvider.TimeRange).ConfigureAwait(false);
-        } // end method
-    } // end class
-
-    public class S3OutputConfiguration : IS3OutputConfiguration
-    {
-        public const string OUTPUT_BUCKET = "OUTPUT_BUCKET";
-        public const string OUTPUT_BUCKET_DEFAULT = "momentum-prd-visits";
-
-        public string Bucket { get; protected set; }
-
-        public S3OutputConfiguration(IConfiguration configuration)
-        {
-            Bucket = configuration.GetValue(OUTPUT_BUCKET, OUTPUT_BUCKET_DEFAULT);
-        } // end method
-
-        public virtual async Task<string> BuildKeyAsync(ITimeRange timeRange, CancellationToken token = default)
-        {
-            return $"{timeRange.UtcStart.Value.ToString("yyyyMM")}/{timeRange.UtcStart.Value.ToString("yyyyMMddHH")}_{timeRange.UtcEnd.Value.ToString("yyyyMMddHH")}.csv";
         } // end method
     } // end class
 } // end namespace

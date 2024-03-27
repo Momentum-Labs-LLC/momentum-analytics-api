@@ -9,11 +9,6 @@ namespace Momentum.Analytics.Core.PageViews.Models
     public class PageView : UserActivity
     {
         /// <summary>
-        /// Gets or sets the request id.
-        /// </summary>
-        public string RequestId { get; set; }
-
-        /// <summary>
         /// Gets or sets the domain of the page being viewed.
         /// </summary>
         public string Domain { get; set; }

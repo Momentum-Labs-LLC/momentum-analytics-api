@@ -18,7 +18,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
                 .AddField(VisitConstants.SOURCE, visit.Source)
                 .AddField(VisitConstants.MEDIUM, visit.Medium)
                 .AddField(VisitConstants.PII_VALUE, visit.PiiValue)
-                .AddField(VisitConstants.PII_TYPE, (int)visit.PiiType)
+                .AddField(VisitConstants.PII_TYPE, (int?)visit.PiiType)
                 .AddField(VisitConstants.IS_IDENTIFIED, visit.UtcIdentifiedTimestamp.HasValue)
                 .AddField(VisitConstants.UTC_IDENTIFIED_TIMESTAMP, visit.UtcIdentifiedTimestamp);
         } // end method

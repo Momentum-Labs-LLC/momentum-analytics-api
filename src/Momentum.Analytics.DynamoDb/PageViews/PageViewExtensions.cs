@@ -8,7 +8,6 @@ namespace Momentum.Analytics.DynamoDb.PageViews
         public static Dictionary<string, AttributeValue> ToDynamoDb(this PageView pageView)
         {
             var result = new Dictionary<string, AttributeValue>()
-                .AddField(PageViewConstants.REQUEST_ID, pageView.RequestId)
                 .AddField(PageViewConstants.COOKIE_ID, pageView.CookieId)
                 .AddField(PageViewConstants.UTC_TIMESTAMP, pageView.UtcTimestamp)
                 .AddField(PageViewConstants.DOMAIN, pageView.Domain)
@@ -35,7 +34,6 @@ namespace Momentum.Analytics.DynamoDb.PageViews
         {
             var result = new PageView();
 
-            result.RequestId = fields.ReadString(PageViewConstants.REQUEST_ID);
             var cookieValue = fields.ReadGuid(PageViewConstants.COOKIE_ID);
             if(cookieValue.HasValue)
             {

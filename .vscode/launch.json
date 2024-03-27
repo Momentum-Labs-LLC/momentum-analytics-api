@@ -1,0 +1,30 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Api",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/Momentum.Analytics.Lambda.Api/bin/Debug/net8.0/Momentum.Analytics.Lambda.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Momentum.Analytics.Lambda.Api",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:4000/",
+                "AWS_ACCESS_KEY_ID": "DUMMYIDEXAMPLE",
+                "AWS_SECRET_ACCESS_KEY": "DUMMYEXAMPLEKEY",
+                "REGION": "us-east-1",
+                "DYNAMO_SERVICE_URL": "http://localhost:9876"
+            }
+        }
+    ]
+}

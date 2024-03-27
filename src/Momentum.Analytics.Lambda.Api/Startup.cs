@@ -1,4 +1,6 @@
-﻿using Momentum.Analytics.DynamoDb.PageViews;
+﻿using Momentum.Analytics.Core;
+using Momentum.Analytics.Core.Visits;
+using Momentum.Analytics.DynamoDb.PageViews;
 using Momentum.Analytics.DynamoDb.Pii;
 using Momentum.Analytics.DynamoDb.Visits;
 using Momentum.Analytics.Lambda.Api.Cookies;
@@ -26,10 +28,10 @@ public class Startup
                 config.SetMinimumLevel(LogLevel.Debug);
             })
             .AddMemoryCache()
+            .AddVisitConfiguration()
+            .AddNodaTime()
             .AddPageViewService()
-            //.AddNoopPageViewService()
             .AddDynamoDbPiiService()
-            //.AddNoopPiiService()
             .AddDynamoDbVisitService()
             .AddHttpContextAccessor()
             .AddTransient<ICookieWriter, CookieWriter>();

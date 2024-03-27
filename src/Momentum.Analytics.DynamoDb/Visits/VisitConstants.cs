@@ -9,7 +9,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
     public static class VisitConstants
     {
         public const string TABLE_NAME = "VISIT_TABLE";
-        public const string TABLE_NAME_DEFAULT = "visits";
+        public const string TABLE_NAME_DEFAULT = "momentum-prd-visits";
 
         public const string EXPIRATION_INDEX = "VISIT_EXPIRATION_INDEX";
         public const string EXPIRATION_INDEX_DEFAULT = "VisitExpirationIndex";

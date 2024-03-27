@@ -1,6 +1,5 @@
 using Amazon.DynamoDBv2.Model;
 using Microsoft.Extensions.Logging;
-using Momentum.Analytics.Core.Extensions;
 using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.DynamoDb.Abstractions;
@@ -50,21 +49,19 @@ namespace Momentum.Analytics.DynamoDb.Visits
             return response.Item?.ToVisit();
         } // end method
 
-        public virtual async Task<Visit?> GetByActivityAsync(Guid cookieId, DateTime utcTimestamp, CancellationToken token = default)
+        public virtual async Task<Visit?> GetByActivityAsync(Guid cookieId, ITimeRange expirationTimeRange, CancellationToken token = default)
         {
             Visit? result = null;
 
-            var utcToday = DateTime.UtcNow.Trim(TimeSpan.FromDays(1).Ticks);
-            var utcTomorrow = utcToday.AddDays(1);
             var queryRequest = new QueryRequest()
             {
                 TableName = _tableConfiguration.TableName,
                 IndexName = _tableConfiguration.VisitExpirationIndex,
-                KeyConditionExpression = $"{VisitConstants.COOKIE_ID} = :cookie_id and {VisitConstants.UTC_EXPIRATION} > :today and {VisitConstants.UTC_EXPIRATION} < :tommorrow",
+                KeyConditionExpression = $"{VisitConstants.COOKIE_ID} = :cookie_id and {VisitConstants.UTC_EXPIRATION} BETWEEN :start and :end",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
                     .AddField(":cookie_id", cookieId)
-                    .AddField(":today", utcToday)
-                    .AddField(":tomorrow", utcTomorrow)
+                    .AddField(":start", expirationTimeRange.UtcStart )
+                    .AddField(":end", expirationTimeRange.UtcEnd)
             };
 
             var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
@@ -89,8 +86,9 @@ namespace Momentum.Analytics.DynamoDb.Visits
                 TableName = _tableConfiguration.TableName,
                 IndexName = _tableConfiguration.IdentifiedIndex,
                 ExclusiveStartKey = page,
-                KeyConditionExpression = $"{VisitConstants.IS_IDENTIFIED} = 1 and {VisitConstants.UTC_IDENTIFIED_TIMESTAMP} >= :start and {VisitConstants.UTC_IDENTIFIED_TIMESTAMP} < :end",
+                KeyConditionExpression = $"{VisitConstants.IS_IDENTIFIED} = :yes and {VisitConstants.UTC_IDENTIFIED_TIMESTAMP} BETWEEN :start and :end",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                    .AddField(":yes", true)
                     .AddField(":start", timeRange.UtcStart)
                     .AddField(":end", timeRange.UtcEnd)
             };
@@ -119,9 +117,11 @@ namespace Momentum.Analytics.DynamoDb.Visits
                 TableName = _tableConfiguration.TableName,
                 IndexName = _tableConfiguration.VisitExpirationIndex,
                 ExclusiveStartKey = page,
-                KeyConditionExpression = $"{VisitConstants.COOKIE_ID} = :cookie_id and is_identified = 0",
+                KeyConditionExpression = $"{VisitConstants.COOKIE_ID} = :cookie_id",
+                FilterExpression = $"{VisitConstants.IS_IDENTIFIED} = :no",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
                     .AddField(":cookie_id", cookieId)
+                    .AddField(":no", false)
             };
 
             var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);

@@ -13,8 +13,9 @@ namespace Momentum.Analytics.Processing.Tests.Pii
     {
         public TestCollectedPiiProcessor(
                 ITestVisitService visitService, 
+                IClockService clockService,
                 ILogger<TestCollectedPiiProcessor> logger) 
-            : base(visitService, logger)
+            : base(visitService, clockService, logger)
         {
         } // end method
     } // end class

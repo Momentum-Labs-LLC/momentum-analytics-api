@@ -25,7 +25,7 @@ namespace Momentum.Analytics.DynamoDb.Pii
             {
                 TableName = _tableConfiguration.TableName,
                 IndexName = _tableConfiguration.IdIndexName,
-                KeyConditionExpression = "Id = :id",
+                KeyConditionExpression = $"{PiiValueConstants.PII_ID} = :id",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
                     .AddField(":id", id)
             };

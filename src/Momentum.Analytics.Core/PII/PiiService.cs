@@ -27,9 +27,25 @@ namespace Momentum.Analytics.Core.PII
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
-        public Task<IEnumerable<PiiValue>> GetByCookieIdAsync(Guid cookieId, CancellationToken token = default)
+        public async Task<IEnumerable<PiiValue>> GetByCookieIdAsync(Guid cookieId, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            var result = new List<PiiValue>();
+            var collectedPiis = await _collectedPiiStorage.GetByCookieIdAsync(cookieId, token).ConfigureAwait(false);
+
+            if(collectedPiis != null && collectedPiis.Any())
+            {
+                foreach(var collectedPii in collectedPiis)
+                {
+                    var piiValue = await _piiValueStorage.GetByIdAsync(collectedPii.PiiId.Value, token).ConfigureAwait(false);
+
+                    if(piiValue != null)
+                    {
+                        result.Add(piiValue);
+                    } // end if
+                } // end foreach
+            } // end if
+
+            return result;
         } // end method
 
         public async Task<PiiValue?> GetPiiAsync(Guid id, CancellationToken token = default)

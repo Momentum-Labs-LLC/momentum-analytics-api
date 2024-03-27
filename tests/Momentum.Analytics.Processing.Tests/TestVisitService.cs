@@ -14,10 +14,11 @@ namespace Momentum.Analytics.Processing.Tests
         ITestVisitService
     {
         public TestVisitService(
+                IVisitConfiguration visitConfiguration,
                 ITestVisitStorage visitStorage, 
                 IMemoryCache memoryCache, 
                 ILogger<TestVisitService> logger) 
-            : base(visitStorage, memoryCache, logger)
+            : base(visitConfiguration, visitStorage, memoryCache, logger)
         {
         } // end method
     } // end class

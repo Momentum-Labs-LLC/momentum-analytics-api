@@ -2,6 +2,7 @@ using Amazon.DynamoDBv2.Model;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core.Visits;
+using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.DynamoDb.Abstractions;
 using Momentum.Analytics.DynamoDb.Visits.Interfaces;
@@ -13,10 +14,11 @@ namespace Momentum.Analytics.DynamoDb.Visits
         IDynamoDbVisitService
     {
         public DynamoDbVisitService(
+                IVisitConfiguration visitConfiguration,
                 IDynamoDbVisitStorage visitStorage, 
                 IMemoryCache memoryCache, 
                 ILogger<DynamoDbVisitService> logger) 
-            : base(visitStorage, memoryCache, logger)
+            : base(visitConfiguration, visitStorage, memoryCache, logger)
         {
         } // end method
     } // end class

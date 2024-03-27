@@ -1,5 +1,6 @@
 using Amazon.DynamoDBv2.Model;
 using Microsoft.Extensions.Logging;
+using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.DynamoDb.Abstractions;
 using Momentum.Analytics.DynamoDb.Visits.Interfaces;
@@ -14,8 +15,9 @@ namespace Momentum.Analytics.Processing.DynamoDb.Pii
     {
         public DynamoDbCollectedPiiProcessor(
                 IDynamoDbVisitService visitService, 
+                IClockService clockService,
                 ILogger<DynamoDbCollectedPiiProcessor> logger) 
-            : base(visitService, logger)
+            : base(visitService, clockService, logger)
         {
         } // end method
     } // end class

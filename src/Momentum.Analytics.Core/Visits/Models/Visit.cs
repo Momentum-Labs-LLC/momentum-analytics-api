@@ -1,4 +1,5 @@
 using Momentum.Analytics.Core.PII.Models;
+using NodaTime;
 
 namespace Momentum.Analytics.Core.Visits.Models
 {
@@ -17,13 +18,13 @@ namespace Momentum.Analytics.Core.Visits.Models
         /// <summary>
         /// Gets or sets the start of the visit.
         /// </summary>
-        public DateTime UtcStart { get; set; }
+        public Instant UtcStart { get; set; }
 
         /// <summary>
         /// Gets or sets the expected expiration of the visit.
         /// This could be extended, depending on the definition of a visit.
         /// </summary>
-        public DateTime UtcExpiration { get; set; }
+        public Instant UtcExpiration { get; set; }
 
         /// <summary>
         /// Gets or sets the conversion funnel step.
@@ -58,6 +59,6 @@ namespace Momentum.Analytics.Core.Visits.Models
         /// <summary>
         /// Gets or sets the timestamp of the identification of the visit.
         /// </summary>
-        public DateTime? UtcIdentifiedTimestamp { get; set; }
+        public Instant? UtcIdentifiedTimestamp { get; set; }
     } // end class
 } // end namespace

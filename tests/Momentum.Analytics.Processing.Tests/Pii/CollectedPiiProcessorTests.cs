@@ -1,5 +1,6 @@
 using System.Net;
 using Microsoft.Extensions.Logging;
+using Momentum.Analytics.Core;
 using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Models;
 using Momentum.Analytics.Core.PageViews.Interfaces;
@@ -10,22 +11,26 @@ using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.Pii;
 using Moq;
+using NodaTime;
 
 namespace Momentum.Analytics.Processing.Tests.Pii
 {
     public class CollectedPiiProcessorTests
     {
+        private IClockService _clockService;
         private Mock<ITestVisitService> _visitService;        
         private Mock<ILogger<TestCollectedPiiProcessor>> _logger;
         private TestCollectedPiiProcessor _processor;
 
         public CollectedPiiProcessorTests()
         {
+            _clockService = new ClockService();
             _visitService = new Mock<ITestVisitService>();
             _logger = new Mock<ILogger<TestCollectedPiiProcessor>>();
 
             _processor = new TestCollectedPiiProcessor(
                 _visitService.Object,
+                _clockService,
                 _logger.Object);
         } // end method
 
@@ -55,12 +60,12 @@ namespace Momentum.Analytics.Processing.Tests.Pii
             {
                 PiiId = Guid.NewGuid(),
                 CookieId = Guid.NewGuid(),
-                UtcTimestamp = DateTime.UtcNow,
+                UtcTimestamp = _clockService.Now,
                 Pii = piiValue,
             };
         } // end method
 
-        protected Visit BuildVisit(Guid cookieId, DateTime utcTimestamp)
+        protected Visit BuildVisit(Guid cookieId, Instant utcTimestamp)
         {
             return new Visit()
             {
@@ -97,13 +102,14 @@ namespace Momentum.Analytics.Processing.Tests.Pii
         [Fact]
         public async Task ProcessAsync_ActiveVisit_Identified_Improved()
         {
+            var now = _clockService.Now;
             var userId = BuildUserId("12345");
             var collectedPii = BuildCollectedPii(userId);
             
             var activeVisit = BuildVisit(collectedPii.CookieId, collectedPii.UtcTimestamp);
             activeVisit.PiiType = PiiTypeEnum.Email;
             activeVisit.PiiValue = "asdfasdfasdf";
-            activeVisit.UtcIdentifiedTimestamp = DateTime.UtcNow.AddMinutes(-5);
+            activeVisit.UtcIdentifiedTimestamp = now.Minus(Duration.FromMinutes(-5));
             _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(activeVisit);
 
@@ -123,13 +129,14 @@ namespace Momentum.Analytics.Processing.Tests.Pii
         [Fact]
         public async Task ProcessAsync_ActiveUnidentified_OldUnidentified()
         {
+            var now = _clockService.Now;
             var userId = BuildUserId("12345");
             var collectedPii = BuildCollectedPii(userId);
             
             var activeVisit = BuildVisit(collectedPii.CookieId, collectedPii.UtcTimestamp);
             activeVisit.PiiType = PiiTypeEnum.Email;
             activeVisit.PiiValue = "asdfasdfasdf";
-            activeVisit.UtcIdentifiedTimestamp = DateTime.UtcNow.AddMinutes(-5);
+            activeVisit.UtcIdentifiedTimestamp = now.Minus(Duration.FromMinutes(5));
             _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(activeVisit);
 
@@ -147,7 +154,7 @@ namespace Momentum.Analytics.Processing.Tests.Pii
                 { 
                     Total = 2,
                     HasMore = false, 
-                    Data = new List<Visit>() { BuildVisit(collectedPii.CookieId, DateTime.UtcNow.AddDays(-2)) } 
+                    Data = new List<Visit>() { BuildVisit(collectedPii.CookieId, now.Minus(Duration.FromDays(2))) } 
                 });
 
             await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
@@ -160,13 +167,14 @@ namespace Momentum.Analytics.Processing.Tests.Pii
         [Fact]
         public async Task ProcessAsync_ActiveIdentified_NotImproved()
         {
+            var now = _clockService.Now;
             var userId = BuildEmail("abc@123.com");
             var collectedPii = BuildCollectedPii(userId);
             
             var activeVisit = BuildVisit(collectedPii.CookieId, collectedPii.UtcTimestamp);
             activeVisit.PiiType = PiiTypeEnum.UserId;
             activeVisit.PiiValue = "12345";
-            activeVisit.UtcIdentifiedTimestamp = DateTime.UtcNow.AddMinutes(-5);
+            activeVisit.UtcIdentifiedTimestamp = now.Minus(Duration.FromMinutes(5));
             _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(activeVisit);
 

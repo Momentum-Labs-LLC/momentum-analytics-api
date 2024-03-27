@@ -1,5 +1,6 @@
 using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
+using NodaTime;
 
 namespace Momentum.Analytics.Core.Visits.Interfaces
 {
@@ -9,7 +10,7 @@ namespace Momentum.Analytics.Core.Visits.Interfaces
         Task<Visit?> GetAsync(Guid id, CancellationToken token = default);
         Task UpsertAsync(Visit visit, CancellationToken token = default);
         Task DeleteAsync(Guid id, CancellationToken token = default);
-        Task<Visit?> GetByActivityAsync(Guid cookieId, DateTime utcTimestamp, CancellationToken token = default);
+        Task<Visit?> GetByActivityAsync(Guid cookieId, ITimeRange expirationTimeRange, CancellationToken token = default);
         Task<TSearchResponse> GetIdentifiedAsync(ITimeRange timeRange, TPage page, CancellationToken token = default);
         Task<TSearchResponse> GetUnidentifiedAsync(Guid cookieId, TPage page, CancellationToken token = default);
     } // end interface

@@ -15,8 +15,9 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
         public TestPageViewProcessor(
                 IPiiService piiService, 
                 ITestVisitService visitService, 
+                IClockService clockService,
                 ILogger<TestPageViewProcessor> logger) 
-            : base(piiService, visitService, logger)
+            : base(piiService, visitService, clockService, logger)
         {
         } // end method
     } // end class

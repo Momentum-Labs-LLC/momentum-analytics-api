@@ -1,4 +1,5 @@
 using Momentum.Analytics.Core.Interfaces;
+using NodaTime;
 
 namespace Momentum.Analytics.Core.Models
 {
@@ -6,6 +7,6 @@ namespace Momentum.Analytics.Core.Models
     {
         public Guid CookieId { get; set; }
 
-        public DateTime UtcTimestamp { get; set; }
+        public Instant UtcTimestamp { get; set; }
     } // end class
 } // end namespace
