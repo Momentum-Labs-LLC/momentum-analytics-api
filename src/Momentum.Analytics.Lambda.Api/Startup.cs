@@ -28,7 +28,7 @@ public class Startup
                 config.SetMinimumLevel(LogLevel.Debug);
             })
             .AddMemoryCache()
-            .AddVisitConfiguration()
+            .AddVisitExpirationProvider()
             .AddNodaTime()
             .AddPageViewService()
             .AddDynamoDbPiiService()

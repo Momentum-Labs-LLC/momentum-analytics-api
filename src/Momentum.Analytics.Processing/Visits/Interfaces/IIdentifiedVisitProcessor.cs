@@ -4,6 +4,6 @@ namespace Momentum.Analytics.Processing.Visits.Interfaces
 {
     public interface IIdentifiedVisitProcessor
     {
-        Task ExportAsync(ITimeRange timeRange, CancellationToken token = default);
+        Task ReportAsync(ITimeRange timeRange, CancellationToken token = default);
     } // end interface
 } // end namespace

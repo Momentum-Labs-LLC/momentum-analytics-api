@@ -4,7 +4,6 @@ using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.Pii.Interfaces;
-using NodaTime;
 
 namespace Momentum.Analytics.Processing.Pii
 {
@@ -14,20 +13,24 @@ namespace Momentum.Analytics.Processing.Pii
     {
         protected readonly TVisitService _visitService;
         protected readonly IClockService _clockService;
+        protected readonly IVisitExpirationProvider _visitExpirationProvider;
         protected readonly ILogger _logger;
 
         public CollectedPiiProcessor(
             TVisitService visitService,
             IClockService clockService,
+            IVisitExpirationProvider visitExpirationProvider,
             ILogger<CollectedPiiProcessor<TPage, TVisitSearchResponse, TVisitService>> logger)
         {
             _visitService = visitService ?? throw new ArgumentNullException(nameof(visitService));
             _clockService = clockService ?? throw new ArgumentNullException(nameof(clockService));
+            _visitExpirationProvider = visitExpirationProvider ?? throw new ArgumentNullException(nameof(visitExpirationProvider));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
         public async Task ProcessAsync(CollectedPii collectedPii, CancellationToken token = default)
         {
+            var visitExpiration = await _visitExpirationProvider.GetExpirationAsync(collectedPii.UtcTimestamp, token).ConfigureAwait(false);
             var activeVisit = await _visitService.GetByActivityAsync(collectedPii, token).ConfigureAwait(false);
             if(activeVisit == null)
             {
@@ -79,7 +82,7 @@ namespace Momentum.Analytics.Processing.Pii
                         // TODO: move to a batch upsert?
                         await _visitService.UpsertAsync(visit, token).ConfigureAwait(false);
                         result++;
-                    } // end foreach                        
+                    } // end foreach
                 } // end if
 
                 // increment visitsearch page before next loop.

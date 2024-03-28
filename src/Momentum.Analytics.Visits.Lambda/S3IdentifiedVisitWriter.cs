@@ -3,6 +3,7 @@ using Amazon.S3.Model;
 using CsvHelper;
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core.Interfaces;
+using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 
 namespace Momentum.Analytics.Visits.Lambda
@@ -11,14 +12,17 @@ namespace Momentum.Analytics.Visits.Lambda
     {
         protected readonly IS3OutputConfiguration _outputConfiguration;
         protected readonly IS3ClientFactory _s3ClientFactory;
+        protected readonly IVisitConfiguration _visitConfiguration;
         protected readonly ILogger _logger;
         public S3IdentifiedVisitWriter(
             IS3OutputConfiguration outputConfiguration,
             IS3ClientFactory s3ClientFactory,
+            IVisitConfiguration visitConfiguration,
             ILogger<S3IdentifiedVisitWriter> logger)
         {
             _outputConfiguration = outputConfiguration ?? throw new ArgumentNullException(nameof(outputConfiguration));
             _s3ClientFactory = s3ClientFactory ?? throw new ArgumentNullException(nameof(s3ClientFactory));
+            _visitConfiguration = visitConfiguration ?? throw new ArgumentNullException(nameof(visitConfiguration));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
@@ -50,7 +54,7 @@ namespace Momentum.Analytics.Visits.Lambda
             {
                 Pii = x.PiiValue,
                 PiiTypeId = (int)x.PiiType,
-                VisitStart = x.UtcStart,
+                VisitStart = x.UtcStart.InZone(_visitConfiguration.TimeZone).ToDateTimeOffset().ToString("yyyy-MM-dd HH:mm:ss"),
                 FunnelStep = x.FunnelStep,
                 Referer = x.Referer,
                 Source = x.Source,

@@ -26,6 +26,7 @@ namespace Momentum.Analytics.Core.Visits
 
         public const string TIMEZONE = "VISIT_TIMEZONE";
         public const string TIMEZONE_DEFAULT = "America/New_York";
+        public const string TIMEZONE_UTC = "Etc/UTC";
 
         public const string LOCAL_CACHE_EXPIRATION = "VISIT_LOCAL_CACHE_EXP";
 

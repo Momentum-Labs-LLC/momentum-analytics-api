@@ -16,6 +16,7 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
         protected readonly IPageViewService _pageViewService;
         protected readonly ICookieWriter _cookieWriter;
         protected readonly IClockService _clockService;
+        protected readonly IVisitExpirationProvider _visitExpirationProvider;
         protected readonly IHttpContextAccessor _httpContextAccessor;
         protected readonly ILogger _logger;
 
@@ -23,13 +24,13 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
             IPageViewService pageViewService, 
             ICookieWriter cookieWriter, 
             IClockService clockService,
-            IHttpContextAccessor httpContextAccessor,
+            IVisitExpirationProvider visitExpirationProvider,
             ILogger<PageViewsController> logger)
         {
             _pageViewService = pageViewService ?? throw new ArgumentNullException(nameof(pageViewService));
             _cookieWriter = cookieWriter ?? throw new ArgumentNullException(nameof(cookieWriter));
             _clockService = clockService ?? throw new ArgumentNullException(nameof(clockService));
-            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            _visitExpirationProvider = visitExpirationProvider ?? throw new ArgumentNullException(nameof(visitExpirationProvider));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
@@ -39,8 +40,10 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
             [FromCookie(Name = CookieConstants.NAME)] string? cookieValue = null,
             CancellationToken token = default)
         {
-            var cookie = cookieValue.ToCookieModel();
             var now = _clockService.Now;
+            var visitExpiration = await _visitExpirationProvider.GetExpirationAsync(now, token).ConfigureAwait(false);
+            var cookie = cookieValue.ToCookieModel(visitExpiration);
+            
             var domainModel = pageView.ToDomain(cookie, now);
             await _pageViewService.RecordAsync(domainModel, token).ConfigureAwait(false);
 

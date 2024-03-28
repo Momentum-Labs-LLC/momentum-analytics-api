@@ -18,7 +18,8 @@ namespace Momentum.Analytics.Processing.Tests.Pii
     public class CollectedPiiProcessorTests
     {
         private IClockService _clockService;
-        private Mock<ITestVisitService> _visitService;        
+        private Mock<ITestVisitService> _visitService;
+        private Mock<IVisitExpirationProvider> _visitExpirationProvider;
         private Mock<ILogger<TestCollectedPiiProcessor>> _logger;
         private TestCollectedPiiProcessor _processor;
 
@@ -26,11 +27,13 @@ namespace Momentum.Analytics.Processing.Tests.Pii
         {
             _clockService = new ClockService();
             _visitService = new Mock<ITestVisitService>();
+            _visitExpirationProvider = new Mock<IVisitExpirationProvider>();
             _logger = new Mock<ILogger<TestCollectedPiiProcessor>>();
 
             _processor = new TestCollectedPiiProcessor(
                 _visitService.Object,
                 _clockService,
+                _visitExpirationProvider.Object,
                 _logger.Object);
         } // end method
 

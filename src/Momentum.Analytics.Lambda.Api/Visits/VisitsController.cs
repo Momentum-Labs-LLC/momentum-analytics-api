@@ -35,7 +35,9 @@ namespace Momentum.Analytics.Lambda.Api.Visits
             [FromQuery(Name = "cookieId")] Guid? cookieId = null,
             CancellationToken token = default)
         {
-            var cookie = cookieValue.ToCookieModel();
+            var now = _clockService.Now;
+            var visitExpiration = await _visitService.GetVisitExpirationAsync(now, token).ConfigureAwait(false);
+            var cookie = cookieValue.ToCookieModel(visitExpiration);
             if(cookieId.HasValue)
             {
                 cookie.Id = cookieId.Value;
@@ -59,7 +61,9 @@ namespace Momentum.Analytics.Lambda.Api.Visits
             [FromQuery(Name = "cookieId")] Guid? cookieId = null,
             CancellationToken token = default)
         {
-            var cookie = cookieValue.ToCookieModel();
+            var now = _clockService.Now;
+            var visitExpiration = await _visitService.GetVisitExpirationAsync(now, token).ConfigureAwait(false);
+            var cookie = cookieValue.ToCookieModel(visitExpiration);
             if(cookieId.HasValue)
             {
                 cookie.Id = cookieId.Value;

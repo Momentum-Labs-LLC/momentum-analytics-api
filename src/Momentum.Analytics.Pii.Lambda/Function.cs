@@ -9,6 +9,9 @@ using Momentum.Analytics.DynamoDb.Pii;
 using Momentum.Analytics.Processing.DynamoDb.Pii.Interfaces;
 using Momentum.Analytics.Processing.DynamoDb.Pii;
 using Momentum.Analytics.Core.PII.Interfaces;
+using Momentum.Analytics.Core;
+using Momentum.Analytics.Core.Visits;
+using Momentum.Analytics.DynamoDb.Visits;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -30,19 +33,23 @@ namespace Momentum.Analytics.Pii.Lambda
                 .AddMemoryCache()
                 .AddLogging()
                 .AddSingleton<IConfiguration>(config)
+                .AddNodaTime()
+                .AddVisitExpirationProvider()
                 .AddDynamoDbPiiService()
+                .AddDynamoDbVisitService()
                 .AddTransient<IDynamoDbCollectedPiiProcessor, DynamoDbCollectedPiiProcessor>()
                 .BuildServiceProvider();
 
             _logger = _serviceProvider.GetRequiredService<ILogger<Function>>();
         } // end method
 
-        public Function(IServiceProvider serviceProvider)
+        public Function(IServiceProvider serviceProvider, ILogger<Function> logger)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
-        public async void FunctionHandlerAsync(DynamoDBEvent dynamoEvent, ILambdaContext context)
+        public async Task FunctionHandlerAsync(DynamoDBEvent dynamoEvent)
         {
             _logger.LogInformation($"Beginning to process {dynamoEvent.Records.Count} records...");
             
@@ -59,7 +66,6 @@ namespace Momentum.Analytics.Pii.Lambda
                     try
                     {
                         var collectedPii = BuildCollectedPii(record.Dynamodb);
-
                         var piiValue = await piiService.GetPiiAsync(collectedPii.PiiId.Value).ConfigureAwait(false);
 
                         if(piiValue != null)
@@ -74,7 +80,8 @@ namespace Momentum.Analytics.Pii.Lambda
                     }
                     catch(Exception ex)
                     {
-                        _logger.LogError(new EventId(0), ex, "Unable to process collected pii in event: {EventId}.", record.EventID);
+                        _logger.LogError(new EventId(0), ex, "Failed to process collected pii.");
+                        throw;
                     } // end try/catch                    
                 } // end foreach
             } // end if

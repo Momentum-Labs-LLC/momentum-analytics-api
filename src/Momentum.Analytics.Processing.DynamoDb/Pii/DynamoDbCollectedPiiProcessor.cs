@@ -16,8 +16,9 @@ namespace Momentum.Analytics.Processing.DynamoDb.Pii
         public DynamoDbCollectedPiiProcessor(
                 IDynamoDbVisitService visitService, 
                 IClockService clockService,
+                IVisitExpirationProvider visitExpirationProvider,
                 ILogger<DynamoDbCollectedPiiProcessor> logger) 
-            : base(visitService, clockService, logger)
+            : base(visitService, clockService, visitExpirationProvider, logger)
         {
         } // end method
     } // end class

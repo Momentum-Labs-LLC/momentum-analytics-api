@@ -6,13 +6,13 @@ using NodaTime;
 
 namespace Momentum.Analytics.Visits.Lambda
 {
-    public class VisitTimeRangeProvider : IVisitTimeRangeProvider
+    public class IdentifiedVisitTimeRangeProvider : IIdentifiedVisitTimeRangeProvider
     {
         public const string HOURS_LOOKBACK = "HOURS_LOOKBACK";
         public const int HOURS_LOOKBACK_DEFAULT = 24;
         public ITimeRange TimeRange { get; protected set; }
 
-        public VisitTimeRangeProvider(IConfiguration configuration, IVisitConfiguration visitConfiguration, IClockService clockService)
+        public IdentifiedVisitTimeRangeProvider(IConfiguration configuration, IVisitConfiguration visitConfiguration, IClockService clockService)
         {
             var now = clockService.Now;
             var hoursLookback = configuration.GetValue<int>(HOURS_LOOKBACK, HOURS_LOOKBACK_DEFAULT);

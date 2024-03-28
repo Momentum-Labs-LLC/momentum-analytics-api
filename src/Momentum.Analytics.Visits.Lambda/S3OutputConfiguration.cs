@@ -15,7 +15,7 @@ namespace Momentum.Analytics.Visits.Lambda
 
         public S3OutputConfiguration(IConfiguration configuration, IVisitConfiguration visitConfiguration)
         {
-            Bucket = configuration.GetValue(OUTPUT_BUCKET, OUTPUT_BUCKET_DEFAULT);
+            Bucket = configuration.GetValue<string>(OUTPUT_BUCKET, OUTPUT_BUCKET_DEFAULT);
             _visitConfiguration = visitConfiguration ?? throw new ArgumentNullException(nameof(visitConfiguration));
         } // end method
 

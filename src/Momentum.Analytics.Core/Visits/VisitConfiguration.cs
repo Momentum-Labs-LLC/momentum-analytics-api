@@ -27,12 +27,21 @@ namespace Momentum.Analytics.Core.Visits
             if(fixedWindowStartMinutes >= 0)
             {
                 FixedWindowStart = LocalTime.FromMinutesSinceMidnight(fixedWindowStartMinutes);
+            }
+            else if(!IsSliding)
+            {
+                // this is a fixed window and we need a start
+                throw new ArgumentException(VisitConstants.FIXED_VISIT_WINDOW_START);
             } // end if
 
             var timezoneId = configuration.GetValue<string>(VisitConstants.TIMEZONE, VisitConstants.TIMEZONE_DEFAULT);
             if(!string.IsNullOrWhiteSpace(timezoneId))
             {
                 TimeZone = timezoneProviders.GetZoneOrNull(timezoneId);
+            }
+            else
+            {
+                TimeZone = timezoneProviders.GetZoneOrNull(VisitConstants.TIMEZONE_UTC);
             } // end if
 
             var localCacheSeconds = configuration.GetValue<int>(VisitConstants.LOCAL_CACHE_EXPIRATION, VisitConstants.LOCAL_CACHE_EXPIRATION_DEFAULT);

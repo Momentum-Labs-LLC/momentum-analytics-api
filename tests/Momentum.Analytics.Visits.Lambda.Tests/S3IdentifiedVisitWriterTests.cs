@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core;
 using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Models;
+using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Moq;
 using NodaTime;
@@ -19,6 +20,7 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
         private IClockService _clockService;
         private Mock<IS3ClientFactory> _s3ClientFactory;
         private Mock<IS3OutputConfiguration> _outputConfiguration;
+        private Mock<IVisitConfiguration> _visitConfiguration;
         private Mock<ILogger<S3IdentifiedVisitWriter>> _logger;
 
         private Mock<IAmazonS3> _s3Client;
@@ -30,16 +32,26 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
             _clockService = new ClockService();
             _s3ClientFactory = new Mock<IS3ClientFactory>();
             _outputConfiguration = new Mock<IS3OutputConfiguration>();
+            _visitConfiguration = new Mock<IVisitConfiguration>();
             _logger = new Mock<ILogger<S3IdentifiedVisitWriter>>();
 
             _writer = new S3IdentifiedVisitWriter(
                 _outputConfiguration.Object,
                 _s3ClientFactory.Object,
+                _visitConfiguration.Object,
                 _logger.Object);
 
             _s3Client = new Mock<IAmazonS3>();
             _s3ClientFactory.Setup(x => x.GetAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_s3Client.Object);
+
+            SetupTimezone("America/New_York");
+        } // end method
+
+        protected void SetupTimezone(string timezoneId)
+        {
+            var timezone = NodaTime.DateTimeZoneProviders.Tzdb.GetZoneOrNull(timezoneId);
+            _visitConfiguration.Setup(x => x.TimeZone).Returns(timezone);
         } // end method
 
         [Fact]

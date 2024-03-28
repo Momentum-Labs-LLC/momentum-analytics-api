@@ -7,7 +7,7 @@ namespace Momentum.Analytics.Core.Visits.Interfaces
     public interface IVisitService<TPage, TSearchResponse>
         where TSearchResponse : ISearchResponse<Visit, TPage>
     {
-        Task<Instant> CalculateVisitExpirationAsync(Instant utcActivity, CancellationToken token = default);
+        Task<Instant> GetVisitExpirationAsync(Instant activityTimestamp, CancellationToken token = default);
         Task<Visit?> GetAsync(Guid id, CancellationToken token = default);
         Task<Visit?> GetByActivityAsync(IUserActivity userActivity, CancellationToken token = default);
         Task UpsertAsync(Visit visit, CancellationToken token = default);

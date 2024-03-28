@@ -36,7 +36,7 @@ namespace Momentum.Analytics.Processing.PageViews
             var hasUpsert = false;
             var activeVisit = await _visitService.GetByActivityAsync(pageView, token).ConfigureAwait(false);
 
-            var visitExpiration = await _visitService.CalculateVisitExpirationAsync(pageView.UtcTimestamp, token).ConfigureAwait(false);
+            var visitExpiration = await _visitService.GetVisitExpirationAsync(pageView.UtcTimestamp, token).ConfigureAwait(false);
             if(activeVisit == null)
             {
                 hasUpsert = true;

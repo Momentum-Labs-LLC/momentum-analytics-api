@@ -13,26 +13,26 @@ namespace Momentum.Analytics.Core.Visits
         where TSearchResponse : ISearchResponse<Visit, TPage>
         where TStorage : IVisitStorage<TPage, TSearchResponse>
     {
-        protected readonly IVisitConfiguration _visitConfiguration;
+        protected readonly IVisitExpirationProvider _visitExpirationProvider;
         protected readonly TStorage _visitStorage;
         protected readonly IMemoryCache _memoryCache;        
         protected readonly ILogger _logger;
 
         public VisitService(
-            IVisitConfiguration visitConfiguration,
+            IVisitExpirationProvider visitExpirationProvider,
             TStorage visitStorage,
             IMemoryCache memoryCache,
             ILogger<VisitService<TPage, TSearchResponse, TStorage>> logger)
         {
-            _visitConfiguration = visitConfiguration ?? throw new ArgumentNullException(nameof(visitConfiguration));
+            _visitExpirationProvider = visitExpirationProvider ?? throw new ArgumentNullException(nameof(visitExpirationProvider));
             _visitStorage = visitStorage ?? throw new ArgumentNullException(nameof(visitStorage));
             _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
-        public virtual async Task<Instant> CalculateVisitExpirationAsync(Instant utcActivity, CancellationToken token = default)
+        public virtual async Task<Instant> GetVisitExpirationAsync(Instant activityTimestamp, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            return await _visitExpirationProvider.GetExpirationAsync(activityTimestamp, token).ConfigureAwait(false);
         } // end method
 
         public virtual async Task<Visit?> GetAsync(Guid id, CancellationToken token = default)
@@ -53,10 +53,11 @@ namespace Momentum.Analytics.Core.Visits
 
         public virtual async Task<Visit?> GetByActivityAsync(IUserActivity userActivity, CancellationToken token = default)
         {
+            var visitExpiration = await _visitExpirationProvider.GetExpirationAsync(userActivity.UtcTimestamp, token).ConfigureAwait(false);
             var timeRange = new TimeRange()
             {
                 UtcStart = userActivity.UtcTimestamp,
-                UtcEnd = await CalculateVisitExpirationAsync(userActivity.UtcTimestamp, token).ConfigureAwait(false)
+                UtcEnd = visitExpiration
             };
             Visit? result = await _visitStorage.GetByActivityAsync(userActivity.CookieId, timeRange, token).ConfigureAwait(false);
 

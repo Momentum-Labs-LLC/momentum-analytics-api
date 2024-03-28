@@ -24,19 +24,22 @@ namespace Momentum.Analytics.Processing.Visits
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
-        public async Task ExportAsync(ITimeRange timeRange, CancellationToken token = default)
+        public async Task ReportAsync(ITimeRange timeRange, CancellationToken token = default)
         {
             var identifiedVisits = new List<Visit>();
             TSearchResponse searchResponse = default(TSearchResponse);
+            var nextPage = default(TPage);
             do 
             {
-                searchResponse = await _visitService.GetIdentifiedAsync(timeRange, searchResponse.NextPage, token).ConfigureAwait(false);
+                searchResponse = await _visitService.GetIdentifiedAsync(timeRange, nextPage, token).ConfigureAwait(false);
+
+                nextPage = searchResponse.NextPage;
 
                 if(searchResponse != null && searchResponse.Data != null && searchResponse.Data.Any())
                 {
                     identifiedVisits.AddRange(searchResponse.Data);
                 } // end if
-            } while(searchResponse == null || searchResponse.HasMore);
+            } while(searchResponse.HasMore);
 
             if(identifiedVisits.Any())
             {

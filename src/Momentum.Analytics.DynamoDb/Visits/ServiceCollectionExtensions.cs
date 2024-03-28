@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Momentum.Analytics.Core.Visits;
 using Momentum.Analytics.DynamoDb.Client;
 using Momentum.Analytics.DynamoDb.Visits.Interfaces;
 
@@ -10,6 +11,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
         {
             return services
                 .AddDynamoDbClientFactory()
+                .AddVisitExpirationProvider()
                 .AddSingleton<IVisitTableConfiguration, VisitTableConfiguration>()
                 .AddTransient<IDynamoDbVisitStorage, VisitStorage>()
                 .AddTransient<IDynamoDbVisitService, DynamoDbVisitService>();

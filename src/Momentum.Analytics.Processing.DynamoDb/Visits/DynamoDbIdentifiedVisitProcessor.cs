@@ -9,7 +9,7 @@ using Momentum.Analytics.Processing.Visits.Interfaces;
 
 namespace Momentum.Analytics.Processing.DynamoDb.Visits
 {
-    public abstract class DynamoDbIdentifiedVisitProcessor :
+    public class DynamoDbIdentifiedVisitProcessor :
         IdentifiedVisitProcessor<Dictionary<string, AttributeValue>, IDynamoSearchResponse<Visit>, IDynamoDbVisitService>,
         IDynamoDbIdentifiedVisitProcessor
     {

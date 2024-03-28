@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core;
 using Momentum.Analytics.Core.Visits;
 using Momentum.Analytics.DynamoDb.Visits;
+using Momentum.Analytics.Processing.DynamoDb.Visits;
 using Momentum.Analytics.Processing.DynamoDb.Visits.Interfaces;
 using Momentum.Analytics.Processing.Visits.Interfaces;
 
@@ -33,13 +34,12 @@ namespace Momentum.Analytics.Visits.Lambda
                 .AddMemoryCache()
                 .AddSingleton<IConfiguration>(configuration)
                 .AddNodaTime()
-                .AddVisitConfiguration()
-                .AddSingleton<IVisitTimeRangeProvider, VisitTimeRangeProvider>()
+                .AddSingleton<IIdentifiedVisitTimeRangeProvider, IdentifiedVisitTimeRangeProvider>()
                 .AddDynamoDbVisitService()
                 .AddSingleton<IS3ClientFactory, S3ClientFactory>()
                 .AddSingleton<IS3OutputConfiguration, S3OutputConfiguration>()
                 .AddTransient<IIdentifiedVisitWriter, S3IdentifiedVisitWriter>()
-                //.AddTransient<IDynamoDbIdentifiedVisitProcessor, DynamoDbIdentifiedVisitProcessor>();
+                .AddTransient<IDynamoDbIdentifiedVisitProcessor, DynamoDbIdentifiedVisitProcessor>();
                 ;
             _serviceProvider = services.BuildServiceProvider();    
             _logger = _serviceProvider.GetRequiredService<ILogger<Function>>();
@@ -59,10 +59,10 @@ namespace Momentum.Analytics.Visits.Lambda
         /// <returns></returns>
         public async Task FunctionHandlerAsync(Stream input)
         {
-            var timeRangeProvider = _serviceProvider.GetRequiredService<IVisitTimeRangeProvider>();
+            var timeRangeProvider = _serviceProvider.GetRequiredService<IIdentifiedVisitTimeRangeProvider>();
             var visitProcessor = _serviceProvider.GetRequiredService<IDynamoDbIdentifiedVisitProcessor>();
 
-            await visitProcessor.ExportAsync(timeRangeProvider.TimeRange).ConfigureAwait(false);
+            await visitProcessor.ReportAsync(timeRangeProvider.TimeRange).ConfigureAwait(false);
         } // end method
     } // end class
 } // end namespace

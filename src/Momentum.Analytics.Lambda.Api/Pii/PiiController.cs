@@ -15,17 +15,20 @@ namespace Momentum.Analytics.Lambda.Api.Pii
         protected readonly IPiiService _piiService;
         protected readonly ICookieWriter _cookieWriter;
         protected readonly IClockService _clockService;
+        protected readonly IVisitExpirationProvider _visitExpirationProvider;
         protected readonly ILogger _logger;
 
         public PiiController(
             IPiiService piiService, 
             ICookieWriter cookieWriter,
             IClockService clockService,
+            IVisitExpirationProvider visitExpirationProvider,
             ILogger<PiiController> logger)
         {
             _piiService = piiService ?? throw new ArgumentNullException(nameof(piiService));
             _cookieWriter = cookieWriter ?? throw new ArgumentNullException(nameof(cookieWriter));
             _clockService = clockService ?? throw new ArgumentNullException(nameof(clockService));
+            _visitExpirationProvider = visitExpirationProvider ?? throw new ArgumentNullException(nameof(visitExpirationProvider));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
@@ -35,7 +38,9 @@ namespace Momentum.Analytics.Lambda.Api.Pii
             [FromCookie(Name = CookieConstants.NAME)] string? cookieValue = null,
             CancellationToken token = default)
         {
-            var cookie = cookieValue.ToCookieModel();
+            var now = _clockService.Now;
+            var visitExpiration = await _visitExpirationProvider.GetExpirationAsync(now, token).ConfigureAwait(false);
+            var cookie = cookieValue.ToCookieModel(visitExpiration);
 
             var collectedPii = new CollectedPii()
             {
@@ -84,7 +89,9 @@ namespace Momentum.Analytics.Lambda.Api.Pii
         {
             IActionResult result = NotFound();
 
-            var cookie = cookieValue.ToCookieModel();
+            var now = _clockService.Now;
+            var visitExpiration = await _visitExpirationProvider.GetExpirationAsync(now, token).ConfigureAwait(false);
+            var cookie = cookieValue.ToCookieModel(visitExpiration);
             if(cookieId.HasValue)
             {
                 cookie.Id = cookieId.Value;

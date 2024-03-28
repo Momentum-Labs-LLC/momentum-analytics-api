@@ -7,6 +7,8 @@ using Momentum.Analytics.Core.PageViews.Models;
 using Momentum.Analytics.DynamoDb.PageViews;
 using Momentum.Analytics.Processing.DynamoDb.PageViews;
 using Momentum.Analytics.Processing.DynamoDb.PageViews.Interfaces;
+using Momentum.Analytics.Core;
+using Momentum.Analytics.Core.Visits;
 
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -34,6 +36,8 @@ namespace Momentum.Analytics.PageViews.Lambda
                         config.SetMinimumLevel(LogLevel.Debug);
                     })
                 .AddSingleton<IConfiguration>(config)
+                .AddNodaTime()
+                .AddVisitExpirationProvider()
                 .AddDynamoDbPageViewProcessor()
                 .BuildServiceProvider();
 
@@ -41,9 +45,10 @@ namespace Momentum.Analytics.PageViews.Lambda
             _logger.LogInformation("Page View Processing Lambda Created.");
         } // end method
 
-        public Function(IServiceProvider serviceProvider)
+        public Function(IServiceProvider serviceProvider, ILogger<Function> logger)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
         public async Task FunctionHandlerAsync(DynamoDBEvent dynamoEvent)
@@ -67,6 +72,7 @@ namespace Momentum.Analytics.PageViews.Lambda
                     catch(Exception ex)
                     {
                         _logger.LogError(new EventId(0), ex, "Unable to process page view in event: {EventId}.", record.EventID);
+                        throw;
                     } // end try/catch                    
                 } // end foreach
             } // end if
