@@ -40,21 +40,31 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
             [FromCookie(Name = CookieConstants.NAME)] string? cookieValue = null,
             CancellationToken token = default)
         {
-            var now = _clockService.Now;
-            var visitExpiration = await _visitExpirationProvider.GetExpirationAsync(now, token).ConfigureAwait(false);
-            var cookie = cookieValue.ToCookieModel(visitExpiration);
-            
-            var domainModel = pageView.ToDomain(cookie, now);
-            await _pageViewService.RecordAsync(domainModel, token).ConfigureAwait(false);
+            IActionResult result = Ok();
 
-            if(cookie.MaxFunnelStep < pageView.FunnelStep)
+            try
             {
-                cookie.MaxFunnelStep = pageView.FunnelStep;
-            } // end if
+                var now = _clockService.Now;
+                var visitExpiration = await _visitExpirationProvider.GetExpirationAsync(now, token).ConfigureAwait(false);
+                var cookie = cookieValue.ToCookieModel(visitExpiration);
+                
+                var domainModel = pageView.ToDomain(cookie, now);
+                await _pageViewService.RecordAsync(domainModel, token).ConfigureAwait(false);
 
-            await _cookieWriter.SetCookieAsync(cookie, token).ConfigureAwait(false);
+                if(cookie.MaxFunnelStep < pageView.FunnelStep)
+                {
+                    cookie.MaxFunnelStep = pageView.FunnelStep;
+                } // end if
 
-            return Ok();
+                await _cookieWriter.SetCookieAsync(cookie, token).ConfigureAwait(false);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(new EventId(0), ex, "Failed to accept page view.");
+                result = StatusCode(500);
+            } // end try/catch
+
+            return result;
         } // end method
     } // end class
 } // end namespace

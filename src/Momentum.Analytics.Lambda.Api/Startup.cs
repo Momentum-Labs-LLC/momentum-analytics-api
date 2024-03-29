@@ -25,7 +25,8 @@ public class Startup
             {
                 config.AddFilter("Microsoft", LogLevel.Warning);
                 config.AddFilter("System", LogLevel.Warning);
-                config.SetMinimumLevel(LogLevel.Debug);
+                config.SetMinimumLevel(LogLevel.Error);
+                config.AddLambdaLogger();
             })
             .AddMemoryCache()
             .AddVisitExpirationProvider()

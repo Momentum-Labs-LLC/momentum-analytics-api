@@ -38,31 +38,40 @@ namespace Momentum.Analytics.Lambda.Api.Pii
             [FromCookie(Name = CookieConstants.NAME)] string? cookieValue = null,
             CancellationToken token = default)
         {
-            var now = _clockService.Now;
-            var visitExpiration = await _visitExpirationProvider.GetExpirationAsync(now, token).ConfigureAwait(false);
-            var cookie = cookieValue.ToCookieModel(visitExpiration);
-
-            var collectedPii = new CollectedPii()
+            IActionResult result = Ok();
+            try
             {
-                CookieId = cookie.Id,
-                UtcTimestamp = _clockService.Now,
-                Pii = new PiiValue()
+                var now = _clockService.Now;
+                var visitExpiration = await _visitExpirationProvider.GetExpirationAsync(now, token).ConfigureAwait(false);
+                var cookie = cookieValue.ToCookieModel(visitExpiration);
+
+                var collectedPii = new CollectedPii()
                 {
-                    Value = piiViewModel.Value,
-                    PiiType = piiViewModel.Type
-                }
-            };
+                    CookieId = cookie.Id,
+                    UtcTimestamp = _clockService.Now,
+                    Pii = new PiiValue()
+                    {
+                        Value = piiViewModel.Value,
+                        PiiType = piiViewModel.Type
+                    }
+                };
 
-            await _piiService.RecordAsync(collectedPii, token).ConfigureAwait(false);
+                await _piiService.RecordAsync(collectedPii, token).ConfigureAwait(false);
 
-            if(!cookie.CollectedPii.HasFlag(piiViewModel.Type))
+                if(!cookie.CollectedPii.HasFlag(piiViewModel.Type))
+                {
+                    cookie.CollectedPii = cookie.CollectedPii | piiViewModel.Type;
+                } // end if
+
+                await _cookieWriter.SetCookieAsync(cookie, token).ConfigureAwait(false);
+            }
+            catch(Exception ex)
             {
-                cookie.CollectedPii = cookie.CollectedPii | piiViewModel.Type;
-            } // end if
-
-            await _cookieWriter.SetCookieAsync(cookie, token).ConfigureAwait(false);
-
-            return Ok();            
+                _logger.LogError(new EventId(0), ex, "Failed to accept pii");
+                result = StatusCode(500);
+            } // end try/catch
+            
+            return result;
         } // end method
 
         [HttpGet("{id}")]
