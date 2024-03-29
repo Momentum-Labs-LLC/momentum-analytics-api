@@ -54,7 +54,7 @@ namespace Momentum.Analytics.DynamoDb.Pii
             };
 
             var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
-            var putItemResponse = await client.PutItemAsync(request, token).ConfigureAwait(false);
+            await client.PutItemAsync(request, token).ConfigureAwait(false);
         } // end method
     } // end class
 } // end namespace
