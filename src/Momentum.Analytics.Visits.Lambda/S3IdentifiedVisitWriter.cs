@@ -62,7 +62,7 @@ namespace Momentum.Analytics.Visits.Lambda
             });
 
             var result = new MemoryStream();
-            using (var stream = new StreamWriter(result))
+            using (var stream = new StreamWriter(result, leaveOpen: true))
             using (var csv = new CsvWriter(stream, CultureInfo.InvariantCulture))
             {	
                 await csv.WriteRecordsAsync(rows, token);
