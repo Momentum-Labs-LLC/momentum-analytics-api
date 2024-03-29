@@ -63,5 +63,21 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
             Assert.NotNull(timeRange);
             // TODO: Fix asserts
         } // end method
+
+        [Fact]
+        public async Task GetAsync_TrimToHour_False()
+        {
+            SetupHoursLookback(1);
+            SetupTrimToHour(false);
+            _timeRangeProvider = new IdentifiedVisitTimeRangeProvider(_configuration.Object, _visitConfiguration.Object, _clockService);
+            
+            var utcHour = DateTime.UtcNow.Trim(TimeSpan.FromHours(1).Ticks);
+            var utcStart = utcHour.AddHours(-24);
+
+            var timeRange = _timeRangeProvider.TimeRange;
+
+            Assert.NotNull(timeRange);
+            // TODO: Fix asserts
+        } // end method
     } // end class
 } // end namespace

@@ -75,8 +75,8 @@ namespace Momentum.Analytics.DynamoDb.PageViews
             {
                 utmParameters.Add(new UrchinTrackingParameter()
                 {
-                    Parameter = UrchinParameterEnum.Source,
-                    Value = sourceValue
+                    Parameter = UrchinParameterEnum.Medium,
+                    Value = mediumValue
                 });
             } // end if
 

@@ -6,7 +6,6 @@ using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.PageViews.Interfaces;
-using NodaTime;
 
 namespace Momentum.Analytics.Processing.PageViews
 {
@@ -46,7 +45,7 @@ namespace Momentum.Analytics.Processing.PageViews
                     CookieId = pageView.CookieId,
                     UtcStart = pageView.UtcTimestamp,
                     UtcExpiration = visitExpiration,
-                    FunnelStep = pageView.FunnelStep                    
+                    FunnelStep = pageView.FunnelStep               
                 };
             }
 

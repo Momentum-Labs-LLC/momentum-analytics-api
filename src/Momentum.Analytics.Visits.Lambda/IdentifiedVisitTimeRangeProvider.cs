@@ -41,6 +41,9 @@ namespace Momentum.Analytics.Visits.Lambda
 
                 // get the instant from the current time trimed to the hour
                 endInstant = zonedHour.ToInstant();
+
+                // remove a single millisecond to avoid overlapping reports when trimming is enabled.
+                endInstant = endInstant.Minus(Duration.FromMilliseconds(1));
             } // end method            
 
             TimeRange = new TimeRange()
