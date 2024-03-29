@@ -61,7 +61,7 @@ resource "aws_iam_role_policy" "this-lambda-dynamo" {
           "dynamodb:DescribeStream",
           "dynamodb:ListStreams"
         ],
-        "Resource" : "${data.aws_dynamodb_table.this-page-views.arn}/stream/*"
+        "Resource" : "${data.aws_dynamodb_table.this-collected-pii.arn}/stream/*"
       }
     ]
   })
