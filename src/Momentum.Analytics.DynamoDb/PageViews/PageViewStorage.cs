@@ -23,20 +23,11 @@ namespace Momentum.Analytics.DynamoDb.PageViews
             var request = new PutItemRequest
             {
                 TableName = _tableConfiguration.TableName,
-                Item = pageView.ToDynamoDb(),
-
-                // prevent overwrite of existing record by primary key
-                ConditionExpression = "attribute_not_exists(#requestId)",
-                ExpressionAttributeNames = new Dictionary<string, string>()
-                {
-                    { "#requestId", PageViewConstants.REQUEST_ID }
-                }
+                Item = pageView.ToDynamoDb()
             };
 
             var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
-            var putItemResponse = await client.PutItemAsync(request, token).ConfigureAwait(false);
-
-            // TODO: handle response
+            await client.PutItemAsync(request, token).ConfigureAwait(false);
         } // end method
     } // end class
 } // end namespace

@@ -5,7 +5,6 @@ namespace Momentum.Analytics.DynamoDb.PageViews
         public const string TABLE_NAME_KEY = "PAGE_VIEWS_TABLE";
         public const string TABLE_NAME_DEFAULT = "momentum-prd-page-views";
 
-        public const string REQUEST_ID = "RequestId";
         public const string COOKIE_ID = "CookieId";
         public const string UTC_TIMESTAMP = "UtcTimestamp";
         public const string DOMAIN = "Domain";
