@@ -39,10 +39,20 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
                 .Returns(configSection.Object);
         } // end method
 
+        protected void SetupTrimToHour(bool trimToHour = true)
+        {
+            var configSection = new Mock<IConfigurationSection>();
+            configSection.Setup(x => x.Value).Returns(trimToHour.ToString());
+
+            _configuration.Setup(x => x.GetSection(IdentifiedVisitTimeRangeProvider.TRIM_TO_HOUR))
+                .Returns(configSection.Object);
+        } // end method
+
         [Fact]
         public async Task GetAsync()
         {
             SetupHoursLookback();
+            SetupTrimToHour();
             _timeRangeProvider = new IdentifiedVisitTimeRangeProvider(_configuration.Object, _visitConfiguration.Object, _clockService);
             
             var utcHour = DateTime.UtcNow.Trim(TimeSpan.FromHours(1).Ticks);
@@ -52,8 +62,6 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
 
             Assert.NotNull(timeRange);
             // TODO: Fix asserts
-            // Assert.Equal(utcStart, timeRange.UtcStart);
-            // Assert.Equal(utcHour, timeRange.UtcEnd);
         } // end method
     } // end class
 } // end namespace
