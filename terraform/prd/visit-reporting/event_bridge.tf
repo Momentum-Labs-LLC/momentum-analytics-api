@@ -4,8 +4,8 @@ resource "aws_scheduler_schedule" "this-schedule" {
     mode = "OFF"
   }
   schedule_expression          = "cron(30 0 * * ? *)" //30 minutes after midnight
-  schedule_expression_timezone = "America/New_York"        // Eastern Time Zone
-  state                        = "ENABLED"                 // DISABLED
+  schedule_expression_timezone = "America/New_York"   // Eastern Time Zone
+  state                        = "ENABLED"            // DISABLED
   target {
     arn      = aws_lambda_function.this-function-0.arn
     role_arn = aws_iam_role.this-schedule-role.arn

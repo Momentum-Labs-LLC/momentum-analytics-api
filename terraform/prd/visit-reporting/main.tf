@@ -18,8 +18,8 @@ locals {
   name_prefix    = "${local.corp}-${local.env}-${local.project}-${local.subproject}"
   function_name  = "${local.name_prefix}-${local.iteration}"
 
-  timeout         = 300
-  memory_size     = 1024
+  timeout         = 900
+  memory_size     = 3008
   max_concurrency = -1
 
   log_retention_days = 365

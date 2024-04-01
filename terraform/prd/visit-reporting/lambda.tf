@@ -17,9 +17,9 @@ resource "aws_lambda_function" "this-function-0" {
 
   environment {
     variables = {
-      OUTPUT_BUCKET = data.aws_s3_bucket.this-bucket.bucket
+      OUTPUT_BUCKET  = data.aws_s3_bucket.this-bucket.bucket
       HOURS_LOOKBACK = 24
-      TRIM_TO_HOUR = "true"
+      TRIM_TO_HOUR   = "true"
     }
   }
 

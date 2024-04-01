@@ -24,7 +24,7 @@ namespace Momentum.Analytics.Core.Visits.Models
         /// Gets or sets the expected expiration of the visit.
         /// This could be extended, depending on the definition of a visit.
         /// </summary>
-        public Instant UtcExpiration { get; set; }
+        public Instant? UtcExpiration { get; set; }
 
         /// <summary>
         /// Gets or sets the conversion funnel step.

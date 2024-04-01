@@ -29,7 +29,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
             result.Id = fields.ReadGuid(VisitConstants.ID, true).Value;
             result.CookieId = fields.ReadGuid(VisitConstants.COOKIE_ID, true).Value;
             result.UtcStart = fields.ReadDateTime(VisitConstants.UTC_START, true).Value;
-            result.UtcExpiration = fields.ReadDateTime(VisitConstants.UTC_EXPIRATION, true).Value;
+            result.UtcExpiration = fields.ReadDateTime(VisitConstants.UTC_EXPIRATION);
             result.FunnelStep = fields.ReadInteger(VisitConstants.FUNNEL_STEP);
             result.Referer = fields.ReadString(VisitConstants.REFERER);
             result.Source = fields.ReadString(VisitConstants.SOURCE);

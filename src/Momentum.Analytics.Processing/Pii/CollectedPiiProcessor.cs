@@ -40,6 +40,7 @@ namespace Momentum.Analytics.Processing.Pii
                     Id = Guid.NewGuid(),
                     CookieId = collectedPii.CookieId,
                     UtcStart = collectedPii.UtcTimestamp,
+                    UtcExpiration = visitExpiration,
                     PiiType = collectedPii.Pii.PiiType,
                     PiiValue = collectedPii.Pii.Value,
                     UtcIdentifiedTimestamp = collectedPii.UtcTimestamp,
