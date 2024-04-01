@@ -45,12 +45,16 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
         public async Task BuildKeyAsync()
         {
             var hoursLookback = 24;
-            var hourStart = DateTime.UtcNow.Trim(TimeSpan.FromHours(1).Ticks).ToInstant();
+            var endWindow = DateTime.UtcNow
+                .Trim(TimeSpan.FromHours(1).Ticks)
+                .ToInstant();
+            var hourStart = endWindow
+                .Minus(Duration.FromHours(24));
             
             var timeRange = new TimeRange()
             {
-                UtcStart = hourStart.Minus(Duration.FromHours(24)),
-                UtcEnd = hourStart
+                UtcStart = hourStart,
+                UtcEnd = endWindow
             };
             var key = await _outputConfig.BuildKeyAsync(timeRange).ConfigureAwait(false);
 
