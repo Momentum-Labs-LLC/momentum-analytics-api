@@ -60,7 +60,7 @@ resource "aws_api_gateway_rest_api" "this-api-0" {
 
 resource "aws_api_gateway_deployment" "this-api-deploy" {
   rest_api_id = aws_api_gateway_rest_api.this-api-0.id
-  stage_name = local.env
+  stage_name  = local.env
 
   # redeploy whenever the s3 etag is differnt
   triggers = {
