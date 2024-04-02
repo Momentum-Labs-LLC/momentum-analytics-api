@@ -1,4 +1,4 @@
 variable "api_image_tag" {
   type    = string
-  default = "1.0.24"
+  default = "1.0.25"
 }
