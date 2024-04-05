@@ -35,14 +35,14 @@ namespace Momentum.Analytics.Lambda.Api.Pii
         } // end method
 
         [HttpGet(ApiConstants.PIXEL_PATH)]
-        public async Task<IActionResult> PiiPixelAsync([FromQuery(Name = ApiConstants.QUERY_STRING_EVENT_KEY)] string base64PageView,
+        public async Task<IActionResult> PiiPixelAsync([FromQuery(Name = ApiConstants.QUERY_STRING_EVENT_KEY)] string base64Pii,
             [FromCookie(Name = CookieConstants.NAME)] string? cookieValue = null,
             CancellationToken token = default)
         {
             IActionResult result = File(ApiConstants.GIF_BYTES, "image/gif");
 
             PiiViewModel viewModel;
-            var pageViewBytes = Convert.FromBase64String(base64PageView);
+            var pageViewBytes = Convert.FromBase64String(base64Pii);
             using (var stream = new MemoryStream(pageViewBytes))
             {
                 viewModel = await JsonSerializer.DeserializeAsync<PiiViewModel>(stream, cancellationToken: token).ConfigureAwait(false);

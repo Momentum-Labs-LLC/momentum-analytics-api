@@ -1,4 +1,5 @@
-﻿using Momentum.Analytics.Core;
+﻿using Amazon.DynamoDBv2;
+using Momentum.Analytics.Core;
 using Momentum.Analytics.Core.Visits;
 using Momentum.Analytics.DynamoDb.PageViews;
 using Momentum.Analytics.DynamoDb.Pii;
@@ -29,6 +30,7 @@ public class Startup
                 config.AddLambdaLogger();
             })
             .AddMemoryCache()
+            .AddSingleton<IConfiguration>(Configuration)
             .AddVisitExpirationProvider()
             .AddNodaTime()
             .AddPageViewService()
@@ -37,6 +39,22 @@ public class Startup
             .AddHttpContextAccessor()
             .AddTransient<ICookieWriter, CookieWriter>();
 
+        
+
+        var corsOriginsValue = Configuration.GetValue<string>(ApiConstants.CORS_ORIGINS, ApiConstants.CORS_ORIGINS_DEFAULT);
+        var corsOrigins = corsOriginsValue.Split(",").Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim());
+
+        
+        services.AddCors(corsBuilder => 
+        {
+            corsBuilder.AddDefaultPolicy(policyBuilder => 
+            {
+                policyBuilder.WithOrigins(corsOrigins.ToArray())
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
         services.AddMvcCore(options => 
@@ -62,7 +80,7 @@ public class Startup
         app.UseRouting();
 
         app.UseAuthorization();
-
+        app.UseCors();
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();

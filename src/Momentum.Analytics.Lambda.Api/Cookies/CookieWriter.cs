@@ -21,9 +21,9 @@ namespace Momentum.Analytics.Lambda.Api.Cookies
                 {
                     Expires = DateTime.UtcNow.Add(CookieConstants.COOKIE_EXPIRATION),
                     Domain = BuildCookieDomain(),
-                    Path = "/",
-                    SameSite = SameSiteMode.Lax, // Default
-                    Secure = false,
+                    //Path = "/",
+                    SameSite = SameSiteMode.None, // Default
+                    Secure = true,
                     HttpOnly = false,
                 };       
             
