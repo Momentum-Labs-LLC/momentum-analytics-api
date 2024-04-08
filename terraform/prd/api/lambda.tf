@@ -17,7 +17,8 @@ resource "aws_lambda_function" "this-api-0" {
 
   environment {
     variables = {
-      CORS_ORIGINS = "https://${aws_route53_record.this-route.fqdn}"
+      CORS_ORIGINS  = "https://${data.aws_route53_zone.this-zone.name}",
+      COOKIE_DOMAIN = "${data.aws_route53_zone.this-zone.name}"
     }
   }
 
