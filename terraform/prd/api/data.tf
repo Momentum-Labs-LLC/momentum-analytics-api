@@ -42,3 +42,16 @@ data "aws_dynamodb_table" "this-pii" {
 data "aws_dynamodb_table" "this-collected-pii" {
   name = "${local.corp}-${local.env}-collected-pii"
 }
+
+data "aws_cloudfront_distribution" "this-distribution" {
+  id = "E3NXINRKUEXAOJ"
+}
+
+data "aws_acm_certificate" "cert" {
+  domain   = "mll-analytics.com"
+  statuses = ["ISSUED"]
+}
+
+data "aws_route53_zone" "this-zone" {
+  name = "mll-analytics.com"
+}

@@ -36,8 +36,8 @@ public class Startup
             .AddPageViewService()
             .AddDynamoDbPiiService()
             .AddDynamoDbVisitService()
-            .AddHttpContextAccessor()
-            .AddTransient<ICookieWriter, CookieWriter>();
+            .AddCookieWriter();
+            
 
         
 

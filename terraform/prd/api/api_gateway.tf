@@ -97,27 +97,38 @@ resource "aws_lambda_permission" "this-lambda-permission" {
 }
 
 #setup the custom domain name for the api gateway
-# resource "aws_api_gateway_domain_name" "this-domain-0" {
-#   domain_name              = local.custom_domain_name
-#   regional_certificate_arn = data.aws_acm_certificate.this-cert.arn
-#   security_policy          = "TLS_1_2"
+resource "aws_api_gateway_domain_name" "this-domain-0" {
+  domain_name              = "api.mll-analytics.com"
+  regional_certificate_arn = data.aws_acm_certificate.cert.arn
+  security_policy          = "TLS_1_2"
 
-#   endpoint_configuration {
-#     types = [local.endpoint_type]
-#   }
+  endpoint_configuration {
+    types = [local.endpoint_type]
+  }
 
-#   tags = local.tags
-# }
+  tags = local.tags
+}
 
-# resource "aws_api_gateway_base_path_mapping" "this-mapping-0" {
-#   api_id      = aws_api_gateway_rest_api.this-api-0.id
-#   stage_name  = aws_api_gateway_deployment.this-api-deploy.stage_name
-#   domain_name = aws_api_gateway_domain_name.this-domain-0.domain_name
+resource "aws_route53_record" "this-route" {
+  zone_id = data.aws_route53_zone.this-zone.zone_id
+  name    = "api.mll-analytics.com"
+  type    = "A"
+  alias {
+    name                   = aws_api_gateway_domain_name.this-domain-0.regional_domain_name
+    zone_id                = aws_api_gateway_domain_name.this-domain-0.regional_zone_id
+    evaluate_target_health = true
+  }
+}
 
-#   depends_on = [
-#     aws_api_gateway_rest_api.this-api-0,
-#     aws_api_gateway_deployment.this-api-deploy,
-#     aws_api_gateway_domain_name.this-domain-0,
-#     aws_route53_record.this-route
-#   ]
-# }
+resource "aws_api_gateway_base_path_mapping" "this-mapping-0" {
+  api_id      = aws_api_gateway_rest_api.this-api-0.id
+  stage_name  = local.env
+  domain_name = aws_api_gateway_domain_name.this-domain-0.domain_name
+
+  depends_on = [
+    aws_api_gateway_rest_api.this-api-0,
+    aws_api_gateway_deployment.this-api-deploy,
+    aws_api_gateway_domain_name.this-domain-0,
+    aws_route53_record.this-route
+  ]
+}

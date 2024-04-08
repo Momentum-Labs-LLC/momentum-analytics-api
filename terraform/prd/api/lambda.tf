@@ -17,7 +17,7 @@ resource "aws_lambda_function" "this-api-0" {
 
   environment {
     variables = {
-      NAME = "VALUE"
+      CORS_ORIGINS = "https://${aws_route53_record.this-route.fqdn}"
     }
   }
 
