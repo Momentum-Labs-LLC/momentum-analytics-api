@@ -13,16 +13,19 @@ namespace Momentum.Analytics.Visits.Lambda
         protected readonly IS3OutputConfiguration _outputConfiguration;
         protected readonly IS3ClientFactory _s3ClientFactory;
         protected readonly IVisitConfiguration _visitConfiguration;
+        protected readonly IdentifiedVisitMap _identifiedVisitMap;
         protected readonly ILogger _logger;
         public S3IdentifiedVisitWriter(
             IS3OutputConfiguration outputConfiguration,
             IS3ClientFactory s3ClientFactory,
             IVisitConfiguration visitConfiguration,
+            IdentifiedVisitMap identifiedVisitMap,
             ILogger<S3IdentifiedVisitWriter> logger)
         {
             _outputConfiguration = outputConfiguration ?? throw new ArgumentNullException(nameof(outputConfiguration));
             _s3ClientFactory = s3ClientFactory ?? throw new ArgumentNullException(nameof(s3ClientFactory));
             _visitConfiguration = visitConfiguration ?? throw new ArgumentNullException(nameof(visitConfiguration));
+            _identifiedVisitMap = identifiedVisitMap ?? throw new ArgumentNullException(nameof(identifiedVisitMap));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
@@ -50,13 +53,13 @@ namespace Momentum.Analytics.Visits.Lambda
             IEnumerable<Visit> visits, 
             CancellationToken token = default)
         {
-            var rows = visits.Select(x => new 
+            var rows = visits.Select(x => new IdentifiedVisit()
             {
                 Pii = x.PiiValue,
                 PiiTypeId = (int)x.PiiType,
                 VisitStart = x.UtcStart.InZone(_visitConfiguration.TimeZone).ToDateTimeOffset().ToString("yyyy-MM-dd HH:mm:ss"),
                 FunnelStep = x.FunnelStep,
-                Referer = x.Referer,
+                Referrer = x.Referer,
                 Source = x.Source,
                 Medium = x.Medium
             });
@@ -65,6 +68,7 @@ namespace Momentum.Analytics.Visits.Lambda
             using (var stream = new StreamWriter(result, leaveOpen: true))
             using (var csv = new CsvWriter(stream, CultureInfo.InvariantCulture))
             {	
+                csv.Context.RegisterClassMap(_identifiedVisitMap);
                 await csv.WriteRecordsAsync(rows, token);
                 
                 await csv.FlushAsync().ConfigureAwait(false);

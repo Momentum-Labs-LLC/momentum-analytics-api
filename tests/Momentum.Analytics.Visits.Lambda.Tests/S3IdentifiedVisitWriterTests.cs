@@ -23,6 +23,9 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
         private Mock<IVisitConfiguration> _visitConfiguration;
         private Mock<ILogger<S3IdentifiedVisitWriter>> _logger;
 
+        private Mock<IColumnNameConfiguration> _columnNameConfiguration;
+        private IdentifiedVisitMap _visitMap;
+
         private Mock<IAmazonS3> _s3Client;
 
         private S3IdentifiedVisitWriter _writer;
@@ -33,12 +36,16 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
             _s3ClientFactory = new Mock<IS3ClientFactory>();
             _outputConfiguration = new Mock<IS3OutputConfiguration>();
             _visitConfiguration = new Mock<IVisitConfiguration>();
+
+            _columnNameConfiguration = new Mock<IColumnNameConfiguration>();
+            _visitMap = new IdentifiedVisitMap(_columnNameConfiguration.Object);
             _logger = new Mock<ILogger<S3IdentifiedVisitWriter>>();
 
             _writer = new S3IdentifiedVisitWriter(
                 _outputConfiguration.Object,
                 _s3ClientFactory.Object,
                 _visitConfiguration.Object,
+                _visitMap,
                 _logger.Object);
 
             _s3Client = new Mock<IAmazonS3>();

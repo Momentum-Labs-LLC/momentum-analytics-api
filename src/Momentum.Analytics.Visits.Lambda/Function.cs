@@ -38,6 +38,8 @@ namespace Momentum.Analytics.Visits.Lambda
                 .AddDynamoDbVisitService()
                 .AddSingleton<IS3ClientFactory, S3ClientFactory>()
                 .AddSingleton<IS3OutputConfiguration, S3OutputConfiguration>()
+                .AddSingleton<IColumnNameConfiguration, ColumnNameConfiguration>()
+                .AddSingleton<IdentifiedVisitMap>((serviceProvider) => new IdentifiedVisitMap(serviceProvider.GetRequiredService<IColumnNameConfiguration>()))
                 .AddTransient<IIdentifiedVisitWriter, S3IdentifiedVisitWriter>()
                 .AddTransient<IDynamoDbIdentifiedVisitProcessor, DynamoDbIdentifiedVisitProcessor>();
                 ;

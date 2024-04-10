@@ -9,8 +9,10 @@ namespace Momentum.Analytics.Visits.Lambda
         public const string OUTPUT_BUCKET = "OUTPUT_BUCKET";
         public const string OUTPUT_BUCKET_DEFAULT = "momentum-prd-visits";
 
+        public const string FUNNEL_STEP_COLUMN = "FUNNEL_STEP_COLUMN";
+        public const string FUNNEL_STEP_COLUMN_DEFAULT = "FunnelStep";
+
         public string Bucket { get; protected set; }
-        
         protected readonly IVisitConfiguration _visitConfiguration;
 
         public S3OutputConfiguration(IConfiguration configuration, IVisitConfiguration visitConfiguration)
