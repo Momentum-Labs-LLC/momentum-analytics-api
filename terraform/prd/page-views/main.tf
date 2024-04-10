@@ -23,7 +23,12 @@ locals {
   memory_size     = 1024
   max_concurrency = -1
 
-  log_retention_days = 365
+  log_retention_days = 30
+
+  # alerts
+  behind_period    = 5 * 60         # 5 minutes
+  behind_periods   = 3              # 15 minutes
+  behind_threshold = 1000 * 60 * 30 # 30 minutes
 
   tags = {
     Production  = "true"

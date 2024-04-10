@@ -23,7 +23,17 @@ locals {
   memory_size     = 1024
   max_concurrency = -1
 
-  log_retention_days = 365
+  log_retention_days = 30
+
+  #alerts
+  api_error_rate_period    = 5 * 60
+  api_error_rate_periods   = 3
+  api_error_rate_threshold = 2
+
+  api_request_period    = 1 * 60
+  api_request_periods   = 3
+  api_request_threshold = 1
+
 
   # ingress/egress/security group stuff
   this_ipv4_cidr_blocks = [data.aws_vpc.this-vpc.cidr_block]
