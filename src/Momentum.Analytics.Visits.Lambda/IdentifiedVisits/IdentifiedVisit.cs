@@ -1,4 +1,4 @@
-namespace Momentum.Analytics.Visits.Lambda
+namespace Momentum.Analytics.Visits.Lambda.IdentifiedVisits
 {
     public class IdentifiedVisit
     {
@@ -9,5 +9,6 @@ namespace Momentum.Analytics.Visits.Lambda
         public string Referrer { get; set; }
         public string Source { get; set; }
         public string Medium { get; set; }
+        public string CookieId { get; set; }
     } // end class
 } // end namespace

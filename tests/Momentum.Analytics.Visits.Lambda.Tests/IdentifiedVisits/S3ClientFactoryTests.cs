@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Momentum.Analytics.Visits.Lambda.IdentifiedVisits;
 using Moq;
 
-namespace Momentum.Analytics.Visits.Lambda.Tests
+namespace Momentum.Analytics.Visits.Lambda.Tests.IdentifiedVisits
 {
     public class S3ClientFactoryTests
     {

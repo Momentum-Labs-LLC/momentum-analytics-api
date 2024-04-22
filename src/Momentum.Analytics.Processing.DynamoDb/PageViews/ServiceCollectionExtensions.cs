@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Momentum.Analytics.DynamoDb.Pii;
 using Momentum.Analytics.DynamoDb.Visits;
+using Momentum.Analytics.Processing.Cookies;
 using Momentum.Analytics.Processing.DynamoDb.PageViews.Interfaces;
 
 namespace Momentum.Analytics.Processing.DynamoDb.PageViews
@@ -12,6 +13,7 @@ namespace Momentum.Analytics.Processing.DynamoDb.PageViews
             return services
                 .AddDynamoDbPiiService()
                 .AddDynamoDbVisitService()
+                .AddSharedCookieConfiguration()
                 .AddTransient<IDynamoDbPageViewProcessor, DynamoDbPageViewProcessor>();
         } // end method
     } // end class

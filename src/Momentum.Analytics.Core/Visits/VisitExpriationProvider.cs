@@ -5,12 +5,12 @@ using NodaTime;
 
 namespace Momentum.Analytics.Core.Visits
 {
-    public class VisitExpirationProvider : IVisitExpirationProvider
+    public class VisitWindowCalculator : IVisitWindowCalculator
     {
         protected readonly IVisitConfiguration _visitConfiguration;
         protected readonly ILogger _logger;
 
-        public VisitExpirationProvider(IVisitConfiguration visitConfiguration, ILogger<VisitExpirationProvider> logger)
+        public VisitWindowCalculator(IVisitConfiguration visitConfiguration, ILogger<VisitWindowCalculator> logger)
         {
             _visitConfiguration = visitConfiguration ?? throw new ArgumentNullException(nameof(visitConfiguration));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

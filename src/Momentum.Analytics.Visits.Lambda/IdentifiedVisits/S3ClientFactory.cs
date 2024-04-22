@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Amazon.S3;
 using Microsoft.Extensions.Logging;
+using Momentum.Analytics.Visits.Lambda.IdentifiedVisits.Interfaces;
 
-namespace Momentum.Analytics.Visits.Lambda
+namespace Momentum.Analytics.Visits.Lambda.IdentifiedVisits
 {
     public class S3ClientFactory : IS3ClientFactory
     {

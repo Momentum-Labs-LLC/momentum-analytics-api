@@ -31,14 +31,12 @@ public class Startup
             })
             .AddMemoryCache()
             .AddSingleton<IConfiguration>(Configuration)
-            .AddVisitExpirationProvider()
+            .AddVisitWindowCalculator()
             .AddNodaTime()
             .AddPageViewService()
             .AddDynamoDbPiiService()
             .AddDynamoDbVisitService()
             .AddCookieWriter();
-            
-
         
 
         var corsOriginsValue = Configuration.GetValue<string>(ApiConstants.CORS_ORIGINS, ApiConstants.CORS_ORIGINS_DEFAULT);

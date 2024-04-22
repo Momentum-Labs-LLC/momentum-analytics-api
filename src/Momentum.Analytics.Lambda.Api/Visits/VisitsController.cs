@@ -69,7 +69,7 @@ namespace Momentum.Analytics.Lambda.Api.Visits
                 cookie.Id = cookieId.Value;
             } // end if
 
-            var unidentifiedVisits = await _visitService.GetUnidentifiedAsync(cookie.Id, null, token);
+            var unidentifiedVisits = await _visitService.GetUnidentifiedAsync(cookie.Id, now, null, token);
 
             IActionResult result = NotFound();
             if(unidentifiedVisits != null && unidentifiedVisits.Data != null && unidentifiedVisits.Data.Any())

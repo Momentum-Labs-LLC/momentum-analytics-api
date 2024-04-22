@@ -5,8 +5,9 @@ using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
+using Momentum.Analytics.Visits.Lambda.IdentifiedVisits.Interfaces;
 
-namespace Momentum.Analytics.Visits.Lambda
+namespace Momentum.Analytics.Visits.Lambda.IdentifiedVisits
 {
     public class S3IdentifiedVisitWriter : IS3IdentifiedVisitWriter
     {

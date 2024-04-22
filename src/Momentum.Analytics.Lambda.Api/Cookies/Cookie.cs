@@ -13,5 +13,6 @@ namespace Momentum.Analytics.Lambda.Api.Cookies
         public Instant VisitExpiration { get; set; }
         public PiiTypeEnum CollectedPii { get; set; }
         public int MaxFunnelStep { get; set; }
+        public string? UserId { get; set; }
     } // end class
 } // end namespace

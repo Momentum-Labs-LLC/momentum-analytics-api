@@ -17,7 +17,7 @@ namespace Momentum.Analytics.Core.Tests.Visits
 {
     public class VisitServiceTests
     {
-        private Mock<IVisitExpirationProvider> _visitExpirationProvider;
+        private Mock<IVisitWindowCalculator> _visitWindowCalculator;
         private Mock<IVisitStorage<int, ISearchResponse<Visit>>> _visitStorage;
         private Mock<IMemoryCache> _memoryCache;
         private Mock<ILogger<TestVisitService>> _logger;
@@ -26,13 +26,13 @@ namespace Momentum.Analytics.Core.Tests.Visits
 
         public VisitServiceTests()
         {
-            _visitExpirationProvider = new Mock<IVisitExpirationProvider>();
+            _visitWindowCalculator = new Mock<IVisitWindowCalculator>();
             _visitStorage = new Mock<IVisitStorage<int, ISearchResponse<Visit>>>();
             _memoryCache = new Mock<IMemoryCache>();
             _logger = new Mock<ILogger<TestVisitService>>();
 
             _visitService = new TestVisitService(
-                _visitExpirationProvider.Object,
+                _visitWindowCalculator.Object,
                 _visitStorage.Object,
                 _memoryCache.Object,
                 _logger.Object);
@@ -42,11 +42,11 @@ namespace Momentum.Analytics.Core.Tests.Visits
     public class TestVisitService : VisitService<int, ISearchResponse<Visit>, IVisitStorage<int, ISearchResponse<Visit>>>
     {
         public TestVisitService(
-                IVisitExpirationProvider visitExpirationProvider, 
+                IVisitWindowCalculator visitWindowCalculator, 
                 IVisitStorage<int, ISearchResponse<Visit>> visitStorage, 
                 IMemoryCache memoryCache, 
                 ILogger<TestVisitService> logger) 
-            : base(visitExpirationProvider, visitStorage, memoryCache, logger)
+            : base(visitWindowCalculator, visitStorage, memoryCache, logger)
         {
         } // end method
     } // end class

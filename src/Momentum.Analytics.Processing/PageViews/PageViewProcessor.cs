@@ -5,6 +5,7 @@ using Momentum.Analytics.Core.PII.Interfaces;
 using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
+using Momentum.Analytics.Processing.Cookies;
 using Momentum.Analytics.Processing.PageViews.Interfaces;
 
 namespace Momentum.Analytics.Processing.PageViews
@@ -13,19 +14,19 @@ namespace Momentum.Analytics.Processing.PageViews
         where TVisitSearchResponse : ISearchResponse<Visit, TPage>
         where TVisitService : IVisitService<TPage, TVisitSearchResponse>
     {
-        protected readonly IPiiService _piiService;
         protected readonly TVisitService _visitService;
+        protected readonly ISharedCookieConfiguration _sharedCookieConfiguration;
         protected readonly IClockService _clockService;
         protected readonly ILogger _logger;
 
         public PageViewProcessor(
-            IPiiService piiService,
             TVisitService visitService,
+            ISharedCookieConfiguration sharedCookieConfiguration,
             IClockService clockService,
             ILogger<PageViewProcessor<TPage, TVisitSearchResponse, TVisitService>> logger)
         {
-            _piiService = piiService ?? throw new ArgumentNullException(nameof(piiService));
             _visitService = visitService ?? throw new ArgumentNullException(nameof(visitService));
+            _sharedCookieConfiguration = sharedCookieConfiguration ?? throw new ArgumentNullException(nameof(sharedCookieConfiguration));
             _clockService = clockService ?? throw new ArgumentNullException(nameof(clockService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
@@ -45,7 +46,7 @@ namespace Momentum.Analytics.Processing.PageViews
                     CookieId = pageView.CookieId,
                     UtcStart = pageView.UtcTimestamp,
                     UtcExpiration = visitExpiration,
-                    FunnelStep = pageView.FunnelStep               
+                    FunnelStep = pageView.FunnelStep
                 };
             }
 
@@ -75,24 +76,6 @@ namespace Momentum.Analytics.Processing.PageViews
                 activeVisit.Medium = pageView.UtmParameters?.FirstOrDefault(x => x.Parameter == UrchinParameterEnum.Medium)?.Value;
 
                 hasUpsert = true;
-            } // end if
-            
-            if(activeVisit.PiiType == null || activeVisit.PiiType > PiiTypeEnum.UserId)
-            {
-                var piiValues = await _piiService.GetByCookieIdAsync(pageView.CookieId, token).ConfigureAwait(false);
-                if(piiValues != null && piiValues.Any())
-                {
-                    var preferredPii = piiValues.OrderBy(x => x.PiiType).First();
-                    
-                    if(preferredPii.PiiType < activeVisit.PiiType)
-                    {
-                        activeVisit.PiiValue = preferredPii.Value;
-                        activeVisit.PiiType = preferredPii.PiiType;
-                        activeVisit.UtcIdentifiedTimestamp = _clockService.Now;
-
-                        hasUpsert = true;
-                    } // end if
-                } // end if
             } // end if
 
             if(hasUpsert)

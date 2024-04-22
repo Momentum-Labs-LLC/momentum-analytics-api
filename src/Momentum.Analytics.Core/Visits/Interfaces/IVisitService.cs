@@ -12,6 +12,7 @@ namespace Momentum.Analytics.Core.Visits.Interfaces
         Task<Visit?> GetByActivityAsync(IUserActivity userActivity, CancellationToken token = default);
         Task UpsertAsync(Visit visit, CancellationToken token = default);
         Task<TSearchResponse> GetIdentifiedAsync(ITimeRange timeRange, TPage page, CancellationToken token = default);
-        Task<TSearchResponse> GetUnidentifiedAsync(Guid cookieId, TPage page, CancellationToken token = default);
+        Task<TSearchResponse> GetUnidentifiedAsync(ITimeRange timeRange, TPage page, CancellationToken token = default);
+        Task<TSearchResponse> GetUnidentifiedAsync(Guid cookieId, Instant timestamp, TPage page, CancellationToken token = default);
     } // end interface
 } // end namespace

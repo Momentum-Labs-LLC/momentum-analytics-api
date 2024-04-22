@@ -10,10 +10,12 @@ using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
+using Momentum.Analytics.Visits.Lambda.IdentifiedVisits;
+using Momentum.Analytics.Visits.Lambda.IdentifiedVisits.Interfaces;
 using Moq;
 using NodaTime;
 
-namespace Momentum.Analytics.Visits.Lambda.Tests
+namespace Momentum.Analytics.Visits.Lambda.Tests.IdentifiedVisits
 {
     public class S3IdentifiedVisitWriterTests
     {

@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.DynamoDb.Visits.Interfaces;
 using Momentum.Analytics.Processing.DynamoDb.Visits.Interfaces;
 using Momentum.Analytics.Processing.Visits.Interfaces;
+using Momentum.Analytics.Visits.Lambda.IdentifiedVisits.Interfaces;
 
 namespace Momentum.Analytics.Visits.Lambda.Tests
 {
@@ -52,6 +49,16 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
             Assert.NotNull(visitProcessor);
             Assert.IsAssignableFrom<IDynamoDbIdentifiedVisitProcessor>(visitProcessor);
         } // end method
+
+        [Fact]
+        public void DI_UnidentifiedVisitProcessor()
+        {
+            _function = new TestFunction();
+            var visitProcessor = _function.GetUnidentifiedVisitProcessor();
+
+            Assert.NotNull(visitProcessor);
+            Assert.IsAssignableFrom<IDynamoDbUnidentifiedVisitProcessor>(visitProcessor);
+        } // end method
     } // end class
 
     public class TestFunction : Function
@@ -82,9 +89,14 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
             return _serviceProvider.GetRequiredService<IDynamoDbVisitService>();
         } // end method
 
-        public IDynamoDbIdentifiedVisitProcessor GetVisitProcessor()
+        public IIdentifiedVisitProcessor GetVisitProcessor()
         {
-            return _serviceProvider.GetRequiredService<IDynamoDbIdentifiedVisitProcessor>();
+            return _serviceProvider.GetRequiredService<IIdentifiedVisitProcessor>();
+        } // end method
+
+        public IUnidentifiedVisitProcessor GetUnidentifiedVisitProcessor()
+        {
+            return _serviceProvider.GetRequiredService<IUnidentifiedVisitProcessor>();
         } // end method
     } // end class
 } // end namespace

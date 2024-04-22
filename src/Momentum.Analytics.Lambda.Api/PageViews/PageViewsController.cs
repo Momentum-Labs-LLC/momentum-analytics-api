@@ -18,7 +18,7 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
         protected readonly IPageViewService _pageViewService;
         protected readonly ICookieWriter _cookieWriter;
         protected readonly IClockService _clockService;
-        protected readonly IVisitExpirationProvider _visitExpirationProvider;
+        protected readonly IVisitWindowCalculator _visitWindowCalculator;
         protected readonly IHttpContextAccessor _httpContextAccessor;
         protected readonly ILogger _logger;
 
@@ -26,13 +26,13 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
             IPageViewService pageViewService, 
             ICookieWriter cookieWriter, 
             IClockService clockService,
-            IVisitExpirationProvider visitExpirationProvider,
+            IVisitWindowCalculator visitWindowCalculator,
             ILogger<PageViewsController> logger)
         {
             _pageViewService = pageViewService ?? throw new ArgumentNullException(nameof(pageViewService));
             _cookieWriter = cookieWriter ?? throw new ArgumentNullException(nameof(cookieWriter));
             _clockService = clockService ?? throw new ArgumentNullException(nameof(clockService));
-            _visitExpirationProvider = visitExpirationProvider ?? throw new ArgumentNullException(nameof(visitExpirationProvider));
+            _visitWindowCalculator = visitWindowCalculator ?? throw new ArgumentNullException(nameof(visitWindowCalculator));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
@@ -110,7 +110,7 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
             CancellationToken token = default)
         {
             var now = _clockService.Now;
-            var visitExpiration = await _visitExpirationProvider.GetExpirationAsync(now, token).ConfigureAwait(false);
+            var visitExpiration = await _visitWindowCalculator.GetExpirationAsync(now, token).ConfigureAwait(false);
             var cookie = cookieValue.ToCookieModel(visitExpiration);
             
             var domainModel = viewModel.ToDomain(cookie, now);

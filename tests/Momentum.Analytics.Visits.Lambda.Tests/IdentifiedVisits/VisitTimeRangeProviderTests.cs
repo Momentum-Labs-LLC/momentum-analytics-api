@@ -3,9 +3,10 @@ using Momentum.Analytics.Core;
 using Momentum.Analytics.Core.Extensions;
 using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Visits.Interfaces;
+using Momentum.Analytics.Visits.Lambda.IdentifiedVisits;
 using Moq;
 
-namespace Momentum.Analytics.Visits.Lambda.Tests
+namespace Momentum.Analytics.Visits.Lambda.Tests.IdentifiedVisits
 {
     public class VisitTimeRangeProviderTests
     {

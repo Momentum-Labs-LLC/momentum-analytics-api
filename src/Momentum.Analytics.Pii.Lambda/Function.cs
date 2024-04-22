@@ -12,6 +12,7 @@ using Momentum.Analytics.Core.PII.Interfaces;
 using Momentum.Analytics.Core;
 using Momentum.Analytics.Core.Visits;
 using Momentum.Analytics.DynamoDb.Visits;
+using Momentum.Analytics.Processing.Cookies;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -34,9 +35,10 @@ namespace Momentum.Analytics.Pii.Lambda
                 .AddLogging()
                 .AddSingleton<IConfiguration>(config)
                 .AddNodaTime()
-                .AddVisitExpirationProvider()
+                .AddVisitWindowCalculator()
                 .AddDynamoDbPiiService()
                 .AddDynamoDbVisitService()
+                .AddSharedCookieConfiguration()
                 .AddTransient<IDynamoDbCollectedPiiProcessor, DynamoDbCollectedPiiProcessor>()
                 .BuildServiceProvider();
 

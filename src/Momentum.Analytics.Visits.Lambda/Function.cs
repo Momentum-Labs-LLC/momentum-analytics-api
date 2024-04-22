@@ -3,10 +3,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core;
 using Momentum.Analytics.Core.Visits;
+using Momentum.Analytics.DynamoDb.Pii;
 using Momentum.Analytics.DynamoDb.Visits;
+using Momentum.Analytics.Processing.Cookies;
 using Momentum.Analytics.Processing.DynamoDb.Visits;
 using Momentum.Analytics.Processing.DynamoDb.Visits.Interfaces;
+using Momentum.Analytics.Processing.Visits;
 using Momentum.Analytics.Processing.Visits.Interfaces;
+using Momentum.Analytics.Visits.Lambda.IdentifiedVisits;
+using Momentum.Analytics.Visits.Lambda.IdentifiedVisits.Interfaces;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: Amazon.Lambda.Core.LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -35,14 +40,10 @@ namespace Momentum.Analytics.Visits.Lambda
                 .AddSingleton<IConfiguration>(configuration)
                 .AddNodaTime()
                 .AddSingleton<IIdentifiedVisitTimeRangeProvider, IdentifiedVisitTimeRangeProvider>()
-                .AddDynamoDbVisitService()
-                .AddSingleton<IS3ClientFactory, S3ClientFactory>()
-                .AddSingleton<IS3OutputConfiguration, S3OutputConfiguration>()
-                .AddSingleton<IColumnNameConfiguration, ColumnNameConfiguration>()
-                .AddSingleton<IdentifiedVisitMap>((serviceProvider) => new IdentifiedVisitMap(serviceProvider.GetRequiredService<IColumnNameConfiguration>()))
-                .AddTransient<IIdentifiedVisitWriter, S3IdentifiedVisitWriter>()
-                .AddTransient<IDynamoDbIdentifiedVisitProcessor, DynamoDbIdentifiedVisitProcessor>();
+                .AddIdentifiedVisitProcessor()
+                .AddUnidentifiedVisitProcessor()
                 ;
+
             _serviceProvider = services.BuildServiceProvider();    
             _logger = _serviceProvider.GetRequiredService<ILogger<Function>>();
         } // end method
@@ -62,9 +63,12 @@ namespace Momentum.Analytics.Visits.Lambda
         public async Task FunctionHandlerAsync(Stream input)
         {
             var timeRangeProvider = _serviceProvider.GetRequiredService<IIdentifiedVisitTimeRangeProvider>();
-            var visitProcessor = _serviceProvider.GetRequiredService<IDynamoDbIdentifiedVisitProcessor>();
 
-            await visitProcessor.ReportAsync(timeRangeProvider.TimeRange).ConfigureAwait(false);
+            var unidentifiedVisitProcessor = _serviceProvider.GetRequiredService<IUnidentifiedVisitProcessor>();
+            await unidentifiedVisitProcessor.ProcessAsync(timeRangeProvider.TimeRange).ConfigureAwait(false);
+
+            var identifiedVisitProcessor = _serviceProvider.GetRequiredService<IIdentifiedVisitProcessor>();
+            await identifiedVisitProcessor.ReportAsync(timeRangeProvider.TimeRange).ConfigureAwait(false);
         } // end method
     } // end class
 } // end namespace

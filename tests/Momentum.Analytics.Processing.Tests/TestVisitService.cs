@@ -14,7 +14,7 @@ namespace Momentum.Analytics.Processing.Tests
         ITestVisitService
     {
         public TestVisitService(
-                IVisitExpirationProvider visitExpirationProvider,
+                IVisitWindowCalculator visitExpirationProvider,
                 ITestVisitStorage visitStorage, 
                 IMemoryCache memoryCache, 
                 ILogger<TestVisitService> logger) 

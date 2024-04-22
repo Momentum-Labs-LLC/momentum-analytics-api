@@ -2,9 +2,10 @@ using Microsoft.Extensions.Configuration;
 using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
+using Momentum.Analytics.Visits.Lambda.IdentifiedVisits.Interfaces;
 using NodaTime;
 
-namespace Momentum.Analytics.Visits.Lambda
+namespace Momentum.Analytics.Visits.Lambda.IdentifiedVisits
 {
     public class IdentifiedVisitTimeRangeProvider : IIdentifiedVisitTimeRangeProvider
     {

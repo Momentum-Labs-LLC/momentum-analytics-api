@@ -6,7 +6,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
 {
     public class VisitTableConfiguration : TableConfigurationBase, IVisitTableConfiguration
     {
-        public string VisitExpirationIndex { get; protected set; }
+        public string VisitStartIndex { get; protected set; }
 
         public string IdentifiedIndex { get; protected set; }
 
@@ -19,10 +19,10 @@ namespace Momentum.Analytics.DynamoDb.Visits
                 throw new ArgumentNullException(VisitConstants.TABLE_NAME);
             } // end if
 
-            VisitExpirationIndex = configuration.GetValue<string>(VisitConstants.EXPIRATION_INDEX, VisitConstants.EXPIRATION_INDEX_DEFAULT);
-            if(string.IsNullOrWhiteSpace(VisitExpirationIndex))
+            VisitStartIndex = configuration.GetValue<string>(VisitConstants.START_INDEX, VisitConstants.START_INDEX_DEFAULT);
+            if(string.IsNullOrWhiteSpace(VisitStartIndex))
             {
-                throw new ArgumentNullException(VisitConstants.EXPIRATION_INDEX);
+                throw new ArgumentNullException(VisitConstants.START_INDEX);
             } // end if
 
             IdentifiedIndex = configuration.GetValue<string>(VisitConstants.IDENTIFIED_INDEX, VisitConstants.IDENTIFIED_INDEX_DEFAULT);

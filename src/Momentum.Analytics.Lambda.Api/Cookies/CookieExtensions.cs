@@ -23,7 +23,8 @@ namespace Momentum.Analytics.Lambda.Api.Cookies
                     $"{CookieConstants.COOKIE_ID}{CookieConstants.COOKIE_VALUE_DELIMITER}{cookie.Id}", 
                     $"{CookieConstants.VISIT_EXPIRATION}{CookieConstants.COOKIE_VALUE_DELIMITER}{cookie.VisitExpiration.ToUnixTimeMilliseconds()}", 
                     $"{CookieConstants.MAX_FUNNEL_STEP}{CookieConstants.COOKIE_VALUE_DELIMITER}{cookie.MaxFunnelStep}", 
-                    $"{CookieConstants.PII_BITMAP}{CookieConstants.COOKIE_VALUE_DELIMITER}{(int)cookie.CollectedPii}"
+                    $"{CookieConstants.PII_BITMAP}{CookieConstants.COOKIE_VALUE_DELIMITER}{(int)cookie.CollectedPii}",
+                    $"{CookieConstants.USER_ID}{CookieConstants.COOKIE_VALUE_DELIMITER}{cookie.UserId}"
                 ]);
         } // end method
 
@@ -42,7 +43,8 @@ namespace Momentum.Analytics.Lambda.Api.Cookies
                     Id = Guid.Parse(cookieDict[CookieConstants.COOKIE_ID]),
                     VisitExpiration = visitExpiration,
                     CollectedPii = (PiiTypeEnum)cookieDict.ReadInteger(CookieConstants.PII_BITMAP),
-                    MaxFunnelStep = cookieDict.ReadInteger(CookieConstants.MAX_FUNNEL_STEP)
+                    MaxFunnelStep = cookieDict.ReadInteger(CookieConstants.MAX_FUNNEL_STEP),
+                    UserId = cookieDict.ReadString(CookieConstants.USER_ID)
                 };
             }
             else
@@ -64,6 +66,19 @@ namespace Momentum.Analytics.Lambda.Api.Cookies
             int result = defaultValue;
             if(int.TryParse(dictionary.GetValueOrDefault(key), out int tmpValue)
                 && tmpValue != defaultValue)
+            {
+                result = tmpValue;
+            } // end if
+
+            return result;
+        } // end method
+
+        public static string? ReadString(this Dictionary<String, string> dictionary, string key, string? defaultValue = null)
+        {
+            var result = defaultValue;
+
+            if(dictionary.TryGetValue(key, out string tmpValue)
+                && !string.IsNullOrWhiteSpace(tmpValue))
             {
                 result = tmpValue;
             } // end if

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core.Interfaces;
 using Momentum.Analytics.Core.Models;
@@ -10,7 +6,6 @@ using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.Visits;
 using Momentum.Analytics.Processing.Visits.Interfaces;
 using Moq;
-using Xunit.Sdk;
 
 namespace Momentum.Analytics.Processing.Tests.Visits
 {

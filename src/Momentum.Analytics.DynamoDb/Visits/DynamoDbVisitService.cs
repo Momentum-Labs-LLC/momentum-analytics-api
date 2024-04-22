@@ -15,11 +15,11 @@ namespace Momentum.Analytics.DynamoDb.Visits
         IDynamoDbVisitService
     {
         public DynamoDbVisitService(
-                IVisitExpirationProvider visitExpirationProvider,
+                IVisitWindowCalculator visitWindowCalculator,
                 IDynamoDbVisitStorage visitStorage, 
                 IMemoryCache memoryCache, 
                 ILogger<DynamoDbVisitService> logger) 
-            : base(visitExpirationProvider, visitStorage, memoryCache, logger)
+            : base(visitWindowCalculator, visitStorage, memoryCache, logger)
         {
         } // end method
     } // end class

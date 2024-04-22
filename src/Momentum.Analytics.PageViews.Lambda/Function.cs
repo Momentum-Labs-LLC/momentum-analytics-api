@@ -37,7 +37,7 @@ namespace Momentum.Analytics.PageViews.Lambda
                     })
                 .AddSingleton<IConfiguration>(config)
                 .AddNodaTime()
-                .AddVisitExpirationProvider()
+                .AddVisitWindowCalculator()
                 .AddDynamoDbPageViewProcessor()
                 .BuildServiceProvider();
 

@@ -1,4 +1,4 @@
-namespace Momentum.Analytics.Visits.Lambda
+namespace Momentum.Analytics.Visits.Lambda.IdentifiedVisits.Interfaces
 {
     public interface IColumnNameConfiguration
     {
@@ -9,5 +9,7 @@ namespace Momentum.Analytics.Visits.Lambda
         string ReferrerColumn { get; }
         string SourceColumn { get; }
         string MediumColumn { get; }
+        bool WriteCookieId { get; }
+        string CookieIdColumn { get; }
     } // end interface
 } // end namespace

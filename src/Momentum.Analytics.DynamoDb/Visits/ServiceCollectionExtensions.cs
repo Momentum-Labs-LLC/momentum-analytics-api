@@ -11,7 +11,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
         {
             return services
                 .AddDynamoDbClientFactory()
-                .AddVisitExpirationProvider()
+                .AddVisitWindowCalculator()
                 .AddSingleton<IVisitTableConfiguration, VisitTableConfiguration>()
                 .AddTransient<IDynamoDbVisitStorage, VisitStorage>()
                 .AddTransient<IDynamoDbVisitService, DynamoDbVisitService>();

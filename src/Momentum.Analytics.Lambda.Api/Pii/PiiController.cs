@@ -17,20 +17,20 @@ namespace Momentum.Analytics.Lambda.Api.Pii
         protected readonly IPiiService _piiService;
         protected readonly ICookieWriter _cookieWriter;
         protected readonly IClockService _clockService;
-        protected readonly IVisitExpirationProvider _visitExpirationProvider;
+        protected readonly IVisitWindowCalculator _visitWindowCalculator;
         protected readonly ILogger _logger;
 
         public PiiController(
             IPiiService piiService, 
             ICookieWriter cookieWriter,
             IClockService clockService,
-            IVisitExpirationProvider visitExpirationProvider,
+            IVisitWindowCalculator visitWindowCalculator,
             ILogger<PiiController> logger)
         {
             _piiService = piiService ?? throw new ArgumentNullException(nameof(piiService));
             _cookieWriter = cookieWriter ?? throw new ArgumentNullException(nameof(cookieWriter));
             _clockService = clockService ?? throw new ArgumentNullException(nameof(clockService));
-            _visitExpirationProvider = visitExpirationProvider ?? throw new ArgumentNullException(nameof(visitExpirationProvider));
+            _visitWindowCalculator = visitWindowCalculator ?? throw new ArgumentNullException(nameof(visitWindowCalculator));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
@@ -125,7 +125,7 @@ namespace Momentum.Analytics.Lambda.Api.Pii
             IActionResult result = NotFound();
 
             var now = _clockService.Now;
-            var visitExpiration = await _visitExpirationProvider.GetExpirationAsync(now, token).ConfigureAwait(false);
+            var visitExpiration = await _visitWindowCalculator.GetExpirationAsync(now, token).ConfigureAwait(false);
             var cookie = cookieValue.ToCookieModel(visitExpiration);
             if(cookieId.HasValue)
             {
@@ -147,7 +147,7 @@ namespace Momentum.Analytics.Lambda.Api.Pii
             CancellationToken token = default)
         {
             var now = _clockService.Now;
-            var visitExpiration = await _visitExpirationProvider.GetExpirationAsync(now, token).ConfigureAwait(false);
+            var visitExpiration = await _visitWindowCalculator.GetExpirationAsync(now, token).ConfigureAwait(false);
             var cookie = cookieValue.ToCookieModel(visitExpiration);
 
             var collectedPii = new CollectedPii()
@@ -166,6 +166,16 @@ namespace Momentum.Analytics.Lambda.Api.Pii
             if(!cookie.CollectedPii.HasFlag(piiViewModel.Type))
             {
                 cookie.CollectedPii = cookie.CollectedPii | piiViewModel.Type;
+            } // end if
+
+            if(piiViewModel.Type == PiiTypeEnum.UserId // the pii is a user id
+                && !string.IsNullOrWhiteSpace(piiViewModel.Value) // there is actually a value
+                // that value is different than any value in the current cookie
+                && (string.IsNullOrWhiteSpace(cookie.UserId) || !cookie.UserId.Equals(piiViewModel.Value)))
+            {
+                cookie.UserId = piiViewModel.Value; // reset the user id
+                cookie.MaxFunnelStep = 0; // reset the max funnel step (like a new visit)
+                cookie.CollectedPii = PiiTypeEnum.UserId; // reset the collected pii (like a new visit)
             } // end if
 
             await _cookieWriter.SetCookieAsync(cookie, token).ConfigureAwait(false);

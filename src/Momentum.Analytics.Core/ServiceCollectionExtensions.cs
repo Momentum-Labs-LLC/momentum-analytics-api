@@ -19,6 +19,6 @@ namespace Momentum.Analytics.Core
                 .AddSingleton<IDateTimeZoneProvider, NodaTime.TimeZones.DateTimeZoneCache>()
                 .AddSingleton<IClock>(NodaTime.SystemClock.Instance)
                 .AddSingleton<IClockService, ClockService>();
-        } // end methoid
+        } // end method
     } // end class
 } // end namespace

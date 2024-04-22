@@ -11,8 +11,8 @@ namespace Momentum.Analytics.DynamoDb.Visits
         public const string TABLE_NAME = "VISIT_TABLE";
         public const string TABLE_NAME_DEFAULT = "momentum-prd-visits";
 
-        public const string EXPIRATION_INDEX = "VISIT_EXPIRATION_INDEX";
-        public const string EXPIRATION_INDEX_DEFAULT = "VisitExpirationIndex";
+        public const string START_INDEX = "VISIT_START_INDEX";
+        public const string START_INDEX_DEFAULT = "VisitStartIndex";
 
         public const string IDENTIFIED_INDEX = "IDENTIFIED_INDEX";
         public const string IDENTIFIED_INDEX_DEFAULT = "IdentifiedIndex";

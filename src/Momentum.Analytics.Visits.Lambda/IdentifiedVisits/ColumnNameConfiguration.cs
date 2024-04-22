@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
+using Momentum.Analytics.Visits.Lambda.IdentifiedVisits.Interfaces;
 
-namespace Momentum.Analytics.Visits.Lambda
+namespace Momentum.Analytics.Visits.Lambda.IdentifiedVisits
 {
     public class ColumnNameConfiguration : IColumnNameConfiguration
     {
@@ -17,6 +18,8 @@ namespace Momentum.Analytics.Visits.Lambda
         public string SourceColumn { get; protected set; }
 
         public string MediumColumn { get; protected set; }
+        public bool WriteCookieId { get; protected set; }
+        public string CookieIdColumn { get; protected set; }
 
         public const string PII_COLUMN = "PII_COLUMN";
         public const string PII_COLUMN_DEFAULT = "Pii";
@@ -32,6 +35,10 @@ namespace Momentum.Analytics.Visits.Lambda
         public const string SOURCE_COLUMN_DEFAULT = "Source";
         public const string MEDIUM_COLUMN = "MEDIUM";
         public const string MEDIUM_COLUMN_DEFAULT = "Medium";
+        public const string WRITE_COOKIE_ID = "WRITE_COOKIE_ID";
+        public const bool WRITE_COOKIE_ID_DEFAULT = false;
+        public const string COOKIE_ID_COLUMN = "COOKIE_ID";
+        public const string COOKIE_ID_COLUMN_DEFAULT = "CookieId";
 
         public ColumnNameConfiguration(IConfiguration configuration)
         {
@@ -42,6 +49,8 @@ namespace Momentum.Analytics.Visits.Lambda
             ReferrerColumn = configuration.GetValue<string>(REFERRER_COLUMN, REFERRER_COLUMN_DEFAULT);
             SourceColumn = configuration.GetValue<string>(SOURCE_COLUMN, SOURCE_COLUMN_DEFAULT);
             MediumColumn = configuration.GetValue<string>(MEDIUM_COLUMN, MEDIUM_COLUMN_DEFAULT);
+            WriteCookieId = configuration.GetValue<bool>(WRITE_COOKIE_ID, WRITE_COOKIE_ID_DEFAULT);
+            CookieIdColumn = configuration.GetValue<string>(COOKIE_ID_COLUMN, COOKIE_ID_COLUMN_DEFAULT);
         } // end method
     } // end class
 } // end namespace

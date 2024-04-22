@@ -6,6 +6,7 @@ using Momentum.Analytics.Core.PII.Interfaces;
 using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
+using Momentum.Analytics.Processing.Cookies;
 using Momentum.Analytics.Processing.PageViews;
 using Moq;
 using NodaTime;
@@ -15,18 +16,18 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
     public class PageViewProcessorTests
     {
         private IClockService _clockService;
-        private Mock<IPiiService> _piiService;
         private Mock<ITestVisitService> _visitService;
+        private Mock<ISharedCookieConfiguration> _sharedCookieConfiguration;
         private Mock<ILogger<TestPageViewProcessor>> _logger;
         private TestPageViewProcessor _processor;
 
         public PageViewProcessorTests()
         {
             _clockService = new ClockService();
-            _piiService = new Mock<IPiiService>();
             _visitService = new Mock<ITestVisitService>();
+            _sharedCookieConfiguration = new Mock<ISharedCookieConfiguration>();
             _logger = new Mock<ILogger<TestPageViewProcessor>>();
-            _processor = new TestPageViewProcessor(_piiService.Object, _visitService.Object, _clockService, _logger.Object);
+            _processor = new TestPageViewProcessor(_visitService.Object, _sharedCookieConfiguration.Object, _clockService, _logger.Object);
         } // end method
 
         protected PageView BuildPageView(string? path = null, string? referrer = null, int funnelStep = 0)
@@ -58,12 +59,8 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     UtcExpiration = pageView.UtcTimestamp.Plus(Duration.FromDays(1))
                 });
 
-            _piiService.Setup(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PiiValue>());
-
             await _processor.ProcessAsync(pageView).ConfigureAwait(false);
 
-            _piiService.Verify(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Never);
         } // end method
@@ -79,11 +76,6 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     PiiType = PiiTypeEnum.UserId,
                     Value = "12345"
                 };
-            _piiService.Setup(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PiiValue>() 
-                {
-                    userId
-                });
 
             _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Visit)null);
@@ -93,7 +85,6 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
 
             await _processor.ProcessAsync(pageView).ConfigureAwait(false);
 
-            _piiService.Verify(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);
         } // end method
@@ -109,11 +100,6 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     PiiType = PiiTypeEnum.UserId,
                     Value = "12345"
                 };
-            _piiService.Setup(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PiiValue>() 
-                {
-                    userId
-                });
 
             _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new Visit()
@@ -129,7 +115,6 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
             await _processor.ProcessAsync(pageView).ConfigureAwait(false);
             
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
-            _piiService.Verify(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()), Times.Never);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);            
         } // end method
 
@@ -144,11 +129,6 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     PiiType = PiiTypeEnum.UserId,
                     Value = "12345"
                 };
-            _piiService.Setup(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PiiValue>() 
-                {
-                    userId
-                });
 
             _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new Visit()
@@ -162,7 +142,6 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
 
             await _processor.ProcessAsync(pageView).ConfigureAwait(false);
 
-            _piiService.Verify(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()), Times.Never);
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);
         } // end method
@@ -186,12 +165,8 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     UtcIdentifiedTimestamp = pageView.UtcTimestamp.Minus(Duration.FromMinutes(1))
                 });
 
-            _piiService.Setup(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<PiiValue>());
-
             await _processor.ProcessAsync(pageView).ConfigureAwait(false);
 
-            _piiService.Verify(x => x.GetByCookieIdAsync(pageView.CookieId, It.IsAny<CancellationToken>()), Times.Never);
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Never);
         } // end method

@@ -17,11 +17,11 @@ namespace Momentum.Analytics.DynamoDb.Pii
             return services
                 .AddDynamoDbClientFactory()
                 .AddSingleton<ICollectedPiiTableConfiguration, CollectedPiiTableConfiguration>()
-                .AddTransient<ICollectedPiiStorage, CollectedPiiStorage>()
+                .AddTransient<IDynamoDbCollectedPiiStorage, CollectedPiiStorage>()
                 .AddSingleton<IPiiValueTableConfiguration, PiiValueTableConfiguration>()
                 .AddTransient<IPiiValueStorage, PiiValueStorage>()
                 .AddTransient<IEmailHasher, EmailHasher>()
-                .AddTransient<IPiiService, PiiService>();
+                .AddTransient<IPiiService, DynamoDbPiiService>();
         } // end method
     } // end class
 } // end namespace

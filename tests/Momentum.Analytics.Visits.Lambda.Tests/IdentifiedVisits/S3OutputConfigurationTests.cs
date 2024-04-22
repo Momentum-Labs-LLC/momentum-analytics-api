@@ -2,11 +2,12 @@ using Microsoft.Extensions.Configuration;
 using Momentum.Analytics.Core.Extensions;
 using Momentum.Analytics.Core.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
+using Momentum.Analytics.Visits.Lambda.IdentifiedVisits;
 using Moq;
 using NodaTime;
 using NodaTime.Extensions;
 
-namespace Momentum.Analytics.Visits.Lambda.Tests
+namespace Momentum.Analytics.Visits.Lambda.Tests.IdentifiedVisits
 {
     public class S3OutputConfigurationTests
     {

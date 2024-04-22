@@ -6,10 +6,10 @@ namespace Momentum.Analytics.Core.Visits
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddVisitExpirationProvider(this IServiceCollection services)
+        public static IServiceCollection AddVisitWindowCalculator(this IServiceCollection services)
         {
             return services.AddSingleton<IVisitConfiguration, VisitConfiguration>()
-                    .AddTransient<IVisitExpirationProvider, VisitExpirationProvider>();
+                    .AddTransient<IVisitWindowCalculator, VisitWindowCalculator>();
         } // end method
     } // end class
 } // end namespace

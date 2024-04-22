@@ -13,16 +13,16 @@ namespace Momentum.Analytics.Core.Tests.Visits
     public class VisitExpirationProviderTests
     {
         private Mock<IVisitConfiguration> _visitConfiguration;
-        private Mock<ILogger<VisitExpirationProvider>> _logger;
+        private Mock<ILogger<VisitWindowCalculator>> _logger;
 
-        private VisitExpirationProvider _expirationProvider;
+        private VisitWindowCalculator _expirationProvider;
 
         public VisitExpirationProviderTests()
         {
             _visitConfiguration = new Mock<IVisitConfiguration>();
-            _logger = new Mock<ILogger<VisitExpirationProvider>>();
+            _logger = new Mock<ILogger<VisitWindowCalculator>>();
 
-            _expirationProvider = new VisitExpirationProvider(
+            _expirationProvider = new VisitWindowCalculator(
                 _visitConfiguration.Object,
                 _logger.Object);
         } // end method
