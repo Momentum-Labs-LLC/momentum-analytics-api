@@ -27,7 +27,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
                 .AddField(VisitConstants.IS_IDENTIFIED, visit.UtcIdentifiedTimestamp.HasValue)
                 .AddField(VisitConstants.UTC_IDENTIFIED_TIMESTAMP, visit.UtcIdentifiedTimestamp)
                 .AddField(VisitConstants.UTC_IDENTIFIED_HOUR, visit.UtcIdentifiedTimestamp.HasValue ? 
-                                EpochInstant : visit.UtcIdentifiedTimestamp.Value.TrimToHour());
+                                visit.UtcIdentifiedTimestamp.Value.TrimToHour() : EpochInstant);
         } // end method
 
         public static Visit ToVisit(this Dictionary<string, AttributeValue> fields)
