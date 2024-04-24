@@ -82,7 +82,6 @@ namespace Momentum.Analytics.DynamoDb.Pii
             if(queryResult != null)
             {
                 result.NextPage = queryResult.LastEvaluatedKey;
-                result.HasMore = queryResult.LastEvaluatedKey != null;
 
                 if(queryResult.Items != null && queryResult.Items.Any())
                 {

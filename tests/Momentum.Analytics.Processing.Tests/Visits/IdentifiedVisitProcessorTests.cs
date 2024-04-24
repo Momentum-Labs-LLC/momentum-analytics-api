@@ -71,7 +71,6 @@ namespace Momentum.Analytics.Processing.Tests.Visits
                 .ReturnsAsync(new SearchResponse<Visit>()
                 {
                     NextPage = 2,
-                    HasMore = true,
                     Data = new List<Visit>()
                     {
                         new Visit(),
@@ -80,7 +79,6 @@ namespace Momentum.Analytics.Processing.Tests.Visits
                 })
                 .ReturnsAsync(new SearchResponse<Visit>()
                 {
-                    HasMore = false,
                     Data = new List<Visit>()
                     {
                         new Visit(),

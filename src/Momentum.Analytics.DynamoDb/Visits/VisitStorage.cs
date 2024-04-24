@@ -52,7 +52,6 @@ namespace Momentum.Analytics.DynamoDb.Visits
             if(response.Items != null && response.Items.Any())
             {
                 result.Data = response.Items.Select(x => x.ToVisit());
-                result.HasMore = response.LastEvaluatedKey != null && response.LastEvaluatedKey.Any();
                 result.NextPage = response.LastEvaluatedKey;
             } // end if
 
@@ -119,7 +118,6 @@ namespace Momentum.Analytics.DynamoDb.Visits
             if(response.Items != null && response.Items.Any())
             {
                 result.Data = response.Items.Select(x => x.ToVisit());
-                result.HasMore = response.LastEvaluatedKey != null && response.LastEvaluatedKey.Any();
                 result.NextPage = response.LastEvaluatedKey;
             } // end if
 
@@ -162,7 +160,6 @@ namespace Momentum.Analytics.DynamoDb.Visits
             if(response.Items != null && response.Items.Any())
             {
                 result.Data = response.Items.Select(x => x.ToVisit());
-                result.HasMore = response.LastEvaluatedKey != null && response.LastEvaluatedKey.Any();
                 result.NextPage = response.LastEvaluatedKey;
             } // end if
 

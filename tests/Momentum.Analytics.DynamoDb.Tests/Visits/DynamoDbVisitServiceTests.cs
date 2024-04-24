@@ -47,7 +47,6 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
             _visitStorage.SetupSequence(x => x.GetIdentifiedAsync(It.IsAny<Instant>(), It.IsAny<Dictionary<string, AttributeValue>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new DynamoSearchResponse<Visit>()
                 {
-                    HasMore = false,
                     NextPage = null,
                     Data = new List<Visit>()
                     {
@@ -61,7 +60,6 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
                 })
                 .ReturnsAsync(new DynamoSearchResponse<Visit>()
                 {
-                    HasMore = false,
                     NextPage = null,
                     Data = new List<Visit>()
                     {
@@ -90,7 +88,6 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
             _visitStorage.SetupSequence(x => x.GetUnidentifiedAsync(It.IsAny<Instant>(), It.IsAny<Dictionary<string, AttributeValue>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new DynamoSearchResponse<Visit>()
                 {
-                    HasMore = false,
                     NextPage = null,
                     Data = new List<Visit>()
                     {
@@ -104,7 +101,6 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
                 })
                 .ReturnsAsync(new DynamoSearchResponse<Visit>()
                 {
-                    HasMore = false,
                     NextPage = null,
                     Data = new List<Visit>()
                     {

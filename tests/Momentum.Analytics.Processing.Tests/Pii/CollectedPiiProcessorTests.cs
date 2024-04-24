@@ -107,7 +107,7 @@ namespace Momentum.Analytics.Processing.Tests.Pii
                 .ReturnsAsync(new List<CollectedPii>());
 
             _visitService.Setup(x => x.GetUnidentifiedAsync(collectedPii.CookieId, collectedPii.UtcTimestamp, It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new SearchResponse<Visit>() { Total = 0, HasMore = false, Data = null });            
+                .ReturnsAsync(new SearchResponse<Visit>() { Total = 0, Data = null });            
 
             await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
             
@@ -134,7 +134,7 @@ namespace Momentum.Analytics.Processing.Tests.Pii
                 .Returns(Task.CompletedTask);
 
             _visitService.Setup(x => x.GetUnidentifiedAsync(collectedPii.CookieId, collectedPii.UtcTimestamp, It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new SearchResponse<Visit>() { Total = 0, HasMore = false, Data = null });            
+                .ReturnsAsync(new SearchResponse<Visit>() { Total = 0, Data = null });            
 
             await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
             
@@ -163,14 +163,11 @@ namespace Momentum.Analytics.Processing.Tests.Pii
             _visitService.SetupSequence(x => x.GetUnidentifiedAsync(collectedPii.CookieId, collectedPii.UtcTimestamp, It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new SearchResponse<Visit>() 
                 { 
-                    Total = 2, 
-                    HasMore = true, 
-                    Data = new List<Visit>() { activeVisit } 
+                    Data = new List<Visit>() { activeVisit },
+                    NextPage = 2
                 })
                 .ReturnsAsync(new SearchResponse<Visit>() 
                 { 
-                    Total = 2,
-                    HasMore = false, 
                     Data = new List<Visit>() { BuildVisit(collectedPii.CookieId, now.Minus(Duration.FromDays(2))) } 
                 });
 
@@ -199,7 +196,7 @@ namespace Momentum.Analytics.Processing.Tests.Pii
                 .Returns(Task.CompletedTask);
 
             _visitService.Setup(x => x.GetUnidentifiedAsync(collectedPii.CookieId, collectedPii.UtcTimestamp, It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new SearchResponse<Visit>() { Total = 0, HasMore = false, Data = null });            
+                .ReturnsAsync(new SearchResponse<Visit>() { Total = 0, Data = null });            
 
             await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
             

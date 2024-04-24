@@ -91,6 +91,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
             if(identifiedVisits.Any())
             {
                 result.Data = identifiedVisits;
+                result.NextPage = null;
             } // end if
 
             return result;

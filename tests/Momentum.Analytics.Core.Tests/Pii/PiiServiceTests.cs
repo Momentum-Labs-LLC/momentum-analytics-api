@@ -42,8 +42,7 @@ namespace Momentum.Analytics.Core.Tests.Pii
                     CookieId = cookieId,
                     UtcTimestamp = DateTime.UtcNow.ToInstant().Minus(Duration.FromMinutes(x)),
                 }),
-                NextPage = nextPage,
-                HasMore = nextPage > 0
+                NextPage = nextPage
             };
 
             return response;

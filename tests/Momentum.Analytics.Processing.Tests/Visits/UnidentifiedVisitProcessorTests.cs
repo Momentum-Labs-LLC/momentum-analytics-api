@@ -155,7 +155,7 @@ namespace Momentum.Analytics.Processing.Tests.Visits
         {
 
             _visitService.SetupSequence(x => x.GetUnidentifiedAsync(It.IsAny<ITimeRange>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new SearchResponse<Visit>() { Total = 1, Data = BuildUnidentifiedVisits(1), HasMore = true, NextPage = 2 })
+                .ReturnsAsync(new SearchResponse<Visit>() { Total = 1, Data = BuildUnidentifiedVisits(1), NextPage = 2 })
                 .ReturnsAsync(new SearchResponse<Visit>() { Total = 1, Data = BuildUnidentifiedVisits(1) });
             _piiService.Setup(x => x.GetUniqueUserIdsAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<CollectedPii>()
