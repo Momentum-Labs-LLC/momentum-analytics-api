@@ -46,7 +46,6 @@ namespace Momentum.Analytics.Core.PII
                 do
                 {
                     TPage nextPage = default;
-                    _logger.LogDebug("Getting {0} latest userIds for {1}.", maximum, cookieId);
                     searchResponse = await _collectedPiiStorage
                             .GetLatestUserIdsAsync(cookieId, maximum, nextPage, token)
                             .ConfigureAwait(false);
@@ -77,11 +76,16 @@ namespace Momentum.Analytics.Core.PII
                 } while(searchResponse != default && searchResponse.HasMore && result.Count < maximum);
             } // end if
 
-            foreach(var collectedPii in result)
+            if(result.Any())
             {
-                var piiValue = await _piiValueStorage.GetByIdAsync(collectedPii.PiiId.Value, token).ConfigureAwait(false);
-                collectedPii.Pii = piiValue;
-            } // end foreach    
+                _logger.LogDebug("Found {0} user ids for cookie {1}.", result.Count(), cookieId);
+
+                foreach(var collectedPii in result)
+                {
+                    var piiValue = await _piiValueStorage.GetByIdAsync(collectedPii.PiiId.Value, token).ConfigureAwait(false);
+                    collectedPii.Pii = piiValue;
+                } // end foreach
+            } // end if            
 
             return result;
         } // end method

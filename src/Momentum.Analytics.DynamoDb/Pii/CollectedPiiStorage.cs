@@ -73,7 +73,8 @@ namespace Momentum.Analytics.DynamoDb.Pii
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
                     .AddField(":cookie_id", cookieId)
                     .AddField(":pii_type_id", (int)PiiTypeEnum.UserId),
-                ScanIndexForward = false // reverse order on timestamp
+                ScanIndexForward = false, // reverse order on timestamp
+                Limit = size
             };
 
             var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
