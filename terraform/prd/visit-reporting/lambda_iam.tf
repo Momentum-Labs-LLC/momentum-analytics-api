@@ -39,6 +39,10 @@ resource "aws_iam_role_policy" "this-lambda-dynamo" {
         Resource = [
           data.aws_dynamodb_table.this-visits.arn,
           "${data.aws_dynamodb_table.this-visits.arn}/*",
+          data.aws_dynamodb_table.this-collected-pii.arn,
+          "${data.aws_dynamodb_table.this-collected-pii.arn}/*",
+          data.aws_dynamodb_table.this-pii.arn,
+          "${data.aws_dynamodb_table.this-pii.arn}/*",
         ]
       }
     ]

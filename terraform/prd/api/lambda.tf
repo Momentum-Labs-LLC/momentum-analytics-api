@@ -8,7 +8,7 @@ resource "aws_lambda_function" "this-api-0" {
 
   timeout                        = local.timeout
   memory_size                    = local.memory_size
-  reserved_concurrent_executions = local.max_concurrency
+  #reserved_concurrent_executions = local.max_concurrency #intentionally no reserved concurrency
 
   # vpc_config {
   #   security_group_ids = [aws_security_group.this-local-0.id, aws_security_group.this-self-0.id]
