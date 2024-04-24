@@ -45,8 +45,9 @@ namespace Momentum.Analytics.DynamoDb.Visits
                             && x.UtcIdentifiedTimestamp <= timeRange.UtcEnd);
                     if(visitsWithinTimeRange.Any())
                     {
+                        _logger.LogDebug("Adding {0} identified visits.", visitsWithinTimeRange.Count());
                         identifiedVisits.AddRange(visitsWithinTimeRange);
-                    } // end if                    
+                    } // end if
                 } // end if
 
                 current = current.Plus(Duration.FromHours(1));
@@ -66,12 +67,12 @@ namespace Momentum.Analytics.DynamoDb.Visits
             CancellationToken token = default)
         {
             var result = new DynamoSearchResponse<Visit>();
-            var identifiedVisits = new List<Visit>();
+            var unidentifiedVisits = new List<Visit>();
 
             Instant current = timeRange.UtcStart; // TODO: Truncate to hour utc
             do
             {
-                var hour = current.TrimToHour();
+                var hour = current.TrimToHour();                
                 var hoursIdentifiedVisits = await GetHourUnidentifiedAsync(hour, token).ConfigureAwait(false);
 
                 if(hoursIdentifiedVisits != null && hoursIdentifiedVisits.Any())
@@ -81,16 +82,17 @@ namespace Momentum.Analytics.DynamoDb.Visits
                             && x.UtcIdentifiedTimestamp <= timeRange.UtcEnd);
                     if(visitsWithinTimeRange.Any())
                     {
-                        identifiedVisits.AddRange(visitsWithinTimeRange);
+                        _logger.LogDebug("Adding {0} unidentified visits.", visitsWithinTimeRange.Count());
+                        unidentifiedVisits.AddRange(visitsWithinTimeRange);
                     } // end if                    
                 } // end if
 
                 current = current.Plus(Duration.FromHours(1));
             } while(current < timeRange.UtcEnd);
 
-            if(identifiedVisits.Any())
+            if(unidentifiedVisits.Any())
             {
-                result.Data = identifiedVisits;
+                result.Data = unidentifiedVisits;
                 result.NextPage = null;
             } // end if
 
@@ -103,23 +105,23 @@ namespace Momentum.Analytics.DynamoDb.Visits
         {
             var result = new List<Visit>();
 
+            int pageCounter = 0;
             Dictionary<string, AttributeValue> nextPage = null;
+            IDynamoSearchResponse<Visit> searchResponse;
             do
             {
-                var searchResponse = await _visitStorage.GetIdentifiedAsync(hour, nextPage, token).ConfigureAwait(false);
-                if(searchResponse != null)
+                pageCounter++;
+                _logger.LogDebug("Retrieving identified visits for hour {0} - page {1}", hour.InUtc().ToString("yyyy-MM-dd HH:mm:ss", null), pageCounter);
+                searchResponse = await _visitStorage.GetIdentifiedAsync(hour, nextPage, token).ConfigureAwait(false);
+
+                if(searchResponse.Data != null && searchResponse.Data.Any())
                 {
-                    nextPage = searchResponse.NextPage;
-                    if(searchResponse.Data != null && searchResponse.Data.Any())
-                    {
-                        result.AddRange(searchResponse.Data);
-                    } // end if
-                }
-                else
-                {
-                    nextPage = null;
+                    _logger.LogDebug("{0} identified visits found in hour {1}", searchResponse.Data.Count(), hour.InUtc().ToString("yyyy-MM-dd HH:mm:ss", null));
+                    result.AddRange(searchResponse.Data);
                 } // end if
-            } while(nextPage != null);
+
+                nextPage = searchResponse.NextPage;
+            } while(searchResponse.HasMore);
 
             return result;
         } // end method
@@ -130,23 +132,22 @@ namespace Momentum.Analytics.DynamoDb.Visits
         {
             var result = new List<Visit>();
 
+            var pageCounter = 0;
             Dictionary<string, AttributeValue> nextPage = null;
+            IDynamoSearchResponse<Visit> searchResponse;
             do
             {
-                var searchResponse = await _visitStorage.GetUnidentifiedAsync(hour, nextPage, token).ConfigureAwait(false);
-                if(searchResponse != null)
+                pageCounter++;
+                _logger.LogDebug("Retrieving unidentified visits for hour {0} - page {1}", hour.InUtc().ToString("yyyy-MM-dd HH:mm:ss", null), pageCounter);
+                searchResponse = await _visitStorage.GetUnidentifiedAsync(hour, nextPage, token).ConfigureAwait(false);
+                if(searchResponse.Data != null && searchResponse.Data.Any())
                 {
-                    nextPage = searchResponse.NextPage;
-                    if(searchResponse.Data != null && searchResponse.Data.Any())
-                    {
-                        result.AddRange(searchResponse.Data);
-                    } // end if
-                }
-                else
-                {
-                    nextPage = null;
+                    _logger.LogDebug("{0} unidentified visits found in hour {1}", searchResponse.Data.Count(), hour.InUtc().ToString("yyyy-MM-dd HH:mm:ss", null));
+                    result.AddRange(searchResponse.Data);
                 } // end if
-            } while(nextPage != null);
+
+                nextPage = searchResponse.NextPage;
+            } while(searchResponse.HasMore);
 
             return result;
         } // end method

@@ -64,10 +64,15 @@ namespace Momentum.Analytics.Visits.Lambda
         {
             var timeRangeProvider = _serviceProvider.GetRequiredService<IIdentifiedVisitTimeRangeProvider>();
 
+            
             var unidentifiedVisitProcessor = _serviceProvider.GetRequiredService<IUnidentifiedVisitProcessor>();
+
+            _logger.LogDebug("Starting unidentified visits.");
             await unidentifiedVisitProcessor.ProcessAsync(timeRangeProvider.TimeRange).ConfigureAwait(false);
 
             var identifiedVisitProcessor = _serviceProvider.GetRequiredService<IIdentifiedVisitProcessor>();
+
+            _logger.LogDebug("Starting identified visits.");
             await identifiedVisitProcessor.ReportAsync(timeRangeProvider.TimeRange).ConfigureAwait(false);
         } // end method
     } // end class

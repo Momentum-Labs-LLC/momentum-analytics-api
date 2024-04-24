@@ -1,17 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core.Interfaces;
-using Momentum.Analytics.Core.Models;
 using Momentum.Analytics.Core.PII.Interfaces;
 using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.Cookies;
 using Momentum.Analytics.Processing.Visits.Interfaces;
-using NodaTime;
 
 namespace Momentum.Analytics.Processing.Visits
 {
@@ -43,6 +37,7 @@ namespace Momentum.Analytics.Processing.Visits
             TPage nextPage = default;
             do 
             {
+                _logger.LogDebug("Retrieving unidentified visits for time range.");
                 searchResponse = await _visitService.GetUnidentifiedAsync(timeRange, nextPage, token).ConfigureAwait(false);
 
                 if(searchResponse != null)
@@ -60,24 +55,31 @@ namespace Momentum.Analytics.Processing.Visits
                 } // end if                
             } while(searchResponse != null && searchResponse.HasMore);
 
-            var parallelOptions = new ParallelOptions()
-            {
-                CancellationToken = token,
-                MaxDegreeOfParallelism = 10
-            };
+            _logger.LogDebug("{0} unidentified vists for timerange.", unidentifiedVisits.Count());
 
-            await Parallel.ForEachAsync(unidentifiedVisits, parallelOptions,
-                        async (visit, token) => await ProcessVisitAsync(visit, token).ConfigureAwait(false));
+            if(unidentifiedVisits.Any())
+            {
+                var parallelOptions = new ParallelOptions()
+                {
+                    CancellationToken = token,
+                    MaxDegreeOfParallelism = 10
+                };
+
+                await Parallel.ForEachAsync(unidentifiedVisits, parallelOptions,
+                            async (visit, token) => await ProcessVisitAsync(visit, token).ConfigureAwait(false));
+            } // end if            
         } // end method
 
         protected virtual async Task ProcessVisitAsync(Visit visit, CancellationToken token = default)
         {
             var uniqueUserIds = await _piiService.GetUniqueUserIdsAsync(visit.CookieId, _sharedCookieConfiguration.Threshold, token).ConfigureAwait(false);
-
+            
             if(uniqueUserIds != null 
                 && uniqueUserIds.Any()
                 && uniqueUserIds.Count() < _sharedCookieConfiguration.Threshold) 
             {
+
+                _logger.LogDebug("{0} unique user ids found for unidentified visit cookie.", uniqueUserIds.Count());
                 var identifiedVisits = uniqueUserIds.Select(x => new Visit()
                 {
                     Id = Guid.NewGuid(),

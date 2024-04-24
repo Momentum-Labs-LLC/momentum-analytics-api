@@ -46,6 +46,7 @@ namespace Momentum.Analytics.Core.PII
                 do
                 {
                     TPage nextPage = default;
+                    _logger.LogDebug("Getting {0} latest userIds for {1}.", maximum, cookieId);
                     searchResponse = await _collectedPiiStorage
                             .GetLatestUserIdsAsync(cookieId, maximum, nextPage, token)
                             .ConfigureAwait(false);
