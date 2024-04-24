@@ -22,37 +22,17 @@ namespace Momentum.Analytics.DynamoDb.Visits
         {
         } // end method
 
-        public virtual async Task DeleteAsync(Guid id, CancellationToken token = default)
-        {
-            var request = new DeleteItemRequest()
-            {
-                TableName = _tableConfiguration.TableName,
-                Key = new Dictionary<string, AttributeValue>()
-                        .AddField(VisitConstants.ID, id)
-            };
-
-            var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
-            var response = await client.DeleteItemAsync(request, token).ConfigureAwait(false);
-        } // end method
-
-        public virtual async Task<Visit?> GetAsync(Guid id, CancellationToken token = default)
-        {
-            var request = new GetItemRequest()
-            {
-                TableName = _tableConfiguration.TableName,
-                Key = new Dictionary<string, AttributeValue>()
-                        .AddField(VisitConstants.ID, id)
-            };
-
-            var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
-            var response = await client.GetItemAsync(request, token).ConfigureAwait(false);
-
-            return response.Item?.ToVisit();
-        } // end method
-
         public virtual async Task<IDynamoSearchResponse<Visit>> GetIdentifiedAsync(
             ITimeRange timeRange, 
             Dictionary<string, AttributeValue> page, 
+            CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        } // end method
+
+        public virtual async Task<IDynamoSearchResponse<Visit>> GetIdentifiedAsync(
+            Instant hour,
+            Dictionary<string, AttributeValue> page,
             CancellationToken token = default)
         {
             var result = new DynamoSearchResponse<Visit>();
@@ -61,10 +41,9 @@ namespace Momentum.Analytics.DynamoDb.Visits
                 TableName = _tableConfiguration.TableName,
                 IndexName = _tableConfiguration.IdentifiedIndex,
                 ExclusiveStartKey = page,
-                KeyConditionExpression = $"{VisitConstants.UTC_IDENTIFIED_TIMESTAMP} BETWEEN :start and :end",
+                KeyConditionExpression = $"{VisitConstants.UTC_IDENTIFIED_HOUR} = :hour",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
-                    .AddField(":start", timeRange.UtcStart)
-                    .AddField(":end", timeRange.UtcEnd)
+                    .AddField(":hour", hour)
             };
 
             var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
@@ -86,11 +65,11 @@ namespace Momentum.Analytics.DynamoDb.Visits
             var queryRequest = new QueryRequest()
             {
                 TableName = _tableConfiguration.TableName,
-                IndexName = _tableConfiguration.VisitStartIndex,
-                KeyConditionExpression = $"{VisitConstants.UTC_START} <= :activity and {VisitConstants.COOKIE_ID} = :cookie_id",
+                IndexName = _tableConfiguration.CookieIndex,
+                KeyConditionExpression = $"{VisitConstants.COOKIE_ID} = :cookie_id and {VisitConstants.UTC_START} <= :activity",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
-                    .AddField(":activity", timestamp)
-                    .AddField(":cookie_id", cookieId),
+                    .AddField(":cookie_id", cookieId)
+                    .AddField(":activity", timestamp),
                 ScanIndexForward = false, // order in descending time
                 Limit = 1
             };
@@ -111,31 +90,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
             Dictionary<string, AttributeValue> page, 
             CancellationToken token = default)
         {
-            var result = new DynamoSearchResponse<Visit>();
-            var queryRequest = new QueryRequest()
-            {
-                TableName = _tableConfiguration.TableName,
-                IndexName = _tableConfiguration.VisitStartIndex,
-                ExclusiveStartKey = page,
-                KeyConditionExpression = $"{VisitConstants.UTC_START} BETWEEN :start and :end",
-                FilterExpression = $"{VisitConstants.IS_IDENTIFIED} = :no",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
-                    .AddField(":start", timeRange.UtcStart)
-                    .AddField(":end", timeRange.UtcEnd)
-                    .AddField(":no", false)
-            };
-
-            var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
-            var response = await client.QueryAsync(queryRequest, token).ConfigureAwait(false);
-
-            if(response.Items != null && response.Items.Any())
-            {
-                result.Data = response.Items.Select(x => x.ToVisit());
-                result.HasMore = response.LastEvaluatedKey != null && response.LastEvaluatedKey.Any();
-                result.NextPage = response.LastEvaluatedKey;
-            } // end if
-
-            return result;
+            throw new NotImplementedException();
         } // end method
 
         public virtual async Task<IDynamoSearchResponse<Visit>> GetUnidentifiedAsync(
@@ -148,9 +103,9 @@ namespace Momentum.Analytics.DynamoDb.Visits
             var queryRequest = new QueryRequest()
             {
                 TableName = _tableConfiguration.TableName,
-                IndexName = _tableConfiguration.VisitStartIndex,
+                IndexName = _tableConfiguration.CookieIndex,
                 ExclusiveStartKey = page,
-                KeyConditionExpression = $"{VisitConstants.UTC_START} < :now and {VisitConstants.COOKIE_ID} = :cookie_id",
+                KeyConditionExpression = $"{VisitConstants.COOKIE_ID} = :cookie_id and {VisitConstants.UTC_START} < :now",
                 FilterExpression = $"{VisitConstants.IS_IDENTIFIED} = :no",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
                     .AddField(":now", timestamp)
@@ -181,6 +136,37 @@ namespace Momentum.Analytics.DynamoDb.Visits
 
             var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
             await client.PutItemAsync(request, token).ConfigureAwait(false);
+        } // end method
+
+        public virtual async Task<IDynamoSearchResponse<Visit>> GetUnidentifiedAsync(
+            Instant hour, 
+            Dictionary<string, AttributeValue> page, 
+            CancellationToken token = default)
+        {
+            var result = new DynamoSearchResponse<Visit>();
+            var queryRequest = new QueryRequest()
+            {
+                TableName = _tableConfiguration.TableName,
+                IndexName = _tableConfiguration.VisitStartIndex,
+                ExclusiveStartKey = page,
+                KeyConditionExpression = $"{VisitConstants.UTC_START_HOUR} = :hour",
+                FilterExpression = $"{VisitConstants.IS_IDENTIFIED} = :no",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                    .AddField(":hour", hour)                    
+                    .AddField(":no", false)
+            };
+
+            var client = await _clientFactory.GetAsync(token).ConfigureAwait(false);
+            var response = await client.QueryAsync(queryRequest, token).ConfigureAwait(false);
+
+            if(response.Items != null && response.Items.Any())
+            {
+                result.Data = response.Items.Select(x => x.ToVisit());
+                result.HasMore = response.LastEvaluatedKey != null && response.LastEvaluatedKey.Any();
+                result.NextPage = response.LastEvaluatedKey;
+            } // end if
+
+            return result;
         } // end method
     } // end class
 } // end namespace

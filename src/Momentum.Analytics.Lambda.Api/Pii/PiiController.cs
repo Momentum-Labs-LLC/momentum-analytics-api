@@ -115,31 +115,6 @@ namespace Momentum.Analytics.Lambda.Api.Pii
 
             return result;
         } // end method
-
-        [HttpGet]
-        public async Task<IActionResult> GetByCookieAsync(
-            [FromCookie(Name = CookieConstants.NAME)] string? cookieValue = null,
-            [FromQuery(Name = "cookieId")] Guid? cookieId = null,
-            CancellationToken token = default)
-        {
-            IActionResult result = NotFound();
-
-            var now = _clockService.Now;
-            var visitExpiration = await _visitWindowCalculator.GetExpirationAsync(now, token).ConfigureAwait(false);
-            var cookie = cookieValue.ToCookieModel(visitExpiration);
-            if(cookieId.HasValue)
-            {
-                cookie.Id = cookieId.Value;
-            }
-
-            var cookiePiis = await _piiService.GetByCookieIdAsync(cookie.Id, token).ConfigureAwait(false);
-            if(cookiePiis != null && cookiePiis.Any())
-            {
-                result = Ok(cookiePiis);
-            } // end if
-
-            return result;
-        } // end method
     
         protected async Task AcceptPiiAsync(
             PiiViewModel piiViewModel, 

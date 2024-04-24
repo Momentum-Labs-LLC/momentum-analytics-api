@@ -7,7 +7,7 @@ using Momentum.Analytics.Processing.Visits.Interfaces;
 namespace Momentum.Analytics.Processing.Visits
 {
     public abstract class IdentifiedVisitProcessor<TPage, TSearchResponse, TVisitService> : IIdentifiedVisitProcessor
-        where TSearchResponse : ISearchResponse<Visit, TPage>
+        where TSearchResponse : class, ISearchResponse<Visit, TPage>
         where TVisitService : IVisitService<TPage, TSearchResponse>
     {
         protected readonly TVisitService _visitService;
@@ -27,7 +27,7 @@ namespace Momentum.Analytics.Processing.Visits
         public async Task ReportAsync(ITimeRange timeRange, CancellationToken token = default)
         {
             var identifiedVisits = new List<Visit>();
-            TSearchResponse searchResponse = default(TSearchResponse);
+            TSearchResponse searchResponse = default;
             var nextPage = default(TPage);
             do 
             {
@@ -39,7 +39,7 @@ namespace Momentum.Analytics.Processing.Visits
                 {
                     identifiedVisits.AddRange(searchResponse.Data);
                 } // end if
-            } while(searchResponse.HasMore);
+            } while(searchResponse != null && searchResponse.HasMore);
 
             if(identifiedVisits.Any())
             {

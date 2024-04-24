@@ -20,20 +20,40 @@
             "AttributeType": "N"
         },
         {
-            "AttributeName": "UtcIdentifiedTimestamp",
+            "AttributeName": "UtcExpiredHour",
+            "AttributeType": "N"
+        },
+        {
+            "AttributeName": "UtcIdentifiedHour",
             "AttributeType": "N"
         }
     ],
     "GlobalSecondaryIndexes": [
         {
-            "IndexName": "VisitStartIndex",
+            "IndexName": "CookieIndex",
             "KeySchema": [
                 {
-                    "AttributeName": "UtcStart",
+                    "AttributeName": "CookieId",
                     "KeyType": "HASH"
                 },
                 {
-                    "AttributeName": "CookieId",
+                    "AttributeName": "UtcStart",
+                    "KeyType": "RANGE"
+                }
+            ],
+            "Projection": {
+                "ProjectionType": "ALL"
+            }
+        },
+        {
+            "IndexName": "VisitStartIndex",
+            "KeySchema": [
+                {
+                    "AttributeName": "UtcStartHour",
+                    "KeyType": "HASH"
+                },
+                {
+                    "AttributeName": "Id",
                     "KeyType": "RANGE"
                 }
             ],
@@ -45,11 +65,11 @@
             "IndexName": "IdentifiedIndex",
             "KeySchema": [
                 {
-                    "AttributeName": "UtcIdentifiedTimestamp",
+                    "AttributeName": "UtcIdentifiedHour",
                     "KeyType": "HASH"
                 },
                 {
-                    "AttributeName": "CookieId",
+                    "AttributeName": "Id",
                     "KeyType": "RANGE"
                 }
             ],

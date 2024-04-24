@@ -26,28 +26,6 @@ namespace Momentum.Analytics.Core.PII
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
-
-        public async Task<IEnumerable<PiiValue>> GetByCookieIdAsync(Guid cookieId, CancellationToken token = default)
-        {
-            var result = new List<PiiValue>();
-            var collectedPiis = await _collectedPiiStorage.GetByCookieIdAsync(cookieId, token).ConfigureAwait(false);
-
-            if(collectedPiis != null && collectedPiis.Any())
-            {
-                foreach(var collectedPii in collectedPiis)
-                {
-                    var piiValue = await _piiValueStorage.GetByIdAsync(collectedPii.PiiId.Value, token).ConfigureAwait(false);
-
-                    if(piiValue != null)
-                    {
-                        result.Add(piiValue);
-                    } // end if
-                } // end foreach
-            } // end if
-
-            return result;
-        } // end method
-
         public async Task<PiiValue?> GetPiiAsync(Guid id, CancellationToken token = default)
         {
             return await _piiValueStorage.GetByIdAsync(id, token).ConfigureAwait(false);
@@ -67,23 +45,34 @@ namespace Momentum.Analytics.Core.PII
                 TCollectedPiiSearchResponse searchResponse = default;
                 do
                 {
+                    TPage nextPage = default;
                     searchResponse = await _collectedPiiStorage
-                            .GetLatestUserIdsAsync(cookieId, maximum, searchResponse.NextPage, token)
+                            .GetLatestUserIdsAsync(cookieId, maximum, nextPage, token)
                             .ConfigureAwait(false);
                     
-                    if(searchResponse != null && searchResponse.Data != null && searchResponse.Data.Any())
+                    if(searchResponse != null)
                     {
-                        var uniqueUserIdsInPage = searchResponse.Data.GroupBy(x => x.PiiId)
-                            // get the latest collected version of the pii
-                            .Select(x => x.OrderByDescending(x => x.UtcTimestamp).First())
-                            .ToList();
-
-                        var newUniqueIds = uniqueUserIdsInPage.Where(newId => result.Any(knownId => knownId.PiiId.Equals(newId.PiiId)));
-                        if(newUniqueIds.Any())
+                        nextPage = searchResponse.NextPage;
+                        if(searchResponse.Data != null && searchResponse.Data.Any())
                         {
-                            result.AddRange(newUniqueIds);
+                            var uniqueUserIdsInPage = searchResponse.Data.GroupBy(x => x.PiiId)
+                                // get the latest collected version of the pii
+                                .Select(x => x.OrderByDescending(x => x.UtcTimestamp).First())
+                                .ToList();
+
+                            var newUniqueIds = uniqueUserIdsInPage
+                                .Where(newId => !result.Any(knownId => knownId.PiiId.Equals(newId.PiiId)))
+                                .Take(maximum - result.Count());
+                            if(newUniqueIds.Any())
+                            {
+                                result.AddRange(newUniqueIds);
+                            } // end if
                         } // end if
-                    } // end if
+                    }
+                    else
+                    {
+                        nextPage = default;
+                    }
                 } while(searchResponse != default && searchResponse.HasMore && result.Count < maximum);
             } // end if
 

@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core.Interfaces;
+using Momentum.Analytics.Core.Models;
 using Momentum.Analytics.Core.PII.Interfaces;
 using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Processing.Cookies;
 using Momentum.Analytics.Processing.Visits.Interfaces;
+using NodaTime;
 
 namespace Momentum.Analytics.Processing.Visits
 {
@@ -36,20 +38,36 @@ namespace Momentum.Analytics.Processing.Visits
 
         public virtual async Task ProcessAsync(ITimeRange timeRange, CancellationToken token = default)
         {
+            var unidentifiedVisits = new List<Visit>();
             TSearchResponse searchResponse = default;
-            var nextPage = default(TPage);
-            do
+            TPage nextPage = default;
+            do 
             {
                 searchResponse = await _visitService.GetUnidentifiedAsync(timeRange, nextPage, token).ConfigureAwait(false);
 
-                nextPage = searchResponse.NextPage;
-
-                if(searchResponse != null && searchResponse.Data != null && searchResponse.Data.Any())
+                if(searchResponse != null)
                 {
-                    await Parallel.ForEachAsync(searchResponse.Data, 
+                    nextPage = searchResponse.NextPage;
+                    
+                    if(searchResponse.Data != null && searchResponse.Data.Any())
+                    {
+                        unidentifiedVisits.AddRange(searchResponse.Data);
+                    } // end if
+                }
+                else
+                {
+                    nextPage = default;
+                } // end if                
+            } while(searchResponse != null && searchResponse.HasMore);
+
+            var parallelOptions = new ParallelOptions()
+            {
+                CancellationToken = token,
+                MaxDegreeOfParallelism = 10
+            };
+
+            await Parallel.ForEachAsync(unidentifiedVisits, parallelOptions,
                         async (visit, token) => await ProcessVisitAsync(visit, token).ConfigureAwait(false));
-                } // end if
-            } while(searchResponse != default && searchResponse.HasMore);
         } // end method
 
         protected virtual async Task ProcessVisitAsync(Visit visit, CancellationToken token = default)

@@ -10,6 +10,8 @@ namespace Momentum.Analytics.DynamoDb.Visits
 
         public string IdentifiedIndex { get; protected set; }
 
+        public string CookieIndex { get; protected set;}
+
         public VisitTableConfiguration(IConfiguration configuration)
         {
             TableName = configuration.GetValue<string>(VisitConstants.TABLE_NAME, VisitConstants.TABLE_NAME_DEFAULT);
@@ -29,6 +31,12 @@ namespace Momentum.Analytics.DynamoDb.Visits
             if(string.IsNullOrWhiteSpace(IdentifiedIndex))
             {
                 throw new ArgumentNullException(VisitConstants.IDENTIFIED_INDEX);
+            } // end if
+
+            CookieIndex = configuration.GetValue<string>(VisitConstants.COOKIE_INDEX, VisitConstants.COOKIE_INDEX_DEFAULT);
+            if(string.IsNullOrWhiteSpace(CookieIndex))
+            {
+                throw new ArgumentNullException(VisitConstants.COOKIE_INDEX);
             } // end if
         } // end method
     } // end class
