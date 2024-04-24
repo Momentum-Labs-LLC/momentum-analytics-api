@@ -1,4 +1,3 @@
-using Amazon.Lambda.Core;
 using Amazon.Lambda.DynamoDBEvents;
 using Amazon.DynamoDBv2.Model;
 using Momentum.Analytics.Core.PII.Models;
@@ -15,7 +14,7 @@ using Momentum.Analytics.DynamoDb.Visits;
 using Momentum.Analytics.Processing.Cookies;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
-[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
+[assembly: Amazon.Lambda.Core.LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
 namespace Momentum.Analytics.Pii.Lambda
 {
@@ -32,7 +31,13 @@ namespace Momentum.Analytics.Pii.Lambda
             IServiceCollection services = new ServiceCollection();
             _serviceProvider = services
                 .AddMemoryCache()
-                .AddLogging()
+                .AddLogging(config => 
+                    {
+                        config.AddFilter("Microsoft", LogLevel.Warning);
+                        config.AddFilter("System", LogLevel.Warning);
+                        config.SetMinimumLevel(LogLevel.Debug);
+                        config.AddLambdaLogger();
+                    })
                 .AddSingleton<IConfiguration>(config)
                 .AddNodaTime()
                 .AddVisitWindowCalculator()

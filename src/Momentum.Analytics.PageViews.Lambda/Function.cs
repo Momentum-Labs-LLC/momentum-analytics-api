@@ -34,6 +34,7 @@ namespace Momentum.Analytics.PageViews.Lambda
                         config.AddFilter("Microsoft", LogLevel.Warning);
                         config.AddFilter("System", LogLevel.Warning);
                         config.SetMinimumLevel(LogLevel.Debug);
+                        config.AddLambdaLogger();
                     })
                 .AddSingleton<IConfiguration>(config)
                 .AddNodaTime()

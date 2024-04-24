@@ -2,13 +2,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core;
-using Momentum.Analytics.Core.Visits;
-using Momentum.Analytics.DynamoDb.Pii;
-using Momentum.Analytics.DynamoDb.Visits;
-using Momentum.Analytics.Processing.Cookies;
-using Momentum.Analytics.Processing.DynamoDb.Visits;
-using Momentum.Analytics.Processing.DynamoDb.Visits.Interfaces;
-using Momentum.Analytics.Processing.Visits;
 using Momentum.Analytics.Processing.Visits.Interfaces;
 using Momentum.Analytics.Visits.Lambda.IdentifiedVisits;
 using Momentum.Analytics.Visits.Lambda.IdentifiedVisits.Interfaces;
@@ -35,6 +28,7 @@ namespace Momentum.Analytics.Visits.Lambda
                         config.AddFilter("Microsoft", LogLevel.Warning);
                         config.AddFilter("System", LogLevel.Warning);
                         config.SetMinimumLevel(LogLevel.Debug);
+                        config.AddLambdaLogger();
                     })
                 .AddMemoryCache()
                 .AddSingleton<IConfiguration>(configuration)
