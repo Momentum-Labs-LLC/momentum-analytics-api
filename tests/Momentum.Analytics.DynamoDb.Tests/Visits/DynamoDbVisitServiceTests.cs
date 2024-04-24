@@ -95,7 +95,7 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
                         {
                             Id = Guid.NewGuid(),
                             CookieId = Guid.NewGuid(),
-                            UtcIdentifiedTimestamp = DateTime.UtcNow.ToInstant().Minus(Duration.FromMinutes(90))
+                            UtcStart = DateTime.UtcNow.ToInstant().Minus(Duration.FromMinutes(90))
                         }
                     }
                 })

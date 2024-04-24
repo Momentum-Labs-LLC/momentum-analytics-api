@@ -78,8 +78,8 @@ namespace Momentum.Analytics.DynamoDb.Visits
                 if(hoursIdentifiedVisits != null && hoursIdentifiedVisits.Any())
                 {
                     var visitsWithinTimeRange = hoursIdentifiedVisits.Where(x => 
-                            x.UtcIdentifiedTimestamp >= timeRange.UtcStart
-                            && x.UtcIdentifiedTimestamp <= timeRange.UtcEnd);
+                            x.UtcStart >= timeRange.UtcStart
+                            && x.UtcStart <= timeRange.UtcEnd);
                     if(visitsWithinTimeRange.Any())
                     {
                         _logger.LogDebug("Adding {0} unidentified visits.", visitsWithinTimeRange.Count());
