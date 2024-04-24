@@ -1,17 +1,22 @@
 using Amazon.DynamoDBv2.Model;
+using Momentum.Analytics.Core.Extensions;
 using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits.Models;
+using NodaTime;
+using NodaTime.Extensions;
 
 namespace Momentum.Analytics.DynamoDb.Visits
 {
     public static class VisitExtensions
     {
+        public static Instant EpochInstant = DateTime.UnixEpoch.ToInstant().TrimToHour();
         public static Dictionary<string, AttributeValue> ToDynamoDb(this Visit visit)
         {
             return new Dictionary<string, AttributeValue>()
                 .AddField(VisitConstants.ID, visit.Id)
                 .AddField(VisitConstants.COOKIE_ID, visit.CookieId)
                 .AddField(VisitConstants.UTC_START, visit.UtcStart)
+                .AddField(VisitConstants.UTC_START_HOUR, visit.UtcStart.TrimToHour())
                 .AddField(VisitConstants.UTC_EXPIRATION, visit.UtcExpiration)
                 .AddField(VisitConstants.FUNNEL_STEP, visit.FunnelStep)
                 .AddField(VisitConstants.REFERER, visit.Referer)
@@ -20,7 +25,9 @@ namespace Momentum.Analytics.DynamoDb.Visits
                 .AddField(VisitConstants.PII_VALUE, visit.PiiValue)
                 .AddField(VisitConstants.PII_TYPE, (int?)visit.PiiType)
                 .AddField(VisitConstants.IS_IDENTIFIED, visit.UtcIdentifiedTimestamp.HasValue)
-                .AddField(VisitConstants.UTC_IDENTIFIED_TIMESTAMP, visit.UtcIdentifiedTimestamp);
+                .AddField(VisitConstants.UTC_IDENTIFIED_TIMESTAMP, visit.UtcIdentifiedTimestamp)
+                .AddField(VisitConstants.UTC_IDENTIFIED_HOUR, visit.UtcIdentifiedTimestamp.HasValue ? 
+                                EpochInstant : visit.UtcIdentifiedTimestamp.Value.TrimToHour());
         } // end method
 
         public static Visit ToVisit(this Dictionary<string, AttributeValue> fields)

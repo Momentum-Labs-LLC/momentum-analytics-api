@@ -20,7 +20,7 @@
             "AttributeType": "N"
         },
         {
-            "AttributeName": "UtcExpiredHour",
+            "AttributeName": "UtcStartHour",
             "AttributeType": "N"
         },
         {
