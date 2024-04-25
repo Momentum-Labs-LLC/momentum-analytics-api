@@ -92,17 +92,17 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
             return result;
         } // end method
 
-        [HttpPost("/builder")]
-        public async Task<IActionResult> BuildPixelAsync(
-            [FromBody] PageViewViewModel pageView,
-            CancellationToken token = default)
-        {
-            var json = JsonSerializer.Serialize(pageView);
+        // [HttpPost("/builder")]
+        // public async Task<IActionResult> BuildPixelAsync(
+        //     [FromBody] PageViewViewModel pageView,
+        //     CancellationToken token = default)
+        // {
+        //     var json = JsonSerializer.Serialize(pageView);
 
-            var base64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+        //     var base64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
 
-            return Ok(base64String);
-        } // end method
+        //     return Ok(base64String);
+        // } // end method
 
         protected async Task AcceptPageViewAsync(
             PageViewViewModel viewModel, 

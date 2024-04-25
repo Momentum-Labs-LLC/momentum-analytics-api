@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Momentum.Analytics.Core.Interfaces;
@@ -88,33 +87,33 @@ namespace Momentum.Analytics.Lambda.Api.Pii
             return result;
         } // end method
 
-        [HttpPost("builder")]
-        public async Task<IActionResult> BuildPixelAsync(
-            [FromBody] PiiViewModel piiViewModel,
-            CancellationToken token = default)
-        {
-             var json = JsonSerializer.Serialize(piiViewModel);
+        // [HttpPost("builder")]
+        // public async Task<IActionResult> BuildPixelAsync(
+        //     [FromBody] PiiViewModel piiViewModel,
+        //     CancellationToken token = default)
+        // {
+        //      var json = JsonSerializer.Serialize(piiViewModel);
 
-            var base64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+        //     var base64String = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
 
-            return Ok(base64String);
-        } // end method
+        //     return Ok(base64String);
+        // } // end method
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetAsync(
-            [FromRoute] Guid id,
-            CancellationToken token = default)
-        {
-            IActionResult result = NotFound();
+        // [HttpGet("{id}")]
+        // public async Task<IActionResult> GetAsync(
+        //     [FromRoute] Guid id,
+        //     CancellationToken token = default)
+        // {
+        //     IActionResult result = NotFound();
 
-            var pii = await _piiService.GetPiiAsync(id, token).ConfigureAwait(false);
-            if(pii != null)
-            {
-                result = Ok(pii);
-            } // end if
+        //     var pii = await _piiService.GetPiiAsync(id, token).ConfigureAwait(false);
+        //     if(pii != null)
+        //     {
+        //         result = Ok(pii);
+        //     } // end if
 
-            return result;
-        } // end method
+        //     return result;
+        // } // end method
     
         protected async Task AcceptPiiAsync(
             PiiViewModel piiViewModel, 
