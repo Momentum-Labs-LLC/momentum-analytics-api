@@ -6,8 +6,8 @@ resource "aws_lambda_function" "this-api-0" {
 
   role = aws_iam_role.this-lambda-role.arn
 
-  timeout                        = local.timeout
-  memory_size                    = local.memory_size
+  timeout     = local.timeout
+  memory_size = local.memory_size
   #reserved_concurrent_executions = local.max_concurrency #intentionally no reserved concurrency
 
   # vpc_config {
