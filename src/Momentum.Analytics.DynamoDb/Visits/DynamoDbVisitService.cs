@@ -32,11 +32,10 @@ namespace Momentum.Analytics.DynamoDb.Visits
             var result = new DynamoSearchResponse<Visit>();
             var identifiedVisits = new List<Visit>();
 
-            Instant current = timeRange.UtcStart; // TODO: Truncate to hour utc
+            var currentHour = timeRange.UtcStart.TrimToHour();
             do
             {
-                var hour = current.TrimToHour();
-                var hoursIdentifiedVisits = await GetHourIdentifiedAsync(hour, token).ConfigureAwait(false);
+                var hoursIdentifiedVisits = await GetHourIdentifiedAsync(currentHour, token).ConfigureAwait(false);
 
                 if(hoursIdentifiedVisits != null && hoursIdentifiedVisits.Any())
                 {
@@ -50,8 +49,8 @@ namespace Momentum.Analytics.DynamoDb.Visits
                     } // end if
                 } // end if
 
-                current = current.Plus(Duration.FromHours(1));
-            } while(current < timeRange.UtcEnd);
+                currentHour = currentHour.Plus(Duration.FromHours(1));
+            } while(currentHour < timeRange.UtcEnd);
 
             if(identifiedVisits.Any())
             {
@@ -69,11 +68,10 @@ namespace Momentum.Analytics.DynamoDb.Visits
             var result = new DynamoSearchResponse<Visit>();
             var unidentifiedVisits = new List<Visit>();
 
-            Instant current = timeRange.UtcStart; // TODO: Truncate to hour utc
+            var currentHour = timeRange.UtcStart.TrimToHour(); // TODO: Truncate to hour utc
             do
             {
-                var hour = current.TrimToHour();                
-                var hoursIdentifiedVisits = await GetHourUnidentifiedAsync(hour, token).ConfigureAwait(false);
+                var hoursIdentifiedVisits = await GetHourUnidentifiedAsync(currentHour, token).ConfigureAwait(false);
 
                 if(hoursIdentifiedVisits != null && hoursIdentifiedVisits.Any())
                 {
@@ -87,8 +85,8 @@ namespace Momentum.Analytics.DynamoDb.Visits
                     } // end if                    
                 } // end if
 
-                current = current.Plus(Duration.FromHours(1));
-            } while(current < timeRange.UtcEnd);
+                currentHour = currentHour.Plus(Duration.FromHours(1));
+            } while(currentHour < timeRange.UtcEnd);
 
             if(unidentifiedVisits.Any())
             {

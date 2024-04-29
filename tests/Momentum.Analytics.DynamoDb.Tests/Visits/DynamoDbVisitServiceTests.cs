@@ -65,6 +65,14 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
                     {
                         
                     }
+                })
+                .ReturnsAsync(new DynamoSearchResponse<Visit>()
+                {
+                    NextPage = null,
+                    Data = new List<Visit>()
+                    {
+                        
+                    }
                 });
 
             var now = DateTime.UtcNow.ToInstant();
@@ -79,7 +87,7 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
             Assert.NotEmpty(visits.Data);
             Assert.Equal(1, visits.Data.Count());
 
-            _visitStorage.Verify(x => x.GetIdentifiedAsync(It.IsAny<Instant>(), It.IsAny<Dictionary<string, AttributeValue>>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+            _visitStorage.Verify(x => x.GetIdentifiedAsync(It.IsAny<Instant>(), It.IsAny<Dictionary<string, AttributeValue>>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
         } // end method
 
         [Fact]
@@ -106,6 +114,14 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
                     {
                         
                     }
+                })
+                .ReturnsAsync(new DynamoSearchResponse<Visit>()
+                {
+                    NextPage = null,
+                    Data = new List<Visit>()
+                    {
+                        
+                    }
                 });
 
             var now = DateTime.UtcNow.ToInstant();
@@ -120,7 +136,7 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
             Assert.NotEmpty(visits.Data);
             Assert.Equal(1, visits.Data.Count());
 
-            _visitStorage.Verify(x => x.GetUnidentifiedAsync(It.IsAny<Instant>(), It.IsAny<Dictionary<string, AttributeValue>>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+            _visitStorage.Verify(x => x.GetUnidentifiedAsync(It.IsAny<Instant>(), It.IsAny<Dictionary<string, AttributeValue>>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
         } // end method
     } // end class
 } // end namespace
