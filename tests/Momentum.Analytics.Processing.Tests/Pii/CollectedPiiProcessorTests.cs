@@ -151,9 +151,6 @@ namespace Momentum.Analytics.Processing.Tests.Pii
             var collectedPii = BuildCollectedPii(userId);
             
             var activeVisit = BuildVisit(collectedPii.CookieId, collectedPii.UtcTimestamp);
-            activeVisit.PiiType = PiiTypeEnum.Email;
-            activeVisit.PiiValue = "asdfasdfasdf";
-            activeVisit.UtcIdentifiedTimestamp = now.Minus(Duration.FromMinutes(5));
             _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(activeVisit);
 

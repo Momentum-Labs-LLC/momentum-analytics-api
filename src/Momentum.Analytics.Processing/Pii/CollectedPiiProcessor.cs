@@ -44,7 +44,17 @@ namespace Momentum.Analytics.Processing.Pii
             if(activeVisit != null)
             {
                 // there is already an active visit
-                if(activeVisit.PiiType != null 
+                if(!activeVisit.UtcIdentifiedTimestamp.HasValue
+                    || (activeVisit.PiiType.HasValue && activeVisit.PiiType > collectedPii.Pii.PiiType))
+                {
+                    // this visit is either unidentified or we have just collected a better form of identification
+                    activeVisit.PiiType = collectedPii.Pii.PiiType;
+                    activeVisit.PiiValue = collectedPii.Pii.Value;
+                    activeVisit.UtcIdentifiedTimestamp = collectedPii.UtcTimestamp;
+                    
+                    await _visitService.UpsertAsync(activeVisit, token).ConfigureAwait(false);
+                }                
+                else if(activeVisit.PiiType != null 
                     && activeVisit.PiiType == PiiTypeEnum.UserId 
                     && collectedPii.Pii.PiiType == PiiTypeEnum.UserId
                     && !activeVisit.PiiValue.Equals(collectedPii.Pii.Value))
@@ -64,16 +74,7 @@ namespace Momentum.Analytics.Processing.Pii
                     };
 
                     await _visitService.UpsertAsync(newVisitForUserId, token).ConfigureAwait(false);
-                }
-                else if(activeVisit.PiiType >= collectedPii.Pii.PiiType)
-                {
-                    // this is a visit identified with a lower order pii and now we have a more important pii
-                    activeVisit.PiiType = collectedPii.Pii.PiiType;
-                    activeVisit.PiiValue = collectedPii.Pii.Value;
-                    activeVisit.UtcIdentifiedTimestamp = collectedPii.UtcTimestamp;
-                    
-                    await _visitService.UpsertAsync(activeVisit, token).ConfigureAwait(false);
-                } // end if                
+                } // end if       
             }
             else
             {
