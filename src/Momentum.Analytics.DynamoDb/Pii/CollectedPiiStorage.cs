@@ -74,6 +74,7 @@ namespace Momentum.Analytics.DynamoDb.Pii
                     .AddField(":cookie_id", cookieId)
                     .AddField(":pii_type_id", (int)PiiTypeEnum.UserId),
                 ScanIndexForward = false, // reverse order on timestamp
+                ExclusiveStartKey = page,
                 Limit = size
             };
 
@@ -87,7 +88,7 @@ namespace Momentum.Analytics.DynamoDb.Pii
                 if(queryResult.Items != null && queryResult.Items.Any())
                 {
                     result.Data = queryResult.Items.Select(x => x.ReadCollectedPii()).ToList();
-                } // end if                
+                } // end if
             } // end if
 
             return result;
