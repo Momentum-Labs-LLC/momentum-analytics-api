@@ -42,10 +42,10 @@ namespace Momentum.Analytics.Core.PII
 
             if(maximum > 0)
             {
+                TPage nextPage = default;
                 TCollectedPiiSearchResponse searchResponse = default;
                 do
                 {
-                    TPage nextPage = default;
                     searchResponse = await _collectedPiiStorage
                             .GetLatestUserIdsAsync(cookieId, maximum, nextPage, token)
                             .ConfigureAwait(false);
