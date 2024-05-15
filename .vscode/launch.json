@@ -23,7 +23,8 @@
                 "AWS_ACCESS_KEY_ID": "DUMMYIDEXAMPLE",
                 "AWS_SECRET_ACCESS_KEY": "DUMMYEXAMPLEKEY",
                 "REGION": "us-east-1",
-                "DYNAMO_SERVICE_URL": "http://localhost:9876"
+                "DYNAMO_SERVICE_URL": "http://localhost:9876",
+                "EMAIL_TO_UPPERCASE": "true"
             }
         }
     ]
