@@ -62,7 +62,7 @@ namespace Momentum.Analytics.Pii.Lambda
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
-        public async Task FunctionHandlerAsync(Stream input, CancellationToken token = default)
+        public async Task FunctionHandlerAsync(Stream input)
         {
             var forceFailureProvider = _serviceProvider.GetRequiredService<IForceFailureProvider>();
             if(forceFailureProvider.ShouldForceFailure)
@@ -91,7 +91,7 @@ namespace Momentum.Analytics.Pii.Lambda
                         var sqsEvent = JsonSerializer.Deserialize<SQSEvent>(json);
                         if(sqsEvent != null)
                         {
-                            var events = await ReadEventsFromSqsAsync(sqsEvent, token).ConfigureAwait(false);
+                            var events = await ReadEventsFromSqsAsync(sqsEvent).ConfigureAwait(false);
 
                             if(events != null && events.Any())
                             {
@@ -108,7 +108,7 @@ namespace Momentum.Analytics.Pii.Lambda
 
             foreach(var dynamoEvent in dynamoEvents)
             {
-                await HandleDynamoDbEventAsync(dynamoEvent, token).ConfigureAwait(false);
+                await HandleDynamoDbEventAsync(dynamoEvent).ConfigureAwait(false);
             } // end foreach
         } // end if
 
