@@ -12,14 +12,19 @@ using Momentum.Analytics.Core;
 using Momentum.Analytics.Core.Visits;
 using Momentum.Analytics.DynamoDb.Visits;
 using Momentum.Analytics.Processing.Cookies;
+using Amazon.Lambda.Serialization.SystemTextJson;
+using Momentum.Analytics.Pii.Lambda;
+using System.Text.Json;
+using Amazon.Lambda.SQSEvents;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
-[assembly: Amazon.Lambda.Core.LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
+[assembly: Amazon.Lambda.Core.LambdaSerializer(typeof(SourceGeneratorLambdaJsonSerializer<CustomSerializer>))]
 
 namespace Momentum.Analytics.Pii.Lambda
 {
     public class Function
     {
+        private const string SQS_UNIQUE_VALUE = "Md5OfBody";
         protected readonly IServiceProvider _serviceProvider;
         protected readonly ILogger _logger;
 
@@ -38,8 +43,9 @@ namespace Momentum.Analytics.Pii.Lambda
                         config.SetMinimumLevel(LogLevel.Debug);
                         config.AddLambdaLogger();
                     })
-                .AddSingleton<IConfiguration>(config)
+                .AddSingleton<IConfiguration>(config)                
                 .AddNodaTime()
+                .AddSingleton<IForceFailureProvider, ForceFailureProvider>()
                 .AddVisitWindowCalculator()
                 .AddDynamoDbPiiService()
                 .AddDynamoDbVisitService()
@@ -56,7 +62,72 @@ namespace Momentum.Analytics.Pii.Lambda
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
-        public async Task FunctionHandlerAsync(DynamoDBEvent dynamoEvent)
+        public async Task FunctionHandlerAsync(Stream input, CancellationToken token = default)
+        {
+            var forceFailureProvider = _serviceProvider.GetRequiredService<IForceFailureProvider>();
+            if(forceFailureProvider.ShouldForceFailure)
+            {
+                _logger.LogCritical("FORCE_FAILURE=true");
+                throw new Exception("FORCE_FAILURE=true");
+            } // end if
+
+            var dynamoEvents = new List<DynamoDBEvent>();
+            using(StreamReader reader = new StreamReader(input))
+            {
+                var json = await reader.ReadToEndAsync().ConfigureAwait(false);
+
+                if(!json.Contains(SQS_UNIQUE_VALUE, StringComparison.OrdinalIgnoreCase))
+                {
+                    var dynamoEvent = JsonSerializer.Deserialize<DynamoDBEvent>(json);
+                    if(dynamoEvent != null)
+                    {
+                        dynamoEvents.Add(dynamoEvent);
+                    } // end if
+                }
+                else
+                {
+                    try
+                    {
+                        var sqsEvent = JsonSerializer.Deserialize<SQSEvent>(json);
+                        if(sqsEvent != null)
+                        {
+                            var events = await ReadEventsFromSqsAsync(sqsEvent, token).ConfigureAwait(false);
+
+                            if(events != null && events.Any())
+                            {
+                                dynamoEvents.AddRange(events);
+                            } // end if
+                        } // end if
+                    }
+                    catch(Exception ex)
+                    {
+                        _logger.LogError(new EventId(0), $"Unable to deserialize json: {json}.");
+                    } // end try/catch
+                } // end if
+            } // end using
+
+            foreach(var dynamoEvent in dynamoEvents)
+            {
+                await HandleDynamoDbEventAsync(dynamoEvent, token).ConfigureAwait(false);
+            } // end foreach
+        } // end if
+
+        protected async Task<IEnumerable<DynamoDBEvent>> ReadEventsFromSqsAsync(SQSEvent sqsEvent, CancellationToken token = default)
+        {
+            var dynamoDbEvents = new List<DynamoDBEvent>();
+
+            if(sqsEvent != null && sqsEvent.Records != null && sqsEvent.Records.Any())
+            {
+                dynamoDbEvents = sqsEvent.Records
+                    .Select(msg => JsonSerializer.Deserialize<DynamoDBEvent>(msg.Body))
+                    .Where(x => x != null)
+                    .ToList();
+            } // end if
+
+            return dynamoDbEvents;
+        } // end method
+
+        protected async Task HandleDynamoDbEventAsync(DynamoDBEvent dynamoEvent, CancellationToken token = default)
         {
             _logger.LogInformation($"Beginning to process {dynamoEvent.Records.Count} records...");
             
