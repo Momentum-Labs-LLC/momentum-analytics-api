@@ -1,4 +1,4 @@
 variable "image_tag" {
   type    = string
-  default = "1.0.41"
+  default = "1.0.50"
 }

@@ -1,0 +1,19 @@
+POST https://api.mll-analytics.com/v1/page-views HTTP/1.1
+content-type: application/json
+
+{
+  "referer": "google.com",
+  "domain": "mll-analytics.com",
+  "path": "index.html",
+  "funnelStep": 0
+}
+
+
+POST https://api.mll-analytics.com/v1/pii HTTP/1.1
+content-type: application/json 
+Cookie: mllc=id%3Dbdc07c0e-9e63-4706-a4e9-36609cc62411%2Cvexp%3D1718510400000%2Cfs%3D0%2Cpii%3D0%2Cu%3D;
+
+{
+    "value": "84981657",
+    "type": 1
+}

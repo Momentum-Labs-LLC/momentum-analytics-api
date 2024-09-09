@@ -66,3 +66,27 @@ resource "aws_iam_role_policy" "this-lambda-dynamo" {
     ]
   })
 }
+
+resource "aws_iam_role_policy" "this-lambda-sqs" {
+  name = "${local.name_prefix}-sqs-policy"
+  role = aws_iam_role.this-lambda-role.name
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "sqs:SendMessage",
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes",
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource" : aws_sqs_queue.this-dlq.arn
+      }
+    ]
+  })
+}

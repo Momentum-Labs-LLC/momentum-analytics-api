@@ -17,7 +17,7 @@ resource "aws_lambda_function" "this-function-0" {
 
   environment {
     variables = {
-      NAME = "VALUE"
+      FORCE_FAILURE = "false"
     }
   }
 
@@ -46,7 +46,25 @@ resource "aws_cloudwatch_log_group" "api-log-group" {
 }
 
 resource "aws_lambda_event_source_mapping" "this-event-source" {
-  event_source_arn  = data.aws_dynamodb_table.this-collected-pii.stream_arn
-  function_name     = aws_lambda_function.this-function-0.arn
-  starting_position = "LATEST"
+  enabled                            = true
+  event_source_arn                   = data.aws_dynamodb_table.this-collected-pii.stream_arn
+  function_name                      = aws_lambda_function.this-function-0.arn
+  starting_position                  = "LATEST"
+  batch_size                         = local.db_batch_size
+  maximum_batching_window_in_seconds = local.db_batching_window // wait n seconds to reach maximum batch size
+  bisect_batch_on_function_error     = local.db_split_batch_on_error
+  maximum_retry_attempts             = local.db_max_retries // dump the event after 100 attempts
+
+  destination_config {
+    on_failure {
+      destination_arn = aws_sqs_queue.this-dlq.arn
+    }
+  }
+}
+
+resource "aws_lambda_event_source_mapping" "this-failure-retries" {
+  enabled          = local.dlq_enabled
+  event_source_arn = aws_sqs_queue.this-dlq.arn
+  function_name    = aws_lambda_function.this-function-0.arn
+  batch_size       = local.dlq_batch_size
 }

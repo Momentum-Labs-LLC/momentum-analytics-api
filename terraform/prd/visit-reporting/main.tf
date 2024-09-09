@@ -1,5 +1,13 @@
 provider "aws" {
   region = local.region
+
+  default_tags {
+    tags = {
+      Production  = "true"
+      Environment = local.env
+      Project     = "${local.project}-${local.subproject}"
+    }
+  }
 }
 
 data "aws_availability_zones" "available" {}

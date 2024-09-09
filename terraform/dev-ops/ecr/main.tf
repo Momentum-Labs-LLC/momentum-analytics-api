@@ -12,6 +12,7 @@ locals {
   project     = "analytics"
   subproject  = "ecr"
   name_prefix = "${local.corp}-${local.project}"
+  imageCount  = 5
 
   tags = {
     Production = "true"
@@ -31,6 +32,28 @@ resource "aws_ecr_repository" "this-api-repository" {
   )
 }
 
+resource "aws_ecr_lifecycle_policy" "this-api-lifecycle" {
+  repository = aws_ecr_repository.this-api-repository.name
+
+  policy = jsonencode({
+    "rules" : [
+      {
+        "rulePriority" : 1,
+        "description" : "Keep last 5 images",
+        "selection" : {
+          "tagStatus" : "tagged",
+          "tagPrefixList" : ["1.0"],
+          "countType" : "imageCountMoreThan",
+          "countNumber" : local.imageCount
+        },
+        "action" : {
+          "type" : "expire"
+        }
+      }
+    ]
+  })
+}
+
 resource "aws_ecr_repository" "this-page-views-repository" {
   name                 = "${local.name_prefix}-page-views-processing-repo"
   image_tag_mutability = "MUTABLE"
@@ -41,6 +64,28 @@ resource "aws_ecr_repository" "this-page-views-repository" {
         "Name" : "${local.name_prefix}-page-views-processing-repo"
     })
   )
+}
+
+resource "aws_ecr_lifecycle_policy" "this-page-views-lifecycle" {
+  repository = aws_ecr_repository.this-page-views-repository.name
+
+  policy = jsonencode({
+    "rules" : [
+      {
+        "rulePriority" : 1,
+        "description" : "Keep last 5 images",
+        "selection" : {
+          "tagStatus" : "tagged",
+          "tagPrefixList" : ["1.0"],
+          "countType" : "imageCountMoreThan",
+          "countNumber" : local.imageCount
+        },
+        "action" : {
+          "type" : "expire"
+        }
+      }
+    ]
+  })
 }
 
 resource "aws_ecr_repository" "this-pii-repository" {
@@ -55,6 +100,28 @@ resource "aws_ecr_repository" "this-pii-repository" {
   )
 }
 
+resource "aws_ecr_lifecycle_policy" "this-pii-lifecycle" {
+  repository = aws_ecr_repository.this-pii-repository.name
+
+  policy = jsonencode({
+    "rules" : [
+      {
+        "rulePriority" : 1,
+        "description" : "Keep last 5 images",
+        "selection" : {
+          "tagStatus" : "tagged",
+          "tagPrefixList" : ["1.0"],
+          "countType" : "imageCountMoreThan",
+          "countNumber" : local.imageCount
+        },
+        "action" : {
+          "type" : "expire"
+        }
+      }
+    ]
+  })
+}
+
 resource "aws_ecr_repository" "this-visits-repository" {
   name                 = "${local.name_prefix}-visit-reporting-repo"
   image_tag_mutability = "MUTABLE"
@@ -65,4 +132,26 @@ resource "aws_ecr_repository" "this-visits-repository" {
         "Name" : "${local.name_prefix}-visit-reporting-repo"
     })
   )
+}
+
+resource "aws_ecr_lifecycle_policy" "this-visits-lifecycle" {
+  repository = aws_ecr_repository.this-visits-repository.name
+
+  policy = jsonencode({
+    "rules" : [
+      {
+        "rulePriority" : 1,
+        "description" : "Keep last 5 images",
+        "selection" : {
+          "tagStatus" : "tagged",
+          "tagPrefixList" : ["1.0"],
+          "countType" : "imageCountMoreThan",
+          "countNumber" : local.imageCount
+        },
+        "action" : {
+          "type" : "expire"
+        }
+      }
+    ]
+  })
 }

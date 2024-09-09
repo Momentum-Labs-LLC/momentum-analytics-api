@@ -32,13 +32,28 @@ resource "aws_iam_role_policy" "this-lambda-dynamo" {
     Statement = [
       {
         Action = [
+          "dynamodb:BatchGetItem",
+          "dynamodb:BatchWriteItem",
+          "dynamodb:ConditionCheckItem",
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:Query",
+          "dynamodb:Scan",
+          "dynamodb:UpdateItem"
+        ],
+        Effect = "Allow"
+        Resource = [
+          data.aws_dynamodb_table.this-visits.arn,
+          "${data.aws_dynamodb_table.this-visits.arn}/*",
+        ]
+      },
+      {
+        Action = [
           "dynamodb:Query",
           "dynamodb:Scan",
         ]
         Effect = "Allow"
         Resource = [
-          data.aws_dynamodb_table.this-visits.arn,
-          "${data.aws_dynamodb_table.this-visits.arn}/*",
           data.aws_dynamodb_table.this-collected-pii.arn,
           "${data.aws_dynamodb_table.this-collected-pii.arn}/*",
           data.aws_dynamodb_table.this-pii.arn,
