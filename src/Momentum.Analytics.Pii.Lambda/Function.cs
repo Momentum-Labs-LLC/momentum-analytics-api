@@ -144,17 +144,20 @@ namespace Momentum.Analytics.Pii.Lambda
                     try
                     {
                         var collectedPii = BuildCollectedPii(record.Dynamodb);
-                        var piiValue = await piiService.GetPiiAsync(collectedPii.PiiId.Value).ConfigureAwait(false);
+                        if(collectedPii != null) 
+                        {
+                            var piiValue = await piiService.GetPiiAsync(collectedPii.PiiId.Value).ConfigureAwait(false);
 
-                        if(piiValue != null)
-                        {
-                            collectedPii.Pii = piiValue;
-                            await piiProcessor.ProcessAsync(collectedPii).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            throw new Exception($"Unable to retrieve pii by identifier: {collectedPii.PiiId}.");
-                        } // end if
+                            if(piiValue != null)
+                            {
+                                collectedPii.Pii = piiValue;
+                                await piiProcessor.ProcessAsync(collectedPii).ConfigureAwait(false);
+                            }
+                            else
+                            {
+                                throw new Exception($"Unable to retrieve pii by identifier: {collectedPii.PiiId}.");
+                            } // end if
+                        } // end if                        
                     }
                     catch(Exception ex)
                     {
