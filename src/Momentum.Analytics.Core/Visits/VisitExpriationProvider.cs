@@ -28,16 +28,15 @@ namespace Momentum.Analytics.Core.Visits
             {
                 // visits are configured to be fixed windows
                 var zonedActivityTimestamp = activityTimestamp.InZone(_visitConfiguration.TimeZone);
-                var zonedFirstWindow = new ZonedDateTime(
-                    new LocalDateTime(
+
+                var localDate = new LocalDate(
                         zonedActivityTimestamp.Year, 
                         zonedActivityTimestamp.Month, 
-                        zonedActivityTimestamp.Day, 
-                        _visitConfiguration.FixedWindowStart.Value.Hour, 
-                        _visitConfiguration.FixedWindowStart.Value.Minute),
-                    zonedActivityTimestamp.Zone,
-                    zonedActivityTimestamp.Zone.GetUtcOffset(activityTimestamp)
-                );
+                        zonedActivityTimestamp.Day);
+
+                var zonedMidnight = zonedActivityTimestamp.Zone.AtStartOfDay(localDate);
+                var firstWindowStart = Duration.FromMinutes(_visitConfiguration.FixedWindowStart.Value.Hour * 60 + _visitConfiguration.FixedWindowStart.Value.Minute);
+                var zonedFirstWindow = zonedMidnight.Plus(firstWindowStart);
 
                 result = zonedFirstWindow.ToInstant();
                 while(result <= activityTimestamp)

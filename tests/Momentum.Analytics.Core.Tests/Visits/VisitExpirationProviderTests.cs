@@ -56,16 +56,17 @@ namespace Momentum.Analytics.Core.Tests.Visits
             var activityTimestamp = SystemClock.Instance.GetCurrentInstant();
 
             var expiration = await _expirationProvider.GetExpirationAsync(activityTimestamp).ConfigureAwait(false);
-
             var zonedTimestamp = activityTimestamp.InZone(estTimeZone);
-            var zonedWindowStart = new ZonedDateTime(
-                    new LocalDateTime(
-                        zonedTimestamp.Year,
-                        zonedTimestamp.Month,
-                        zonedTimestamp.Day,
-                        0, 0),
-                    estTimeZone,
-                    estTimeZone.GetUtcOffset(activityTimestamp));
+
+            var localDate = new LocalDate(
+                        zonedTimestamp.Year, 
+                        zonedTimestamp.Month, 
+                        zonedTimestamp.Day);
+
+            var zonedMidnight = zonedTimestamp.Zone.AtStartOfDay(localDate);
+            var firstWindowStart = Duration.FromMinutes(0);
+            var zonedWindowStart = zonedMidnight.Plus(firstWindowStart);
+            
             var zonedExpiration = zonedWindowStart.Plus(visitWindowLength);
             var expectedExpiration = zonedExpiration.ToInstant();
             
@@ -82,16 +83,24 @@ namespace Momentum.Analytics.Core.Tests.Visits
             _visitConfiguration.Setup(x => x.FixedWindowStart).Returns(LocalTime.FromMinutesSinceMidnight(0));
             _visitConfiguration.Setup(x => x.TimeZone).Returns(estTimeZone);
 
+            
+
             var now = SystemClock.Instance.GetCurrentInstant();
             var zonedNow = now.InZone(estTimeZone);
-            var zonedMidnight = new ZonedDateTime(
-                new LocalDateTime(
+            var localDay = new LocalDate(
                     zonedNow.Year,
                     zonedNow.Month,
-                    zonedNow.Day,
-                    0, 0),
-                estTimeZone,
-                estTimeZone.GetUtcOffset(now));
+                    zonedNow.Day);
+
+            var zonedMidnight = estTimeZone.AtStartOfDay(localDay);
+            // var zonedMidnight = new ZonedDateTime(
+            //     new LocalDateTime(
+            //         zonedNow.Year,
+            //         zonedNow.Month,
+            //         zonedNow.Day,
+            //         0, 0),
+            //     estTimeZone,
+            //     estTimeZone.GetUtcOffset(now));
             var midnightTimestamp = zonedMidnight.ToInstant();
 
             var expiration = await _expirationProvider.GetExpirationAsync(midnightTimestamp).ConfigureAwait(false);
