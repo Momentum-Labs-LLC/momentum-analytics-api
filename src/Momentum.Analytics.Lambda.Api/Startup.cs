@@ -18,6 +18,8 @@ public class Startup
 
     public IConfiguration Configuration { get; }
 
+    private const string CORS_POLICY_NAME = "DEFAULT_CORS_POLICY";
+
     // This method gets called by the runtime. Use this method to add services to the container
     public void ConfigureServices(IServiceCollection services)
     {
@@ -45,7 +47,7 @@ public class Startup
         
         services.AddCors(corsBuilder => 
         {
-            corsBuilder.AddDefaultPolicy(policyBuilder => 
+            corsBuilder.AddPolicy(CORS_POLICY_NAME, policyBuilder => 
             {
                 policyBuilder.WithOrigins(corsOrigins.ToArray())
                     .AllowAnyHeader()
@@ -77,8 +79,9 @@ public class Startup
 
         app.UseRouting();
 
+        app.UseCors(CORS_POLICY_NAME);
         app.UseAuthorization();
-        app.UseCors();
+        
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
