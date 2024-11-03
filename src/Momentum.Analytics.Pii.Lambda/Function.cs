@@ -176,7 +176,18 @@ namespace Momentum.Analytics.Pii.Lambda
             }
             else
             {
-                throw new ArgumentException("Stream record did not contain the new image.");
+                int keyCount = 0;
+                if(streamRecord.Keys != null && streamRecord.Keys.Any())
+                {
+                    keyCount = streamRecord.Keys.Count();
+                } // end if
+
+                int oldImageCount = 0;
+                if(streamRecord.OldImage != null && streamRecord.OldImage.Any())
+                {
+                    oldImageCount = streamRecord.OldImage.Count();
+                } // end if
+                _logger.LogWarning("Stream record did not contain the new image. Keys: {0}, OldImage: {1}", keyCount, oldImageCount);
             } // end if
 
             return result;
