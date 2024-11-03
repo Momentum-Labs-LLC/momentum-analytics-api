@@ -131,7 +131,7 @@ namespace Momentum.Analytics.Pii.Lambda
         {
             _logger.LogInformation($"Beginning to process {dynamoEvent.Records.Count} records...");
             
-            if(dynamoEvent != null && dynamoEvent.Records != null && dynamoEvent.Records.Any())
+            if(dynamoEvent != null && dynamoEvent.Records != null && dynamoEvent.Records.Any(x => x.Dynamodb != null))
             {
                 var piiProcessor = _serviceProvider.GetRequiredService<IDynamoDbCollectedPiiProcessor>();
                 var piiService = _serviceProvider.GetRequiredService<IPiiService>();
@@ -179,18 +179,25 @@ namespace Momentum.Analytics.Pii.Lambda
             }
             else
             {
-                int keyCount = 0;
-                if(streamRecord.Keys != null && streamRecord.Keys.Any())
+                if(streamRecord != null) 
                 {
-                    keyCount = streamRecord.Keys.Count();
-                } // end if
+                    int keyCount = 0;
+                    if(streamRecord.Keys != null && streamRecord.Keys.Any())
+                    {
+                        keyCount = streamRecord.Keys.Count();
+                    } // end if
 
-                int oldImageCount = 0;
-                if(streamRecord.OldImage != null && streamRecord.OldImage.Any())
+                    int oldImageCount = 0;
+                    if(streamRecord.OldImage != null && streamRecord.OldImage.Any())
+                    {
+                        oldImageCount = streamRecord.OldImage.Count();
+                    } // end if
+                    _logger.LogWarning("Stream record did not contain the new image. Keys: {0}, OldImage: {1}", keyCount, oldImageCount);
+                }
+                else
                 {
-                    oldImageCount = streamRecord.OldImage.Count();
-                } // end if
-                _logger.LogWarning("Stream record did not contain the new image. Keys: {0}, OldImage: {1}", keyCount, oldImageCount);
+                    _logger.LogWarning("Stream Record was null.");
+                }
             } // end if
 
             return result;
