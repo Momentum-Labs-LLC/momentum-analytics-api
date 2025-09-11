@@ -18,7 +18,10 @@ resource "aws_lambda_function" "this-api-0" {
   environment {
     variables = {
       CORS_ORIGINS  = "https://${data.aws_route53_zone.this-zone.name}",
-      COOKIE_DOMAIN = "${data.aws_route53_zone.this-zone.name}"
+      COOKIE_DOMAIN = "${data.aws_route53_zone.this-zone.name}",
+      PAGE_VIEWS_TABLE = data.aws_dynamodb_table.this-page-views.name
+      PII_VALUES_TABLE = data.aws_dynamodb_table.this-pii.name
+      COLLECTED_PII_TABLE = data.aws_dynamodb_table.this-collected-pii.name
     }
   }
 

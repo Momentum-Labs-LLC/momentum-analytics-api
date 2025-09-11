@@ -28,7 +28,7 @@ data "aws_ecr_image" "this-image" {
 }
 
 data "aws_dynamodb_table" "this-page-views" {
-  name = "${local.corp}-${local.env}-page-views"
+  name = "${local.corp}-${local.env}-page-views-02"
 }
 
 data "aws_dynamodb_table" "this-visits" {
@@ -36,11 +36,11 @@ data "aws_dynamodb_table" "this-visits" {
 }
 
 data "aws_dynamodb_table" "this-pii" {
-  name = "${local.corp}-${local.env}-pii-values"
+  name = "${local.corp}-${local.env}-pii-values-02"
 }
 
 data "aws_dynamodb_table" "this-collected-pii" {
-  name = "${local.corp}-${local.env}-collected-pii"
+  name = "${local.corp}-${local.env}-collected-pii-02"
 }
 
 data "aws_cloudfront_distribution" "this-distribution" {
