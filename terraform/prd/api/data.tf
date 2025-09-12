@@ -40,11 +40,11 @@ data "aws_dynamodb_table" "this-visits" {
 }
 
 data "aws_dynamodb_table" "this-pii" {
-  name = "${local.corp}-${local.env}-pii-values-02"
+  name = "${local.corp}-${local.env}-pii-values"
 }
 
 data "aws_dynamodb_table" "this-collected-pii" {
-  name = "${local.corp}-${local.env}-collected-pii-02"
+  name = "${local.corp}-${local.env}-collected-pii"
 }
 
 data "aws_cloudfront_distribution" "this-distribution" {
