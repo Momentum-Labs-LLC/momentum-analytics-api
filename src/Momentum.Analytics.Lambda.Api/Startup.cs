@@ -1,7 +1,7 @@
-﻿using Amazon.DynamoDBv2;
-using Momentum.Analytics.Core;
+﻿using Momentum.Analytics.Core;
 using Momentum.Analytics.Core.Visits;
 using Momentum.Analytics.DynamoDb.PageViews;
+using Momentum.Analytics.DynamoDb.PageViews.V2;
 using Momentum.Analytics.DynamoDb.Pii;
 using Momentum.Analytics.DynamoDb.Visits;
 using Momentum.Analytics.Lambda.Api.Cookies;
@@ -36,6 +36,7 @@ public class Startup
             .AddVisitWindowCalculator()
             .AddNodaTime()
             .AddPageViewService()
+            .AddPageViewV2Service()
             .AddDynamoDbPiiService()
             .AddDynamoDbVisitService()
             .AddCookieWriter();

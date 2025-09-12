@@ -28,6 +28,10 @@ data "aws_ecr_image" "this-image" {
 }
 
 data "aws_dynamodb_table" "this-page-views" {
+  name = "${local.corp}-${local.env}-page-views"
+}
+
+data "aws_dynamodb_table" "this-page-views-v2" {
   name = "${local.corp}-${local.env}-page-views-02"
 }
 
