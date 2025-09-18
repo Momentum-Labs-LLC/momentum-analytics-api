@@ -1,5 +1,5 @@
 using Amazon.Lambda.DynamoDBEvents;
-using Amazon.DynamoDBv2.Model;
+using static Amazon.Lambda.DynamoDBEvents.DynamoDBEvent;
 using Momentum.Analytics.Core.PII.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -16,6 +16,7 @@ using Amazon.Lambda.Serialization.SystemTextJson;
 using Momentum.Analytics.Pii.Lambda;
 using System.Text.Json;
 using Amazon.Lambda.SQSEvents;
+using Amazon.DynamoDBv2.Model;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: Amazon.Lambda.Core.LambdaSerializer(typeof(SourceGeneratorLambdaJsonSerializer<CustomSerializer>))]

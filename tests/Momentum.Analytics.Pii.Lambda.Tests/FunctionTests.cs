@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Amazon.Lambda.DynamoDBEvents;
+using static Amazon.Lambda.DynamoDBEvents.DynamoDBEvent;
 using Amazon.Lambda.SQSEvents;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,9 +9,10 @@ using Momentum.Analytics.Core.PII.Interfaces;
 using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.DynamoDb;
 using Momentum.Analytics.DynamoDb.Pii;
+using Momentum.Analytics.Processing.DynamoDb;
 using Momentum.Analytics.Processing.DynamoDb.Pii.Interfaces;
 using Moq;
-using static Amazon.Lambda.DynamoDBEvents.DynamoDBEvent;
+
 
 namespace Momentum.Analytics.Pii.Lambda.Tests
 {
@@ -131,9 +133,9 @@ namespace Momentum.Analytics.Pii.Lambda.Tests
                     {
                         EventID = "EventId",
                         EventName = "Name",
-                        Dynamodb = new Amazon.DynamoDBv2.Model.StreamRecord()
+                        Dynamodb = new StreamRecord()
                         {
-                            NewImage = new Dictionary<string, Amazon.DynamoDBv2.Model.AttributeValue>()
+                            NewImage = new Dictionary<string, AttributeValue>()
                                 .AddField(CollectedPiiConstants.PII_ID, piiId)
                                 .AddField(CollectedPiiConstants.COOKIE_ID, Guid.NewGuid())
                                 .AddField(CollectedPiiConstants.UTC_TIMESTAMP, now)
@@ -175,9 +177,9 @@ namespace Momentum.Analytics.Pii.Lambda.Tests
                     {
                         EventID = "EventId",
                         EventName = "Name",
-                        Dynamodb = new Amazon.DynamoDBv2.Model.StreamRecord()
+                        Dynamodb = new StreamRecord()
                         {
-                            NewImage = new Dictionary<string, Amazon.DynamoDBv2.Model.AttributeValue>()
+                            NewImage = new Dictionary<string, AttributeValue>()
                                 .AddField(CollectedPiiConstants.PII_ID, piiId)
                                 .AddField(CollectedPiiConstants.COOKIE_ID, Guid.NewGuid())
                                 .AddField(CollectedPiiConstants.UTC_TIMESTAMP, now)
@@ -226,9 +228,9 @@ namespace Momentum.Analytics.Pii.Lambda.Tests
                     {
                         EventID = "EventId",
                         EventName = "Name",
-                        Dynamodb = new Amazon.DynamoDBv2.Model.StreamRecord()
+                        Dynamodb = new StreamRecord()
                         {
-                            NewImage = new Dictionary<string, Amazon.DynamoDBv2.Model.AttributeValue>()
+                            NewImage = new Dictionary<string, AttributeValue>()
                                 .AddField(CollectedPiiConstants.PII_ID, piiId)
                                 .AddField(CollectedPiiConstants.COOKIE_ID, Guid.NewGuid())
                                 .AddField(CollectedPiiConstants.UTC_TIMESTAMP, now)

@@ -1,14 +1,14 @@
-using Amazon.DynamoDBv2.Model;
-using Amazon.Lambda.DynamoDBEvents;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Momentum.Analytics.Core.PageViews.Models;
 using Momentum.Analytics.DynamoDb.PageViews;
+using Momentum.Analytics.Processing.DynamoDb;
 using Momentum.Analytics.Processing.DynamoDb.PageViews;
 using Momentum.Analytics.Processing.DynamoDb.PageViews.Interfaces;
 using Momentum.Analytics.Core;
 using Momentum.Analytics.Core.Visits;
+using Amazon.Lambda.DynamoDBEvents;
 
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -81,7 +81,7 @@ namespace Momentum.Analytics.PageViews.Lambda
             _logger.LogInformation("Stream processing complete.");
         } // end method
 
-        protected PageView? BuildPageView(StreamRecord streamRecord)
+        protected PageView? BuildPageView(DynamoDBEvent.StreamRecord streamRecord)
         {            
             PageView? result = null;
             if(streamRecord != null && streamRecord.NewImage != null && streamRecord.NewImage.Any())

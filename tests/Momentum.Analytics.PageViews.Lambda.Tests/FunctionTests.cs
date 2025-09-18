@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Amazon.DynamoDBv2.Model;
 using Amazon.Lambda.DynamoDBEvents;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core.PageViews.Models;
-using Momentum.Analytics.DynamoDb;
 using Momentum.Analytics.DynamoDb.PageViews;
 using Momentum.Analytics.Processing.DynamoDb.PageViews.Interfaces;
 using Moq;
@@ -62,9 +58,9 @@ namespace Momentum.Analytics.PageViews.Lambda.Tests
                     {
                         EventID = "id",
                         EventName = "name",
-                        Dynamodb = new Amazon.DynamoDBv2.Model.StreamRecord()
+                        Dynamodb = new StreamRecord()
                         {
-                            NewImage = pageView.ToDynamoDb()
+                            NewImage = pageView.ToDynamoDbEvent()
                         }
                     }
                 }

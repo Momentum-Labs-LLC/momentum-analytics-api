@@ -5,8 +5,13 @@ namespace Momentum.Analytics.DynamoDb.PageViews
 {
     public static class PageViewExtensions
     {
-        public static Dictionary<string, AttributeValue> ToDynamoDb(this PageView pageView)
+        public static Dictionary<string, AttributeValue> ToDynamoDb(this PageView? pageView)
         {
+            if(pageView == null)
+            {
+                return new Dictionary<string, AttributeValue>();
+            } // end if
+
             var result = new Dictionary<string, AttributeValue>()
                 .AddField(PageViewConstants.COOKIE_ID, pageView.CookieId)
                 .AddField(PageViewConstants.UTC_TIMESTAMP, pageView.UtcTimestamp)
