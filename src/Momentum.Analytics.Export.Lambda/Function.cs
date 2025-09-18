@@ -41,6 +41,12 @@ public class Function
         _logger = _serviceProvider.GetRequiredService<ILogger<Function>>();
     } // end method
 
+    public Function(IServiceProvider serviceProvider, ILogger<Function> logger)
+    {
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    } // end method
+
     public async Task FunctionHandlerAsync(Stream input)
     {
         var timeRangeProvider = _serviceProvider.GetRequiredService<ITimeRangeProvider>();
@@ -75,7 +81,6 @@ public class Function
             ExportFormat: ExportFormat.DYNAMODB_JSON,
             ExportType: ExportType.INCREMENTAL_EXPORT);
 
-        await incrementalExporter.ExportAsync(collectedPiiExportRequest).ConfigureAwait(false);
         var collectedPiiExportSuccess = await TryExportAsync(incrementalExporter, collectedPiiExportRequest).ConfigureAwait(false);
         if(collectedPiiExportSuccess)
         {

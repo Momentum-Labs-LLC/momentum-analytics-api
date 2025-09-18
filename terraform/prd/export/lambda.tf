@@ -18,8 +18,8 @@ resource "aws_lambda_function" "this-function-0" {
   environment {
     variables = {
       EXPORT_BUCKET  = data.aws_s3_bucket.this-bucket.bucket
-      HOURS_LOOKBACK = 24
-      TRIM_TO_HOUR   = "true"
+      #HOURS_LOOKBACK = 24
+      #TRIM_TO_HOUR   = "true"
       PAGE_VIEWS_TABLE_ARN = data.aws_dynamodb_table.this-page-views.arn
       COLLECTED_PII_TABLE_ARN = data.aws_dynamodb_table.this-collected-pii.arn
       PII_VALUES_TABLE_ARN = data.aws_dynamodb_table.this-pii.arn
