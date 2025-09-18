@@ -22,23 +22,46 @@ locals {
 ################################################################################
 # GitHub OIDC Role
 ################################################################################
+module "iam_github_oidc_provider" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-oidc-provider"
 
-module "iam_github_ecr_role" {
-  source = "terraform-aws-modules/iam/aws//modules/iam-github-oidc-role"
+  url = "https://token.actions.githubusercontent.com"
 
+  client_id_list = [
+    "sts.amazonaws.com",
+  ]
+}
+
+resource "aws_iam_role" "github_ecr_role" {
   name = "${local.name_prefix}-github-role-${local.iteration}"
 
-  # This should be updated to suit your organization, repository, references/branches, etc.
-  subjects = [
-    # specific repository
-    "Momentum-Labs-LLC/momentum-analytics-api:*",
-  ]
-
-  policies = {
-    ECRPolicy = aws_iam_policy.this-ecr-policy.arn
-  }
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = module.iam_github_oidc_provider.arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+          }
+          StringLike = {
+            "token.actions.githubusercontent.com:sub" = "repo:Momentum-Labs-LLC/momentum-analytics-api:*"
+          }
+        }
+      }
+    ]
+  })
 
   tags = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "github_ecr_policy" {
+  role       = aws_iam_role.github_ecr_role.name
+  policy_arn = aws_iam_policy.this-ecr-policy.arn
 }
 
 data "aws_ecr_repository" "this_ecr" {
@@ -57,6 +80,10 @@ data "aws_ecr_repository" "this_visit_ecr" {
   name = "${local.corp}-${local.project}-visit-reporting-repo"
 }
 
+data "aws_ecr_repository" "this_export_ecr" {
+  name = "${local.corp}-${local.project}-export-repo"
+}
+
 resource "aws_iam_policy" "this-ecr-policy" {
   policy = jsonencode({
     "Version" : "2012-10-17",
@@ -70,11 +97,12 @@ resource "aws_iam_policy" "this-ecr-policy" {
           "ecr:BatchCheckLayerAvailability",
           "ecr:PutImage"
         ],
-        "Resource": [
+        "Resource" : [
           data.aws_ecr_repository.this_ecr.arn,
           data.aws_ecr_repository.this_pg_ecr.arn,
           data.aws_ecr_repository.this_pii_ecr.arn,
-          data.aws_ecr_repository.this_visit_ecr.arn
+          data.aws_ecr_repository.this_visit_ecr.arn,
+          data.aws_ecr_repository.this_export_ecr.arn
         ]
       },
       {

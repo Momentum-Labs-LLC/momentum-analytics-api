@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Momentum.Analytics.Pii.Lamb
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Momentum.Analytics.PageViews.Lambda.Tests", "tests\Momentum.Analytics.PageViews.Lambda.Tests\Momentum.Analytics.PageViews.Lambda.Tests.csproj", "{F9188C56-51DD-42CF-82BA-157A12369328}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Momentum.Analytics.Export.Lambda", "src\Momentum.Analytics.Export.Lambda\Momentum.Analytics.Export.Lambda.csproj", "{6C07331D-7E35-4597-9EA9-F8106DFEE365}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -100,6 +102,10 @@ Global
 		{F9188C56-51DD-42CF-82BA-157A12369328}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9188C56-51DD-42CF-82BA-157A12369328}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9188C56-51DD-42CF-82BA-157A12369328}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C07331D-7E35-4597-9EA9-F8106DFEE365}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C07331D-7E35-4597-9EA9-F8106DFEE365}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C07331D-7E35-4597-9EA9-F8106DFEE365}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C07331D-7E35-4597-9EA9-F8106DFEE365}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{32E1A33B-0E7E-4F84-B1CE-67095162320A} = {58673451-9B2A-4F1D-86F6-A05B2EA1A6E5}
@@ -116,5 +122,6 @@ Global
 		{9EE8C632-8CF1-4137-9C19-F46741ED8301} = {6144075E-5978-4F0C-937B-24D1990DD255}
 		{4E518CF5-4037-4F90-9F5A-D9106A609708} = {6144075E-5978-4F0C-937B-24D1990DD255}
 		{F9188C56-51DD-42CF-82BA-157A12369328} = {6144075E-5978-4F0C-937B-24D1990DD255}
+		{6C07331D-7E35-4597-9EA9-F8106DFEE365} = {58673451-9B2A-4F1D-86F6-A05B2EA1A6E5}
 	EndGlobalSection
 EndGlobal

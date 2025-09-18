@@ -155,3 +155,37 @@ resource "aws_ecr_lifecycle_policy" "this-visits-lifecycle" {
     ]
   })
 }
+
+resource "aws_ecr_repository" "this-export-repository" {
+  name                 = "${local.name_prefix}-export-repo"
+  image_tag_mutability = "MUTABLE"
+
+  tags = merge(local.tags,
+    tomap(
+      {
+        "Name" : "${local.name_prefix}-export-repo"
+    })
+  )
+}
+
+resource "aws_ecr_lifecycle_policy" "this-export-lifecycle" {
+  repository = aws_ecr_repository.this-export-repository.name
+
+  policy = jsonencode({
+    "rules" : [
+      {
+        "rulePriority" : 1,
+        "description" : "Keep last 5 images",
+        "selection" : {
+          "tagStatus" : "tagged",
+          "tagPrefixList" : ["1.0"],
+          "countType" : "imageCountMoreThan",
+          "countNumber" : local.imageCount
+        },
+        "action" : {
+          "type" : "expire"
+        }
+      }
+    ]
+  })
+}
