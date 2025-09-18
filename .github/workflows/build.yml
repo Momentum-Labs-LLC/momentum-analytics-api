@@ -8,6 +8,9 @@ on:
 env:
   AWS_DEFAULT_REGION: us-east-1
   AWS_DEFAULT_OUTPUT: json
+  MAJOR_VERSION: 2
+  MINOR_VERSION: 0
+  BUILD_NUMBER: ${{ github.run_number }}
 
 jobs:
   deploy:
@@ -60,7 +63,7 @@ jobs:
           REGION: us-east-1
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: momentum-analytics-api-repo
-          IMAGE_TAG: 1.0.${{ github.run_number }}
+          IMAGE_TAG: $MAJOR_VERSION.$MINOR_VERSION.$BUILD_NUMBER
           PROJECT_DIRECTORY: src/Momentum.Analytics.Lambda.Api
           DOCKERFILE: src/Momentum.Analytics.Lambda.Api/Dockerfile
           OUTPUT_DIR: bin/Release/lambda-publish
@@ -72,7 +75,7 @@ jobs:
           REGION: us-east-1
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: momentum-analytics-page-views-processing-repo
-          IMAGE_TAG: 1.0.${{ github.run_number }}
+          IMAGE_TAG: $MAJOR_VERSION.$MINOR_VERSION.$BUILD_NUMBER
           PROJECT_DIRECTORY: src/Momentum.Analytics.PageViews.Lambda
           DOCKERFILE: src/Momentum.Analytics.PageViews.Lambda/Dockerfile
           OUTPUT_DIR: bin/Release/lambda-publish
@@ -84,7 +87,7 @@ jobs:
           REGION: us-east-1
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: momentum-analytics-pii-processing-repo
-          IMAGE_TAG: 1.0.${{ github.run_number }}
+          IMAGE_TAG: $MAJOR_VERSION.$MINOR_VERSION.$BUILD_NUMBER
           PROJECT_DIRECTORY: src/Momentum.Analytics.Pii.Lambda
           DOCKERFILE: src/Momentum.Analytics.Pii.Lambda/Dockerfile
           OUTPUT_DIR: bin/Release/lambda-publish
@@ -96,7 +99,7 @@ jobs:
           REGION: us-east-1
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: momentum-analytics-visit-reporting-repo
-          IMAGE_TAG: 2.0.${{ github.run_number }}
+          IMAGE_TAG: $MAJOR_VERSION.$MINOR_VERSION.$BUILD_NUMBER
           PROJECT_DIRECTORY: src/Momentum.Analytics.Visits.Lambda
           DOCKERFILE: src/Momentum.Analytics.Visits.Lambda/Dockerfile
           OUTPUT_DIR: bin/Release/lambda-publish
