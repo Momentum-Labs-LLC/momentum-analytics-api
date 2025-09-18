@@ -96,7 +96,7 @@ jobs:
           REGION: us-east-1
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: momentum-analytics-visit-reporting-repo
-          IMAGE_TAG: 1.0.${{ github.run_number }}
+          IMAGE_TAG: 2.0.${{ github.run_number }}
           PROJECT_DIRECTORY: src/Momentum.Analytics.Visits.Lambda
           DOCKERFILE: src/Momentum.Analytics.Visits.Lambda/Dockerfile
           OUTPUT_DIR: bin/Release/lambda-publish
