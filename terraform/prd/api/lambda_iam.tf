@@ -38,6 +38,7 @@ resource "aws_iam_role_policy" "this-lambda-dynamo" {
         Effect = "Allow"
         Resource = [
           data.aws_dynamodb_table.this-page-views.arn,
+          data.aws_dynamodb_table.this-page-views-v2.arn,
           data.aws_dynamodb_table.this-pii.arn,
           data.aws_dynamodb_table.this-collected-pii.arn
         ]
