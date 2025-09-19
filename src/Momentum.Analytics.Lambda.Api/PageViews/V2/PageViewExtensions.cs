@@ -11,6 +11,7 @@ namespace Momentum.Analytics.Lambda.Api.PageViews.V2
             return new PageView()
             {
                 CookieId = cookie.Id,
+                VisitId = cookie.VisitId,
                 UtcTimestamp = timestamp,
                 Url = viewModel.Url,
                 Referer = viewModel.Referer

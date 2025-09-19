@@ -9,6 +9,7 @@ namespace Momentum.Analytics.DynamoDb.PageViews
         public const string V2_TABLE_NAME_DEFAULT = "momentum-prd-page-views-02";
 
         public const string COOKIE_ID = "CookieId";
+        public const string VISIT_ID = "VisitId";
         public const string UTC_TIMESTAMP = "UtcTimestamp";
         public const string URL = "Url";
         public const string DOMAIN = "Domain";

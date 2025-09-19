@@ -5,6 +5,7 @@ using Momentum.Analytics.Core.PageViews.Interfaces;
 using Momentum.Analytics.Core.PageViews.V2;
 using Momentum.Analytics.Lambda.Api.Cookies;
 using Momentum.FromCookie;
+using NodaTime;
 
 namespace Momentum.Analytics.Lambda.Api.PageViews.V2
 {
@@ -108,7 +109,9 @@ namespace Momentum.Analytics.Lambda.Api.PageViews.V2
         {
             var now = _clockService.Now;
             var visitExpiration = await _visitWindowCalculator.GetExpirationAsync(now, token).ConfigureAwait(false);
-            var cookie = cookieValue.ToCookieModel(visitExpiration);
+            var cookie = cookieValue
+                .ToCookieModel(now.Minus(Duration.FromMilliseconds(1)))
+                .UpdateVisitFields(now, visitExpiration);
             
             var domainModel = viewModel.ToDomain(cookie, now);
             await _pageViewService.RecordAsync(domainModel, token).ConfigureAwait(false);

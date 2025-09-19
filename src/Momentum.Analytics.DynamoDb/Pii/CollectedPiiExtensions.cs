@@ -14,6 +14,7 @@ namespace Momentum.Analytics.DynamoDb.Pii
             return new Dictionary<string, AttributeValue>()
                 .AddField(CollectedPiiConstants.PII_ID, collectedPii.PiiId.ToString())
                 .AddField(CollectedPiiConstants.COOKIE_ID, collectedPii.CookieId)
+                .AddField(CollectedPiiConstants.VISIT_ID, collectedPii.VisitId.ToString())
                 .AddField(CollectedPiiConstants.UTC_TIMESTAMP, collectedPii.UtcTimestamp)
                 .AddField(CollectedPiiConstants.PII_TYPE_ID, (int)collectedPii.Pii?.PiiType);
         } // end method
@@ -23,6 +24,7 @@ namespace Momentum.Analytics.DynamoDb.Pii
             var result = new CollectedPii();
 
             result.PiiId = fields.ReadGuid(CollectedPiiConstants.PII_ID, true);
+            result.VisitId = fields.ReadUlid(CollectedPiiConstants.VISIT_ID);
             result.CookieId = fields.ReadGuid(CollectedPiiConstants.COOKIE_ID, true).Value;
             result.UtcTimestamp = fields.ReadDateTime(CollectedPiiConstants.UTC_TIMESTAMP, true).Value;
 

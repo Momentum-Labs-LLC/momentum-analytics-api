@@ -6,6 +6,7 @@ using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Lambda.Api.Cookies;
 using Momentum.Analytics.Lambda.Api.Pii.ViewModels;
 using Momentum.FromCookie;
+using NodaTime;
 
 namespace Momentum.Analytics.Lambda.Api.Pii
 {
@@ -122,11 +123,14 @@ namespace Momentum.Analytics.Lambda.Api.Pii
         {
             var now = _clockService.Now;
             var visitExpiration = await _visitWindowCalculator.GetExpirationAsync(now, token).ConfigureAwait(false);
-            var cookie = cookieValue.ToCookieModel(visitExpiration);
+            var cookie = cookieValue
+                .ToCookieModel(now.Minus(Duration.FromMilliseconds(1)))
+                .UpdateVisitFields(now, visitExpiration);
 
             var collectedPii = new CollectedPii()
             {
                 CookieId = cookie.Id,
+                VisitId = cookie.VisitId,
                 UtcTimestamp = _clockService.Now,
                 Pii = new PiiValue()
                 {
@@ -148,7 +152,7 @@ namespace Momentum.Analytics.Lambda.Api.Pii
                 && (string.IsNullOrWhiteSpace(cookie.UserId) || !cookie.UserId.Equals(piiViewModel.Value)))
             {
                 cookie.UserId = piiViewModel.Value; // reset the user id
-                cookie.MaxFunnelStep = 0; // reset the max funnel step (like a new visit)
+                //cookie.MaxFunnelStep = 0; // reset the max funnel step (like a new visit)
                 cookie.CollectedPii = PiiTypeEnum.UserId; // reset the collected pii (like a new visit)
             } // end if
 

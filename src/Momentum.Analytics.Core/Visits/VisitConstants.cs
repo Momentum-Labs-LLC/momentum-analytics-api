@@ -9,13 +9,13 @@ namespace Momentum.Analytics.Core.Visits
     public static class VisitConstants
     {
         public const string IS_SLIDING = "VISIT_IS_SLIDING";
-        public const bool IS_SLIDING_DEFAULT = false;
+        public const bool IS_SLIDING_DEFAULT = true;
         public const string WINDOW_LENGTH = "VISIT_LENGTH";
 
         /// <summary>
         /// Minutes
         /// </summary>
-        public const int WINDOW_LENGTH_DEFAULT = 60*24; 
+        public const int WINDOW_LENGTH_DEFAULT = 30; 
         
         public const string FIXED_VISIT_WINDOW_START = "FIXED_VISIT_WINDOW_START";
 

@@ -111,7 +111,9 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
         {
             var now = _clockService.Now;
             var visitExpiration = await _visitWindowCalculator.GetExpirationAsync(now, token).ConfigureAwait(false);
-            var cookie = cookieValue.ToCookieModel(visitExpiration);
+            var cookie = cookieValue
+                .ToCookieModel(now.Minus(Duration.FromMilliseconds(1)))
+                .UpdateVisitFields(now, visitExpiration);
             
             var domainModel = viewModel.ToDomain(cookie, now);
             await _pageViewService.RecordAsync(domainModel, token).ConfigureAwait(false);

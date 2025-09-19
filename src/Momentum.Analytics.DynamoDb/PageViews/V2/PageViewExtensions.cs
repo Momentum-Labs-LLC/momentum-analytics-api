@@ -9,6 +9,7 @@ namespace Momentum.Analytics.DynamoDb.PageViews.V2
         {
             return new Dictionary<string, AttributeValue>()
                 .AddField(PageViewConstants.COOKIE_ID, pageView.CookieId)
+                .AddField(PageViewConstants.VISIT_ID, pageView.VisitId.ToString())
                 .AddField(PageViewConstants.UTC_TIMESTAMP, pageView.UtcTimestamp)
                 .AddField(PageViewConstants.URL, pageView.Url)
                 .AddField(PageViewConstants.REFERER, pageView.Referer);
@@ -19,6 +20,7 @@ namespace Momentum.Analytics.DynamoDb.PageViews.V2
             return new PageView()
             {
                 CookieId = fields.ReadGuid(PageViewConstants.COOKIE_ID, true).Value,
+                VisitId = fields.ReadUlid(PageViewConstants.VISIT_ID),
                 UtcTimestamp = fields.ReadDateTime(PageViewConstants.UTC_TIMESTAMP, true).Value,
                 Url = fields.ReadString(PageViewConstants.URL),
                 Referer = fields.ReadString(PageViewConstants.REFERER)

@@ -66,6 +66,22 @@ namespace Momentum.Analytics.DynamoDb
             return result;
         } // end method
 
+        public static Ulid ReadUlid(this Dictionary<string, AttributeValue> fields, string name)
+        {
+            Ulid result;
+            var fieldValue = fields.ReadString(name);
+            if(!string.IsNullOrWhiteSpace(fieldValue))
+            {
+                result = Ulid.Parse(fieldValue);
+            } 
+            else
+            {
+                throw new ArgumentNullException(name, $"{name} field was not found in dynamodb fields dict.");
+            } // end if
+
+            return result;
+        } // end method
+
         public static Dictionary<string, AttributeValue> AddField(
             this Dictionary<string, AttributeValue> fields, 
             string name, 
