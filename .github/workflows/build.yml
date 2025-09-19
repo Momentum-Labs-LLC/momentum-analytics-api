@@ -70,42 +70,6 @@ jobs:
         run: |
           dotnet lambda package --project-location $PROJECT_DIRECTORY --configuration Release --m --docker-host-build-output-dir $OUTPUT_DIR --package-type image -dockerfile $DOCKERFILE --region $REGION --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG --msbuild-parameters -p:runtime=linux-x64
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-      - name: Build, tag, and push Page View Processing Image
-        env:
-          REGION: us-east-1
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: momentum-analytics-page-views-processing-repo
-          IMAGE_TAG: ${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.BUILD_NUMBER }}
-          PROJECT_DIRECTORY: src/Momentum.Analytics.PageViews.Lambda
-          DOCKERFILE: src/Momentum.Analytics.PageViews.Lambda/Dockerfile
-          OUTPUT_DIR: bin/Release/lambda-publish
-        run: |
-          dotnet lambda package --project-location $PROJECT_DIRECTORY --configuration Release --m --docker-host-build-output-dir $OUTPUT_DIR --package-type image -dockerfile $DOCKERFILE --region $REGION --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG --msbuild-parameters -p:runtime=linux-x64
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-      - name: Build, tag, and push Pii Processing Image
-        env:
-          REGION: us-east-1
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: momentum-analytics-pii-processing-repo
-          IMAGE_TAG: ${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.BUILD_NUMBER }}
-          PROJECT_DIRECTORY: src/Momentum.Analytics.Pii.Lambda
-          DOCKERFILE: src/Momentum.Analytics.Pii.Lambda/Dockerfile
-          OUTPUT_DIR: bin/Release/lambda-publish
-        run: |
-          dotnet lambda package --project-location $PROJECT_DIRECTORY --configuration Release --m --docker-host-build-output-dir $OUTPUT_DIR --package-type image -dockerfile $DOCKERFILE --region $REGION --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG --msbuild-parameters -p:runtime=linux-x64
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-      - name: Build, tag, and push Visit Reporting Image
-        env:
-          REGION: us-east-1
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: momentum-analytics-visit-reporting-repo
-          IMAGE_TAG: ${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.BUILD_NUMBER }}
-          PROJECT_DIRECTORY: src/Momentum.Analytics.Visits.Lambda
-          DOCKERFILE: src/Momentum.Analytics.Visits.Lambda/Dockerfile
-          OUTPUT_DIR: bin/Release/lambda-publish
-        run: |
-          dotnet lambda package --project-location $PROJECT_DIRECTORY --configuration Release --m --docker-host-build-output-dir $OUTPUT_DIR --package-type image -dockerfile $DOCKERFILE --region $REGION --image-tag $REGISTRY/$REPOSITORY:$IMAGE_TAG --msbuild-parameters -p:runtime=linux-x64
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
       - name: Build, tag, and push Export Image
         env:
           REGION: us-east-1

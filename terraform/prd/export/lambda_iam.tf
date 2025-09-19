@@ -42,6 +42,7 @@ resource "aws_iam_role_policy" "this-lambda-dynamo" {
           data.aws_dynamodb_table.this-pii.arn
         ]
       },
+    ]
   })
 }
 

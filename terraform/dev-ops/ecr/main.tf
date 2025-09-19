@@ -189,3 +189,29 @@ resource "aws_ecr_lifecycle_policy" "this-export-lifecycle" {
     ]
   })
 }
+
+# ECR Replication configuration
+resource "aws_ecr_replication_configuration" "replication" {
+  replication_configuration {
+    rule {
+      dynamic "repository_filter" {
+        for_each = [aws_ecr_repository.this-api-repository.name, aws_ecr_repository.this-export-repository.name]
+
+        content {
+          filter      = repository_filter.value
+          filter_type = "PREFIX_MATCH"
+        }
+      }
+
+      # Destination block(s)
+      dynamic "destination" {
+        for_each = var.replication_destinations
+
+        content {
+          region      = destination.value.region
+          registry_id = destination.value.account_id
+        }
+      }
+    }
+  }
+}
