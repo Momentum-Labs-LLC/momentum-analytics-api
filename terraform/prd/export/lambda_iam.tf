@@ -32,35 +32,16 @@ resource "aws_iam_role_policy" "this-lambda-dynamo" {
     Statement = [
       {
         Action = [
-          "dynamodb:BatchGetItem",
-          "dynamodb:BatchWriteItem",
-          "dynamodb:ConditionCheckItem",
-          "dynamodb:GetItem",
-          "dynamodb:PutItem",
-          "dynamodb:Query",
-          "dynamodb:Scan",
-          "dynamodb:UpdateItem"
+          "dynamodb:ExportTableToPointInTime",
+          "dynamodb:DescribeTable"
         ],
         Effect = "Allow"
         Resource = [
-          data.aws_dynamodb_table.this-visits.arn,
-          "${data.aws_dynamodb_table.this-visits.arn}/*",
+          data.aws_dynamodb_table.this-page-views.arn,
+          data.aws_dynamodb_table.this-collected-pii.arn,
+          data.aws_dynamodb_table.this-pii.arn
         ]
       },
-      {
-        Action = [
-          "dynamodb:Query",
-          "dynamodb:Scan",
-        ]
-        Effect = "Allow"
-        Resource = [
-          data.aws_dynamodb_table.this-collected-pii.arn,
-          "${data.aws_dynamodb_table.this-collected-pii.arn}/*",
-          data.aws_dynamodb_table.this-pii.arn,
-          "${data.aws_dynamodb_table.this-pii.arn}/*",
-        ]
-      }
-    ]
   })
 }
 
@@ -75,12 +56,14 @@ resource "aws_iam_role_policy" "this-lambda-s3" {
     Statement = [
       {
         Action = [
-          "s3:Put*",
+          "s3:PutObject",
+          "s3:GetBucketLocation",
+          "s3:ListBucket"
         ]
         Effect = "Allow"
         Resource = [
-          data.aws_s3_bucket.this-bucket.arn,
-          "${data.aws_s3_bucket.this-bucket.arn}/*",
+          data.aws_s3_bucket.this-export-bucket.arn,
+          "${data.aws_s3_bucket.this-export-bucket.arn}/*",
         ]
       }
     ]
