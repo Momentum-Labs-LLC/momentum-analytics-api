@@ -14,22 +14,13 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
                 CookieId = cookie.Id,
                 Referer = viewModel.Referer,
                 UtmParameters = viewModel.UtmParameters?
-                    .Select(x => 
-                        {
-                            UrchinTrackingParameter result = null;
-                            if(PageViewConstants.UTM_PARAMETERS.TryGetValue(x.Key, out UrchinParameterEnum utmParam))
-                            {
-                                result = new UrchinTrackingParameter()
-                                {
-                                    Parameter = utmParam,
-                                    Value = x.Value
-                                };
-                            } // end if
-                            
-                            return result;                    
-                        })
-                    .Where(x => x != null)
-                    .ToList(),
+                    .Where(x => PageViewConstants.UTM_PARAMETERS.ContainsKey(x.Key))
+                    .Select(x => new UrchinTrackingParameter()
+                    {
+                        Parameter = PageViewConstants.UTM_PARAMETERS[x.Key],
+                        Value = x.Value
+                    })
+                    .ToList() ?? null,
                 Domain = viewModel.Domain,
                 Path = viewModel.Path,
                 FunnelStep = viewModel.FunnelStep,
