@@ -6,7 +6,7 @@ namespace Momentum.Analytics.Lambda.Api.PageViews.V2
 {
     public static class PageViewExtensions
     {
-        public static PageView ToDomain(this PageViewViewModel viewModel, Cookie cookie, Instant timestamp)
+        public static PageView ToDomain(this PageViewV2ViewModel viewModel, Cookie cookie, Instant timestamp)
         {
             return new PageView()
             {

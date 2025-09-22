@@ -1,5 +1,5 @@
 {
-    "TableName": "momentum-prd-collected-pii",
+    "TableName": "CollectedPii",
     "KeySchema": [
         {
             "AttributeName": "PiiId",

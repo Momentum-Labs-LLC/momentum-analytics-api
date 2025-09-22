@@ -42,11 +42,11 @@ namespace Momentum.Analytics.Lambda.Api.PageViews.V2
         {
             IActionResult result = File(ApiConstants.GIF_BYTES, "image/gif");
 
-            PageViewViewModel? viewModel;
+            PageViewV2ViewModel? viewModel;
             var pageViewBytes = Convert.FromBase64String(base64PageView);
             using (var stream = new MemoryStream(pageViewBytes))
             {
-                viewModel = await JsonSerializer.DeserializeAsync<PageViewViewModel>(stream, cancellationToken: token).ConfigureAwait(false);
+                viewModel = await JsonSerializer.DeserializeAsync<PageViewV2ViewModel>(stream, cancellationToken: token).ConfigureAwait(false);
             } // end using
 
             if(viewModel != null)
@@ -71,7 +71,7 @@ namespace Momentum.Analytics.Lambda.Api.PageViews.V2
 
         [HttpPost]
         public async Task<IActionResult> PageViewedAsync(
-            [FromBody] PageViewViewModel pageView,
+            [FromBody] PageViewV2ViewModel pageView,
             [FromCookie(Name = CookieConstants.NAME)] string? cookieValue = null,
             CancellationToken token = default)
         {
@@ -103,7 +103,7 @@ namespace Momentum.Analytics.Lambda.Api.PageViews.V2
         // } // end method
 
         protected async Task AcceptPageViewAsync(
-            PageViewViewModel viewModel, 
+            PageViewV2ViewModel viewModel, 
             string? cookieValue = null,
             CancellationToken token = default)
         {

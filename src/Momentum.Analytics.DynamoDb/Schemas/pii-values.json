@@ -1,5 +1,5 @@
 {
-    "TableName": "momentum-prd-pii-values",
+    "TableName": "PiiValues",
     "KeySchema": [
         {
             "AttributeName": "Value",
