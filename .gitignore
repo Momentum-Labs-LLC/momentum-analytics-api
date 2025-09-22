@@ -422,3 +422,6 @@ terraform.rc
 # to change depending on the environment.
 #
 *.tfvars
+
+data/
+.DS_Store
