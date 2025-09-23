@@ -8,6 +8,7 @@
       "applicationUrl": "https://localhost:5263",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "COOKIE_SSM": "0",
         "AWS_REGION": "us-east-1",
         "AWS_ACCESS_KEY_ID": "DUMMYIDEXAMPLE",
         "AWS_SECRET_ACCESS_KEY": "DUMMYEXAMPLEKEY",

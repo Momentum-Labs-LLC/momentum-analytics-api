@@ -57,7 +57,7 @@ namespace Momentum.Analytics.Lambda.Api.PageViews.V2
                 }
                 catch(Exception ex)
                 {
-                    _logger.LogError(new EventId(0), ex, "Failed to accept page view.");
+                    _logger.LogError(new EventId(0), ex, $"Failed to accept (GET) page view: {ex.Message}");
                     result = StatusCode(500);
                 } // end try/catch
             }
@@ -83,7 +83,7 @@ namespace Momentum.Analytics.Lambda.Api.PageViews.V2
             }
             catch(Exception ex)
             {
-                _logger.LogError(new EventId(0), ex, "Failed to accept page view.");
+                _logger.LogError(new EventId(0), ex, $"Failed to accept (POST) page view: {ex.Message}");
                 result = StatusCode(500);
             } // end try/catch
 
