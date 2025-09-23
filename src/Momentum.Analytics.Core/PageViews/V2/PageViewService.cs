@@ -55,39 +55,15 @@ namespace Momentum.Analytics.Core.PageViews.V2
             {
                 return null;
             } // end if
-            
-            var queryStringPieces = urlSplit[1].Split('&');
 
-            var queryStringDict = queryStringPieces
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .ToDictionary(
-                    x => x.Split('=')[0], 
-                    x => {
-                        var pieces = x.Split('=');
-                        if(pieces.Length == 2)
-                        {
-                            return pieces[1];
-                        }
-                        return null;
-                    }, StringComparer.OrdinalIgnoreCase);
-
-            if(queryStringDict == null || queryStringDict.Count == 0)
-            {
-                return null;
-            } // end if
-
-            if(queryStringDict.TryGetValue("yourAppointmentId", out string? yourAppointmentId)
-                && !string.IsNullOrWhiteSpace(yourAppointmentId))
-            {
-                return yourAppointmentId;
-            }
-            else if(queryStringDict.TryGetValue("appointmentId", out string? appointmentId)
-                && !string.IsNullOrWhiteSpace(appointmentId))
-            {
-                return appointmentId;
-            } // end if
-
-            return null;
+            return urlSplit[1]
+                .Split('&')
+                .Where(x => !string.IsNullOrWhiteSpace(x)
+                    && (x.StartsWith("appointmentId=", StringComparison.OrdinalIgnoreCase) 
+                        || x.StartsWith("yourAppointmentId=", StringComparison.OrdinalIgnoreCase))
+                    && !x.EndsWith("="))
+                .Select(x => x.Split('=')[1])
+                .FirstOrDefault();
         } // end method
     } // end class
 } // end namespace
