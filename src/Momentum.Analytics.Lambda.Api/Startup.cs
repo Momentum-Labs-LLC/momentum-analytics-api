@@ -3,6 +3,7 @@ using Momentum.Analytics.Core.Visits;
 using Momentum.Analytics.DynamoDb.PageViews;
 using Momentum.Analytics.DynamoDb.PageViews.V2;
 using Momentum.Analytics.DynamoDb.Pii;
+using Momentum.Analytics.DynamoDb.UserActions;
 using Momentum.Analytics.DynamoDb.Visits;
 using Momentum.Analytics.Lambda.Api.Cookies;
 using Momentum.FromCookie;
@@ -28,7 +29,7 @@ public class Startup
             {
                 config.AddFilter("Microsoft", LogLevel.Warning);
                 config.AddFilter("System", LogLevel.Warning);
-                config.SetMinimumLevel(LogLevel.Error);
+                config.SetMinimumLevel(LogLevel.Information);
                 config.AddLambdaLogger();
             })
             .AddMemoryCache()
@@ -39,6 +40,7 @@ public class Startup
             .AddPageViewV2Service()
             .AddDynamoDbPiiService()
             .AddDynamoDbVisitService()
+            .AddFieldChangeService()
             .AddCookieWriter();
         
 

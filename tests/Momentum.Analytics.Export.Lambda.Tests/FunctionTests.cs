@@ -67,7 +67,7 @@ public class FunctionTests
             .Returns(Task.CompletedTask);
         
         var stream = new MemoryStream();
-        await _function.FunctionHandlerAsync(stream).ConfigureAwait(false);
+        await _function.FunctionHandlerAsync(stream);
 
         Assert.Equal(new DateTime(2025, 9, 18, 4, 0, 0), startOffset.UtcDateTime);
         Assert.Equal(new DateTime(2025, 9, 19, 4, 0, 0), endOffset.UtcDateTime);

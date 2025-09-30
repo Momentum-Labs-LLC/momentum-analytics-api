@@ -12,14 +12,10 @@ namespace Momentum.Analytics.DynamoDb.Client
             _clientConfiguration = clientConfiguration ?? throw new ArgumentNullException(nameof(clientConfiguration));
         } // end method
 
-        public virtual async Task<IAmazonDynamoDB?> GetAsync(CancellationToken token = default)
+        public virtual Task<IAmazonDynamoDB> GetAsync(CancellationToken token = default)
         {
-            IAmazonDynamoDB? result = null;
-            if(string.IsNullOrWhiteSpace(_clientConfiguration.ServiceUrl))
-            {
-                result = new AmazonDynamoDBClient();
-            }
-            else
+            IAmazonDynamoDB result = new AmazonDynamoDBClient();
+            if(!string.IsNullOrWhiteSpace(_clientConfiguration.ServiceUrl))
             {
                 var config = new AmazonDynamoDBConfig()
                 {
@@ -28,7 +24,7 @@ namespace Momentum.Analytics.DynamoDb.Client
                 result = new AmazonDynamoDBClient(config);
             } // end if
             
-            return result;
+            return Task.FromResult(result);
         } // end method
     } // end class
 } // end namespace

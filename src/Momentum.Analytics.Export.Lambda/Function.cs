@@ -58,7 +58,7 @@ public class Function
         var s3ExportBucket = configuration.GetValue<string>("EXPORT_BUCKET", "momentum-prd-exports");
 
         var pageViewExportRequest = new IncrementalExportRequest(
-            TableArn: configuration.GetValue<string>("PAGE_VIEWS_TABLE_ARN"),
+            TableArn: configuration.GetValue<string>("PAGE_VIEWS_TABLE_ARN")!,
             S3Bucket: s3ExportBucket,
             S3Prefix: $"pageviews/{dateValue}/",
             FromTime: timeRange.UtcStart.ToDateTimeUtc(),
@@ -73,7 +73,7 @@ public class Function
         }
 
         var collectedPiiExportRequest = new IncrementalExportRequest(
-            TableArn: configuration.GetValue<string>("COLLECTED_PII_TABLE_ARN"),
+            TableArn: configuration.GetValue<string>("COLLECTED_PII_TABLE_ARN")!,
             S3Bucket: s3ExportBucket,
             S3Prefix: $"collected_pii/{dateValue}/",
             FromTime: timeRange.UtcStart.ToDateTimeUtc(),
@@ -88,7 +88,7 @@ public class Function
         }
 
         var piiValueExportRequest = new IncrementalExportRequest(
-            TableArn: configuration.GetValue<string>("PII_VALUES_TABLE_ARN"),
+            TableArn: configuration.GetValue<string>("PII_VALUES_TABLE_ARN")!,
             S3Bucket: s3ExportBucket,
             S3Prefix: $"pii_values/{dateValue}/",
             FromTime: timeRange.UtcStart.ToDateTimeUtc(),

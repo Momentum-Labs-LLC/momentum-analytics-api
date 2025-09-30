@@ -11,10 +11,11 @@ namespace Momentum.Analytics.Visits.Lambda.IdentifiedVisits
         public S3ClientFactory(ILogger<S3ClientFactory> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            Environment.SetEnvironmentVariable("AWS_REGION", "us-east-1");
         } // end method
-        public virtual async Task<IAmazonS3> GetAsync(CancellationToken token = default)
+        public virtual Task<IAmazonS3> GetAsync(CancellationToken token = default)
         {
-            return new AmazonS3Client();
+            return Task.FromResult<IAmazonS3>(new AmazonS3Client());
         } // end method
     } // end class
 } // end namespace

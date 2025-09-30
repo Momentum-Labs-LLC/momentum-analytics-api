@@ -102,7 +102,7 @@ namespace Momentum.Analytics.Pii.Lambda
                     }
                     catch(Exception ex)
                     {
-                        _logger.LogError(new EventId(0), $"Unable to deserialize json: {json}.");
+                        _logger.LogError(new EventId(0), ex, "Unable to deserialize json: {json}.", json);
                     } // end try/catch
                 } // end if
             } // end using
@@ -113,19 +113,21 @@ namespace Momentum.Analytics.Pii.Lambda
             } // end foreach
         } // end if
 
-        protected async Task<IEnumerable<DynamoDBEvent>> ReadEventsFromSqsAsync(SQSEvent sqsEvent, CancellationToken token = default)
+        protected Task<IEnumerable<DynamoDBEvent>> ReadEventsFromSqsAsync(SQSEvent sqsEvent, CancellationToken token = default)
         {
             var dynamoDbEvents = new List<DynamoDBEvent>();
 
             if(sqsEvent != null && sqsEvent.Records != null && sqsEvent.Records.Any())
             {
                 dynamoDbEvents = sqsEvent.Records
+                    .Where(x => !string.IsNullOrWhiteSpace(x.Body))
                     .Select(msg => JsonSerializer.Deserialize<DynamoDBEvent>(msg.Body))
                     .Where(x => x != null)
+                    .Cast<DynamoDBEvent>()
                     .ToList();
             } // end if
 
-            return dynamoDbEvents;
+            return Task.FromResult<IEnumerable<DynamoDBEvent>>(dynamoDbEvents);
         } // end method
 
         protected async Task HandleDynamoDbEventAsync(DynamoDBEvent dynamoEvent, CancellationToken token = default)
@@ -147,7 +149,7 @@ namespace Momentum.Analytics.Pii.Lambda
                         var collectedPii = BuildCollectedPii(record.Dynamodb);
                         if(collectedPii != null) 
                         {
-                            var piiValue = await piiService.GetPiiAsync(collectedPii.PiiId.Value).ConfigureAwait(false);
+                            var piiValue = await piiService.GetPiiAsync(collectedPii.PiiId!.Value).ConfigureAwait(false);
 
                             if(piiValue != null)
                             {

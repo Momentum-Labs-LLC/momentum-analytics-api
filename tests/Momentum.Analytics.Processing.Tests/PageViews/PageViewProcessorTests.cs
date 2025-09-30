@@ -59,7 +59,7 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     UtcExpiration = pageView.UtcTimestamp.Plus(Duration.FromDays(1))
                 });
 
-            await _processor.ProcessAsync(pageView).ConfigureAwait(false);
+            await _processor.ProcessAsync(pageView);
 
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -78,12 +78,12 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                 };
 
             _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Visit)null);
+                .ReturnsAsync((Visit?)null);
 
             _visitService.Setup(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _processor.ProcessAsync(pageView).ConfigureAwait(false);
+            await _processor.ProcessAsync(pageView);
 
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -112,7 +112,7 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     FunnelStep = 0
                 });
 
-            await _processor.ProcessAsync(pageView).ConfigureAwait(false);
+            await _processor.ProcessAsync(pageView);
             
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);            
@@ -140,7 +140,7 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     UtcIdentifiedTimestamp = pageView.UtcTimestamp.Minus(Duration.FromMinutes(2)),
                 });
 
-            await _processor.ProcessAsync(pageView).ConfigureAwait(false);
+            await _processor.ProcessAsync(pageView);
 
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -165,7 +165,7 @@ namespace Momentum.Analytics.Processing.Tests.PageViews
                     UtcIdentifiedTimestamp = pageView.UtcTimestamp.Minus(Duration.FromMinutes(1))
                 });
 
-            await _processor.ProcessAsync(pageView).ConfigureAwait(false);
+            await _processor.ProcessAsync(pageView);
 
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Never);

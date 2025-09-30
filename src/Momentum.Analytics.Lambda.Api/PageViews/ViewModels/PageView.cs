@@ -11,7 +11,7 @@ namespace Momentum.Analytics.Lambda.Api.PageViews.ViewModels
         public Dictionary<string, string>? UtmParameters { get; set; }
 
         [JsonPropertyName("domain")]
-        public string Domain { get; set; }
+        public string Domain { get; set; } = string.Empty;
 
         [JsonPropertyName("path")]
         public string? Path { get; set; } = "/";

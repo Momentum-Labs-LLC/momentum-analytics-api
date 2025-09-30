@@ -53,7 +53,7 @@ namespace Momentum.Analytics.Processing.Tests.Visits
                 UtcEnd = DateTime.UtcNow.ToInstant()
             };             
             
-            await _processor.ProcessAsync(timeRange).ConfigureAwait(false);
+            await _processor.ProcessAsync(timeRange);
 
             _visitService.Verify(x => x.GetUnidentifiedAsync(It.IsAny<ITimeRange>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
             _piiService.Verify(x => x.GetUniqueUserIdsAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -85,7 +85,7 @@ namespace Momentum.Analytics.Processing.Tests.Visits
                 UtcEnd = DateTime.UtcNow.ToInstant()
             };             
             
-            await _processor.ProcessAsync(timeRange).ConfigureAwait(false);
+            await _processor.ProcessAsync(timeRange);
 
             _visitService.Verify(x => x.GetUnidentifiedAsync(It.IsAny<ITimeRange>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
             _piiService.Verify(x => x.GetUniqueUserIdsAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -126,14 +126,14 @@ namespace Momentum.Analytics.Processing.Tests.Visits
                 UtcEnd = DateTime.UtcNow.ToInstant()
             };             
             
-            await _processor.ProcessAsync(timeRange).ConfigureAwait(false);
+            await _processor.ProcessAsync(timeRange);
 
             _visitService.Verify(x => x.GetUnidentifiedAsync(It.IsAny<ITimeRange>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
             _piiService.Verify(x => x.GetUniqueUserIdsAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);
         } // end method
 
-        protected new List<Visit> BuildUnidentifiedVisits(int count)
+        protected List<Visit> BuildUnidentifiedVisits(int count)
         {
             var result = new List<Visit>();
             for(int i = 0; i < count; i++)
@@ -175,7 +175,7 @@ namespace Momentum.Analytics.Processing.Tests.Visits
                 UtcEnd = DateTime.UtcNow.ToInstant()
             };             
             
-            await _processor.ProcessAsync(timeRange).ConfigureAwait(false);
+            await _processor.ProcessAsync(timeRange);
 
             _visitService.Verify(x => x.GetUnidentifiedAsync(It.IsAny<ITimeRange>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
             _piiService.Verify(x => x.GetUniqueUserIdsAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Exactly(2));

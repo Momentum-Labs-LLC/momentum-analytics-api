@@ -22,9 +22,9 @@ namespace Momentum.Analytics.DynamoDb.Visits
         {
         } // end method
 
-        public virtual async Task<IDynamoSearchResponse<Visit>> GetIdentifiedAsync(
+        public virtual Task<IDynamoSearchResponse<Visit>> GetIdentifiedAsync(
             ITimeRange timeRange, 
-            Dictionary<string, AttributeValue> page, 
+            Dictionary<string, AttributeValue>? page = default, 
             CancellationToken token = default)
         {
             throw new NotImplementedException();
@@ -32,7 +32,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
 
         public virtual async Task<IDynamoSearchResponse<Visit>> GetIdentifiedAsync(
             Instant hour,
-            Dictionary<string, AttributeValue> page,
+            Dictionary<string, AttributeValue>? page = default,
             CancellationToken token = default)
         {
             var result = new DynamoSearchResponse<Visit>();
@@ -40,7 +40,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
             {
                 TableName = _tableConfiguration.TableName,
                 IndexName = _tableConfiguration.IdentifiedIndex,
-                ExclusiveStartKey = page,
+                ExclusiveStartKey = page ?? new Dictionary<string, AttributeValue>(),
                 KeyConditionExpression = $"{VisitConstants.UTC_IDENTIFIED_HOUR} = :hour",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
                     .AddField(":hour", hour)
@@ -84,9 +84,9 @@ namespace Momentum.Analytics.DynamoDb.Visits
             return result;
         } // end if
 
-        public virtual async Task<IDynamoSearchResponse<Visit>> GetUnidentifiedAsync(
+        public virtual Task<IDynamoSearchResponse<Visit>> GetUnidentifiedAsync(
             ITimeRange timeRange, 
-            Dictionary<string, AttributeValue> page, 
+            Dictionary<string, AttributeValue>? page = default, 
             CancellationToken token = default)
         {
             throw new NotImplementedException();
@@ -95,7 +95,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
         public virtual async Task<IDynamoSearchResponse<Visit>> GetUnidentifiedAsync(
             Guid cookieId, 
             Instant timestamp,
-            Dictionary<string, AttributeValue> page, 
+            Dictionary<string, AttributeValue>? page = default, 
             CancellationToken token = default)
         {
             var result = new DynamoSearchResponse<Visit>();
@@ -103,7 +103,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
             {
                 TableName = _tableConfiguration.TableName,
                 IndexName = _tableConfiguration.CookieIndex,
-                ExclusiveStartKey = page,
+                ExclusiveStartKey = page ?? new Dictionary<string, AttributeValue>(),
                 KeyConditionExpression = $"{VisitConstants.COOKIE_ID} = :cookie_id and {VisitConstants.UTC_START} < :now",
                 FilterExpression = $"{VisitConstants.IS_IDENTIFIED} = :no",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
@@ -138,7 +138,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
 
         public virtual async Task<IDynamoSearchResponse<Visit>> GetUnidentifiedAsync(
             Instant hour, 
-            Dictionary<string, AttributeValue> page, 
+            Dictionary<string, AttributeValue>? page = default, 
             CancellationToken token = default)
         {
             var result = new DynamoSearchResponse<Visit>();
@@ -146,7 +146,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
             {
                 TableName = _tableConfiguration.TableName,
                 IndexName = _tableConfiguration.VisitStartIndex,
-                ExclusiveStartKey = page,
+                ExclusiveStartKey = page ?? new Dictionary<string, AttributeValue>(),
                 KeyConditionExpression = $"{VisitConstants.UTC_START_HOUR} = :hour",
                 FilterExpression = $"{VisitConstants.IS_IDENTIFIED} = :no",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>()

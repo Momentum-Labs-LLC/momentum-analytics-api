@@ -88,7 +88,7 @@ namespace Momentum.Analytics.Pii.Lambda.Tests
         } // end method
 
         [Fact]
-        public async Task DI_PiiService()
+        public void DI_PiiService()
         {
             _function = new TestFunction();
             var piiService = _function.GetPiiService();
@@ -98,7 +98,7 @@ namespace Momentum.Analytics.Pii.Lambda.Tests
         } // end method
 
         [Fact]
-        public async Task DI_Processor()
+        public void DI_Processor()
         {
             _function = new TestFunction();
             var processor = _function.GetProcessor();
@@ -145,7 +145,7 @@ namespace Momentum.Analytics.Pii.Lambda.Tests
             };
 
             var inputStream = ToStream(input);
-            await _function.FunctionHandlerAsync(inputStream).ConfigureAwait(false);
+            await _function.FunctionHandlerAsync(inputStream);
 
             _piiService.Verify(x => x.GetPiiAsync(piiId, It.IsAny<CancellationToken>()), Times.Once);
             _processor.Verify(x => x.ProcessAsync(It.IsAny<CollectedPii>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -202,7 +202,7 @@ namespace Momentum.Analytics.Pii.Lambda.Tests
             };
 
             var inputStream = ToStream(sqsEvent);
-            await _function.FunctionHandlerAsync(inputStream).ConfigureAwait(false);
+            await _function.FunctionHandlerAsync(inputStream);
 
             _piiService.Verify(x => x.GetPiiAsync(piiId, It.IsAny<CancellationToken>()), Times.Once);
             _processor.Verify(x => x.ProcessAsync(It.IsAny<CollectedPii>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -215,7 +215,7 @@ namespace Momentum.Analytics.Pii.Lambda.Tests
             var now = NodaTime.SystemClock.Instance.GetCurrentInstant();
             var piiId = Guid.NewGuid();
             _piiService.Setup(x => x.GetPiiAsync(piiId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync((PiiValue)null);
+                .ReturnsAsync((PiiValue?)null);
 
             _processor.Setup(x => x.ProcessAsync(It.IsAny<CollectedPii>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
@@ -253,7 +253,7 @@ namespace Momentum.Analytics.Pii.Lambda.Tests
             try
             {
                 var stream = new MemoryStream();
-                await _function.FunctionHandlerAsync(stream).ConfigureAwait(false);
+                await _function.FunctionHandlerAsync(stream);
                 Assert.Fail("should be an exception");
             }
             catch(Exception ex)
@@ -273,14 +273,14 @@ namespace Momentum.Analytics.Pii.Lambda.Tests
         {
 
         } // end method
-        public IPiiService GetPiiService()
+        public IPiiService? GetPiiService()
         {
-            return _serviceProvider.GetService<IPiiService>();
+            return _serviceProvider.GetRequiredService<IPiiService>();
         } // end method
 
-        public IDynamoDbCollectedPiiProcessor GetProcessor()
+        public IDynamoDbCollectedPiiProcessor? GetProcessor()
         {
-            return _serviceProvider.GetService<IDynamoDbCollectedPiiProcessor>();
+            return _serviceProvider.GetRequiredService<IDynamoDbCollectedPiiProcessor>();
         } // end method
     } // end class
 } // end namespace

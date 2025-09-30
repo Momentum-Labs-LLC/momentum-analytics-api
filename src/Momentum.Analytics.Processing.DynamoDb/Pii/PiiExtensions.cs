@@ -12,15 +12,15 @@ public static class PiiExtensions
         var result = new CollectedPii();
 
         result.PiiId = fields.ReadGuid(CollectedPiiConstants.PII_ID, true);
-        result.CookieId = fields.ReadGuid(CollectedPiiConstants.COOKIE_ID, true).Value;
-        result.UtcTimestamp = fields.ReadDateTime(CollectedPiiConstants.UTC_TIMESTAMP, true).Value;
+        result.CookieId = fields.ReadGuid(CollectedPiiConstants.COOKIE_ID, true)!.Value;
+        result.UtcTimestamp = fields.ReadDateTime(CollectedPiiConstants.UTC_TIMESTAMP, true)!.Value;
 
         var piiTypeId = fields.ReadNullableInteger(CollectedPiiConstants.PII_TYPE_ID);
         if(piiTypeId.HasValue)
         {
             result.Pii = new PiiValue()
             {
-                Id = result.PiiId.Value,
+                Id = result.PiiId!.Value,
                 PiiType = (PiiTypeEnum)piiTypeId.Value
             };
         } // end if

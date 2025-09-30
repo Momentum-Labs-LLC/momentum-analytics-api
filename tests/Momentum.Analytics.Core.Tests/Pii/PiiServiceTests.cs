@@ -63,11 +63,11 @@ namespace Momentum.Analytics.Core.Tests.Pii
                     PiiType = PiiTypeEnum.UserId
                 });
 
-            var results = await _service.GetUniqueUserIdsAsync(cookieId).ConfigureAwait(false);
+            var results = await _service.GetUniqueUserIdsAsync(cookieId);
 
             Assert.NotNull(results);
             Assert.NotEmpty(results);
-            Assert.Equal(1, results.Count());
+            Assert.Single(results);
 
             _collectedPiiStorage.Verify(x => x.GetLatestUserIdsAsync(cookieId, It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
             _piiValueStorage.Verify(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -91,7 +91,7 @@ namespace Momentum.Analytics.Core.Tests.Pii
                     PiiType = PiiTypeEnum.UserId
                 });
 
-            var results = await _service.GetUniqueUserIdsAsync(cookieId, maximum).ConfigureAwait(false);
+            var results = await _service.GetUniqueUserIdsAsync(cookieId, maximum);
 
             Assert.NotNull(results);
             Assert.NotEmpty(results);
@@ -117,14 +117,14 @@ namespace Momentum.Analytics.Core.Tests.Pii
             };
 
             _piiValueStorage.Setup(x => x.GetByValueAsync(collectedPii.Pii.Value, It.IsAny<CancellationToken>()))
-                .ReturnsAsync((PiiValue)null);
+                .ReturnsAsync((PiiValue?)null);
             _piiValueStorage.Setup(x => x.InsertAsync(It.IsAny<PiiValue>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             _collectedPiiStorage.Setup(x => x.InsertAysnc(It.IsAny<CollectedPii>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.RecordAsync(collectedPii).ConfigureAwait(false);
+            await _service.RecordAsync(collectedPii);
 
             _emailHasher.Verify(x => x.HashEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
             _piiValueStorage.Verify(x => x.GetByValueAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -159,7 +159,7 @@ namespace Momentum.Analytics.Core.Tests.Pii
             _collectedPiiStorage.Setup(x => x.InsertAysnc(It.IsAny<CollectedPii>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.RecordAsync(collectedPii).ConfigureAwait(false);
+            await _service.RecordAsync(collectedPii);
 
             _emailHasher.Verify(x => x.HashEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
             _piiValueStorage.Verify(x => x.GetByValueAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -198,7 +198,7 @@ namespace Momentum.Analytics.Core.Tests.Pii
             _collectedPiiStorage.Setup(x => x.InsertAysnc(It.IsAny<CollectedPii>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.RecordAsync(collectedPii).ConfigureAwait(false);
+            await _service.RecordAsync(collectedPii);
 
             _emailHasher.Verify(x => x.HashEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
             _piiValueStorage.Verify(x => x.GetByValueAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);

@@ -22,7 +22,7 @@ namespace Momentum.Analytics.Visits.Lambda.Tests.IdentifiedVisits
         [Fact]
         public async Task GetAsync()
         {
-            var result = _factory.GetAsync();
+            var result = await _factory.GetAsync();
             Assert.NotNull(result);
         } // end method
     } // end class

@@ -66,7 +66,7 @@ namespace Momentum.Analytics.PageViews.Lambda.Tests
                 }
             };
 
-            await _function.FunctionHandlerAsync(input).ConfigureAwait(false);
+            await _function.FunctionHandlerAsync(input);
 
             _processor.Verify(x => x.ProcessAsync(It.IsAny<PageView>(), It.IsAny<CancellationToken>()), Times.Once);
         } // end method
@@ -79,7 +79,7 @@ namespace Momentum.Analytics.PageViews.Lambda.Tests
 
         public IDynamoDbPageViewProcessor GetProcessor()
         {
-            return _serviceProvider.GetService<IDynamoDbPageViewProcessor>();
+            return _serviceProvider.GetRequiredService<IDynamoDbPageViewProcessor>();
         } // end method
     } // end method
 } // end namespace

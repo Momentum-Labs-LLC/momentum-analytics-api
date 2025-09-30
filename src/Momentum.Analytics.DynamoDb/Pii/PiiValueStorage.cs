@@ -18,7 +18,7 @@ namespace Momentum.Analytics.DynamoDb.Pii
         {
         } // end method
 
-        public virtual async Task<PiiValue>? GetByIdAsync(Guid id, CancellationToken token = default)
+        public virtual async Task<PiiValue?> GetByIdAsync(Guid id, CancellationToken token = default)
         {
             PiiValue? result = null;
             var request = new QueryRequest()

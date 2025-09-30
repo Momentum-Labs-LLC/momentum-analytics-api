@@ -17,7 +17,6 @@ namespace Momentum.Analytics.Lambda.Api.PageViews.V2
         protected readonly ICookieWriter _cookieWriter;
         protected readonly IClockService _clockService;
         protected readonly IVisitWindowCalculator _visitWindowCalculator;
-        protected readonly IHttpContextAccessor _httpContextAccessor;
         protected readonly ILogger _logger;
 
         public PageViewsController(

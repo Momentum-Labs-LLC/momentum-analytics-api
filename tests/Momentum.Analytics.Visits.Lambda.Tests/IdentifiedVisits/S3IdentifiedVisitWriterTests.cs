@@ -95,7 +95,7 @@ namespace Momentum.Analytics.Visits.Lambda.Tests.IdentifiedVisits
             _s3Client.Setup(x => x.PutObjectAsync(It.IsAny<PutObjectRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(putResponse);
 
-            await _writer.WriteAsync(timeRange, visits).ConfigureAwait(false);
+            await _writer.WriteAsync(timeRange, visits);
 
             _s3Client.Verify(x => x.PutObjectAsync(It.IsAny<PutObjectRequest>(), It.IsAny<CancellationToken>()), Times.Once);
         } // end method

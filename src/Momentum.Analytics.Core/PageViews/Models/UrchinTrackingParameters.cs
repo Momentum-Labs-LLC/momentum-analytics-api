@@ -14,6 +14,6 @@ namespace Momentum.Analytics.Core.PageViews.Models
         /// <summary>
         /// The value of the parameter.
         /// </summary>
-        public string Value { get; set; }
+        public string Value { get; set; } = string.Empty;
     } // end class
 } // end namespace
