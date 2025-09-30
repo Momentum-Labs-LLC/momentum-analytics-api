@@ -54,13 +54,13 @@ public class Function
         var incrementalExporter = _serviceProvider.GetRequiredService<IIncrementalExporter>();
 
         var timeRange = timeRangeProvider.TimeRange;
-        var dateValue = timeRangeProvider.TimeRange.UtcStart.ToDateTimeOffset().ToString("yyyy/MM/dd");
+        var dateValue = timeRangeProvider.TimeRange.UtcStart.ToDateTimeOffset().ToString("yyyy/MM");
         var s3ExportBucket = configuration.GetValue<string>("EXPORT_BUCKET", "momentum-prd-exports");
 
         var pageViewExportRequest = new IncrementalExportRequest(
             TableArn: configuration.GetValue<string>("PAGE_VIEWS_TABLE_ARN"),
             S3Bucket: s3ExportBucket,
-            S3Prefix: $"{dateValue}/pageviews/",
+            S3Prefix: $"pageviews/{dateValue}/",
             FromTime: timeRange.UtcStart.ToDateTimeUtc(),
             ToTime: timeRange.UtcEnd.ToDateTimeUtc(),
             ExportFormat: ExportFormat.DYNAMODB_JSON,
@@ -75,7 +75,7 @@ public class Function
         var collectedPiiExportRequest = new IncrementalExportRequest(
             TableArn: configuration.GetValue<string>("COLLECTED_PII_TABLE_ARN"),
             S3Bucket: s3ExportBucket,
-            S3Prefix: $"{dateValue}/collected_pii/",
+            S3Prefix: $"collected_pii/{dateValue}/",
             FromTime: timeRange.UtcStart.ToDateTimeUtc(),
             ToTime: timeRange.UtcEnd.ToDateTimeUtc(),
             ExportFormat: ExportFormat.DYNAMODB_JSON,
@@ -90,7 +90,7 @@ public class Function
         var piiValueExportRequest = new IncrementalExportRequest(
             TableArn: configuration.GetValue<string>("PII_VALUES_TABLE_ARN"),
             S3Bucket: s3ExportBucket,
-            S3Prefix: $"{dateValue}/pii_values/",
+            S3Prefix: $"pii_values/{dateValue}/",
             FromTime: timeRange.UtcStart.ToDateTimeUtc(),
             ToTime: timeRange.UtcEnd.ToDateTimeUtc(),
             ExportFormat: ExportFormat.DYNAMODB_JSON,
