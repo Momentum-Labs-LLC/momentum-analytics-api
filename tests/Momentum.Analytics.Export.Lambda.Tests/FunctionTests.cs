@@ -75,7 +75,7 @@ public class FunctionTests
         _incrementalExporter.Verify(x => x.ExportAsync(It.Is<IncrementalExportRequest>(x => 
             x.TableArn == "pageviews_arn"
             && x.S3Bucket == "exports"
-            && x.S3Prefix == $"{startOffset.ToString("yyyy/MM/dd")}/pageviews/"
+            && x.S3Prefix == $"pageviews/{startOffset.ToString("yyyy/MM")}/"
             && x.FromTime == startOffset.UtcDateTime
             && x.ToTime == endOffset.UtcDateTime
             && x.ExportFormat == ExportFormat.DYNAMODB_JSON

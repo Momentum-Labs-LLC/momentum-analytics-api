@@ -63,4 +63,23 @@ public class PageViewServiceTests
         _storage.Verify(x => x.InsertAsync(pageView, It.IsAny<CancellationToken>()), Times.Once);
         _piiService.Verify(x => x.RecordAsync(It.Is<CollectedPii>(x => x.Pii.Value == "12345" && x.Pii.PiiType == PiiTypeEnum.AppointmentId), It.IsAny<CancellationToken>()), Times.Once);
     } // end method
+
+    [Theory]
+    [InlineData("https://test.com?doubleKey=123&doubleKey=321")]
+    public async Task RecordAsync_WeirdQueryStrings(string url)
+    {
+        var pageView = new PageView()
+        {
+            CookieId = Guid.NewGuid(),
+            VisitId = Ulid.NewUlid(),
+            UtcTimestamp = _clockService.Now,
+            Url = "https://test.com",
+            Referer = "https://test.com"
+        };
+
+        await _service.RecordAsync(pageView).ConfigureAwait(false);
+
+        _storage.Verify(x => x.InsertAsync(pageView, It.IsAny<CancellationToken>()), Times.Once);
+        _piiService.Verify(x => x.RecordAsync(It.IsAny<CollectedPii>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
 } // end class
