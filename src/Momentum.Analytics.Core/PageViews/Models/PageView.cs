@@ -11,7 +11,7 @@ namespace Momentum.Analytics.Core.PageViews.Models
         /// <summary>
         /// Gets or sets the domain of the page being viewed.
         /// </summary>
-        public string Domain { get; set; }
+        public string Domain { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the path of the page being viewed.

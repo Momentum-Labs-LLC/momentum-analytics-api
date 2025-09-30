@@ -59,7 +59,7 @@ namespace Momentum.Analytics.DynamoDb.Pii
         public virtual async Task<IDynamoSearchResponse<CollectedPii>> GetLatestUserIdsAsync(
             Guid cookieId, 
             int size = 10, 
-            Dictionary<string, AttributeValue> page = null, 
+            Dictionary<string, AttributeValue>? page = default, 
             CancellationToken token = default)
         {
             var result = new DynamoSearchResponse<CollectedPii>();

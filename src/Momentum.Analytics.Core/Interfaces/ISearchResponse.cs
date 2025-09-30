@@ -26,7 +26,7 @@ namespace Momentum.Analytics.Core.Interfaces
         /// <summary>
         /// Gets or sets the information required to get the next page.
         /// </summary>
-        TNextPage NextPage { get; }
+        TNextPage? NextPage { get; }
     } // end interface
 
     public interface ISearchResponse<T> : ISearchResponse<T, int> {} // end interface

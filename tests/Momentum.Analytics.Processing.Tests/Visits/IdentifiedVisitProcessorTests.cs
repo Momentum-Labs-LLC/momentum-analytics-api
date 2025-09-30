@@ -35,7 +35,7 @@ namespace Momentum.Analytics.Processing.Tests.Visits
             _visitService.Setup(x => x.GetIdentifiedAsync(timeRange.Object, It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new SearchResponse<Visit>());
 
-            await _processor.ReportAsync(timeRange.Object).ConfigureAwait(false);
+            await _processor.ReportAsync(timeRange.Object);
 
             _visitService.Verify(x => x.GetIdentifiedAsync(timeRange.Object, It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
             _identifiedVisitWriter.Verify(x => x.WriteAsync(It.IsAny<ITimeRange>(), It.IsAny<IEnumerable<Visit>>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -57,7 +57,7 @@ namespace Momentum.Analytics.Processing.Tests.Visits
             _identifiedVisitWriter.Setup(x => x.WriteAsync(timeRange.Object, It.IsAny<IEnumerable<Visit>>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _processor.ReportAsync(timeRange.Object).ConfigureAwait(false);
+            await _processor.ReportAsync(timeRange.Object);
 
             _visitService.Verify(x => x.GetIdentifiedAsync(timeRange.Object, It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
             _identifiedVisitWriter.Verify(x => x.WriteAsync(It.IsAny<ITimeRange>(), It.IsAny<IEnumerable<Visit>>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -88,7 +88,7 @@ namespace Momentum.Analytics.Processing.Tests.Visits
             _identifiedVisitWriter.Setup(x => x.WriteAsync(timeRange.Object, It.IsAny<IEnumerable<Visit>>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _processor.ReportAsync(timeRange.Object).ConfigureAwait(false);
+            await _processor.ReportAsync(timeRange.Object);
 
             _visitService.Verify(x => x.GetIdentifiedAsync(timeRange.Object, It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
             _identifiedVisitWriter.Verify(x => x.WriteAsync(It.IsAny<ITimeRange>(), It.IsAny<IEnumerable<Visit>>(), It.IsAny<CancellationToken>()), Times.Once);

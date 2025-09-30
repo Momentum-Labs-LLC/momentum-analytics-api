@@ -10,7 +10,7 @@ namespace Momentum.Analytics.Core.Models
 
         public IEnumerable<T>? Data { get; set; }
 
-        public TPage NextPage { get; set; }
+        public TPage? NextPage { get; set; }
     } // end class
 
     public class SearchResponse<T> : SearchResponse<T, int>, ISearchResponse<T>

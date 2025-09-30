@@ -26,7 +26,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
 
         public override async Task<IDynamoSearchResponse<Visit>> GetIdentifiedAsync(
             ITimeRange timeRange, 
-            Dictionary<string, AttributeValue> page, 
+            Dictionary<string, AttributeValue>? page = default, 
             CancellationToken token = default)
         {
             var result = new DynamoSearchResponse<Visit>();
@@ -62,7 +62,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
 
         public override async Task<IDynamoSearchResponse<Visit>> GetUnidentifiedAsync(
             ITimeRange timeRange, 
-            Dictionary<string, AttributeValue> page, 
+            Dictionary<string, AttributeValue>? page = default, 
             CancellationToken token = default)
         {
             var result = new DynamoSearchResponse<Visit>();
@@ -91,7 +91,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
             if(unidentifiedVisits.Any())
             {
                 result.Data = unidentifiedVisits;
-                result.NextPage = null;
+                result.NextPage = new Dictionary<string, AttributeValue>();
             } // end if
 
             return result;
@@ -104,7 +104,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
             var result = new List<Visit>();
 
             int pageCounter = 0;
-            Dictionary<string, AttributeValue> nextPage = null;
+            Dictionary<string, AttributeValue>? nextPage = null;
             IDynamoSearchResponse<Visit> searchResponse;
             do
             {
@@ -131,7 +131,7 @@ namespace Momentum.Analytics.DynamoDb.Visits
             var result = new List<Visit>();
 
             var pageCounter = 0;
-            Dictionary<string, AttributeValue> nextPage = null;
+            Dictionary<string, AttributeValue>? nextPage = null;
             IDynamoSearchResponse<Visit> searchResponse;
             do
             {

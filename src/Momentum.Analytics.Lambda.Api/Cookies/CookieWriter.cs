@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Primitives;
 using Momentum.Analytics.Core.Interfaces;
 
 namespace Momentum.Analytics.Lambda.Api.Cookies
@@ -22,7 +23,7 @@ namespace Momentum.Analytics.Lambda.Api.Cookies
         {
             var cookieOptions = await _cookieOptionsFactory.GetAsync(token).ConfigureAwait(false);   
             
-            _httpContextAccessor.HttpContext.Response.Cookies.Append(CookieConstants.NAME, cookie.ToHeaderValue(), cookieOptions);
+            _httpContextAccessor.HttpContext?.Response.Cookies.Append(CookieConstants.NAME, cookie.ToHeaderValue().ToString(), cookieOptions);
         } // end method
     } // end class
 } // end namespace

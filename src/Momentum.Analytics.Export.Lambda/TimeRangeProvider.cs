@@ -28,14 +28,14 @@ public class TimeRangeProvider : ITimeRangeProvider
         var hoursLookback = configuration.GetValue<int>(HOURS_LOOKBACK, HOURS_LOOKBACK_DEFAULT);
         var trimToHour = configuration.GetValue<bool>(TRIM_TO_HOUR, TRIM_TO_HOUR_DEFAULT);
         var timezoneId = configuration.GetValue<string>(TIMEZONE, TIMEZONE_DEFAULT);
-        DateTimeZone timeZone = timezoneProviders.GetZoneOrNull(TIMEZONE_UTC);
+        DateTimeZone? timeZone = timezoneProviders.GetZoneOrNull(TIMEZONE_UTC);
         
         if(!string.IsNullOrWhiteSpace(timezoneId))
         {
-            timeZone = timezoneProviders.GetZoneOrNull(timezoneId);
+            timeZone = timezoneProviders.GetZoneOrNull(timezoneId) ?? DateTimeZone.Utc;
         }
 
-        var zoned = now.InZone(timeZone);
+        var zoned = now.InZone(timeZone!);
 
         var endInstant = zoned.ToInstant();
         if(trimToHour)

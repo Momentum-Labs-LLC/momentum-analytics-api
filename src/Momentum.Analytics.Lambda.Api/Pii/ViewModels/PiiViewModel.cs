@@ -6,9 +6,9 @@ namespace Momentum.Analytics.Lambda.Api.Pii.ViewModels
     public class PiiViewModel
     {
         [JsonPropertyName("value")]
-        public string Value { get; set; }
+        public string Value { get; set; } = string.Empty;
 
         [JsonPropertyName("type")]
-        public PiiTypeEnum Type { get; set; }
+        public PiiTypeEnum Type { get; set; } = PiiTypeEnum.None;
     } // end class
 } // end namespace

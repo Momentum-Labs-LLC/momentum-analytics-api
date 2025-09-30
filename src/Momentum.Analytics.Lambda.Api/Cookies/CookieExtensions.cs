@@ -95,11 +95,11 @@ namespace Momentum.Analytics.Lambda.Api.Cookies
             return result;
         } // end method
 
-        public static string? ReadString(this Dictionary<String, string> dictionary, string key, string? defaultValue = null)
+        public static string? ReadString(this Dictionary<string, string> dictionary, string key, string? defaultValue = null)
         {
             var result = defaultValue;
 
-            if(dictionary.TryGetValue(key, out string tmpValue)
+            if(dictionary.TryGetValue(key, out string? tmpValue)
                 && !string.IsNullOrWhiteSpace(tmpValue))
             {
                 result = tmpValue;

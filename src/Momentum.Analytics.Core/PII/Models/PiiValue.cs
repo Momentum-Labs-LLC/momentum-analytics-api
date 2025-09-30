@@ -15,7 +15,7 @@ namespace Momentum.Analytics.Core.PII.Models
         /// <summary>
         /// Gets or sets the hashed pii value.
         /// </summary>
-        public string Value { get; set; }
+        public string Value { get; set; } = string.Empty;
         
         /// <summary>
         /// Gets or sets the type of pii.

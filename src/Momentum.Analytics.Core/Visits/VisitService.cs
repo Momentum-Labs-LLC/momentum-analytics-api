@@ -45,17 +45,17 @@ namespace Momentum.Analytics.Core.Visits
             return result;
         } // end method
 
-        public virtual async Task<TSearchResponse> GetIdentifiedAsync(ITimeRange timeRange, TPage page, CancellationToken token = default)
+        public virtual async Task<TSearchResponse> GetIdentifiedAsync(ITimeRange timeRange, TPage? page = default, CancellationToken token = default)
         {
             return await _visitStorage.GetIdentifiedAsync(timeRange, page, token).ConfigureAwait(false);
         } // end method
 
-        public virtual async Task<TSearchResponse> GetUnidentifiedAsync(Guid cookieId, Instant timestamp, TPage page, CancellationToken token = default)
+        public virtual async Task<TSearchResponse> GetUnidentifiedAsync(Guid cookieId, Instant timestamp, TPage? page = default, CancellationToken token = default)
         {
             return await _visitStorage.GetUnidentifiedAsync(cookieId, timestamp, page, token).ConfigureAwait(false);
         } // end method
 
-        public virtual async Task<TSearchResponse> GetUnidentifiedAsync(ITimeRange timeRange, TPage page, CancellationToken token = default)
+        public virtual async Task<TSearchResponse> GetUnidentifiedAsync(ITimeRange timeRange, TPage? page = default, CancellationToken token = default)
         {
             return await _visitStorage.GetUnidentifiedAsync(timeRange, page, token).ConfigureAwait(false);
         } // end method

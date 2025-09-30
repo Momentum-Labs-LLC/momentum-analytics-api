@@ -3,9 +3,11 @@ using Amazon.S3.Model;
 using CsvHelper;
 using Microsoft.Extensions.Logging;
 using Momentum.Analytics.Core.Interfaces;
+using Momentum.Analytics.Core.PII.Models;
 using Momentum.Analytics.Core.Visits.Interfaces;
 using Momentum.Analytics.Core.Visits.Models;
 using Momentum.Analytics.Visits.Lambda.IdentifiedVisits.Interfaces;
+using NodaTime;
 
 namespace Momentum.Analytics.Visits.Lambda.IdentifiedVisits
 {
@@ -56,13 +58,13 @@ namespace Momentum.Analytics.Visits.Lambda.IdentifiedVisits
         {
             var rows = visits.Select(x => new IdentifiedVisit()
             {
-                Pii = x.PiiValue,
-                PiiTypeId = (int)x.PiiType,
-                VisitStart = x.UtcStart.InZone(_visitConfiguration.TimeZone).ToDateTimeOffset().ToString("yyyy-MM-dd HH:mm:ss"),
+                Pii = x.PiiValue ?? string.Empty,
+                PiiTypeId = (int)(x.PiiType ?? PiiTypeEnum.None),
+                VisitStart = x.UtcStart.InZone(_visitConfiguration.TimeZone ?? DateTimeZone.Utc).ToDateTimeOffset().ToString("yyyy-MM-dd HH:mm:ss"),
                 FunnelStep = x.FunnelStep,
-                Referrer = x.Referer,
-                Source = x.Source,
-                Medium = x.Medium
+                Referrer = x.Referer ?? string.Empty,
+                Source = x.Source ?? string.Empty,
+                Medium = x.Medium ?? string.Empty
             });
 
             var result = new MemoryStream();

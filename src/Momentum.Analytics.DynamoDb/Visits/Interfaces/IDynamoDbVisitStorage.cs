@@ -11,12 +11,12 @@ namespace Momentum.Analytics.DynamoDb.Visits.Interfaces
     {
         Task<IDynamoSearchResponse<Visit>> GetIdentifiedAsync(
             Instant hour, 
-            Dictionary<string, AttributeValue> page,
+            Dictionary<string, AttributeValue>? page,
             CancellationToken token = default);
 
         Task<IDynamoSearchResponse<Visit>> GetUnidentifiedAsync(
             Instant hour,
-            Dictionary<string, AttributeValue> page,
+            Dictionary<string, AttributeValue>? page,
             CancellationToken token = default);
     } // end interface
 } // end namespace
