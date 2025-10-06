@@ -83,6 +83,7 @@ public class Startup
         app.UseRouting();
 
         app.UseCors(CORS_POLICY_NAME);
+        
         app.UseAuthorization();
         
         app.UseEndpoints(endpoints =>
