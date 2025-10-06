@@ -37,7 +37,7 @@ public class PageViewServiceTests
             Referer = "https://test.com"
         };
 
-        await _service.RecordAsync(pageView).ConfigureAwait(false);
+        await _service.RecordAsync(pageView);
 
         _storage.Verify(x => x.InsertAsync(pageView, It.IsAny<CancellationToken>()), Times.Once);
         _piiService.Verify(x => x.RecordAsync(It.IsAny<CollectedPii>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -58,10 +58,10 @@ public class PageViewServiceTests
             Referer = "https://test.com"
         };
 
-        await _service.RecordAsync(pageView).ConfigureAwait(false);
+        await _service.RecordAsync(pageView);
 
         _storage.Verify(x => x.InsertAsync(pageView, It.IsAny<CancellationToken>()), Times.Once);
-        _piiService.Verify(x => x.RecordAsync(It.Is<CollectedPii>(x => x.Pii.Value == "12345" && x.Pii.PiiType == PiiTypeEnum.AppointmentId), It.IsAny<CancellationToken>()), Times.Once);
+        _piiService.Verify(x => x.RecordAsync(It.Is<CollectedPii>(x => x.Pii!.Value == "12345" && x.Pii!.PiiType == PiiTypeEnum.AppointmentId), It.IsAny<CancellationToken>()), Times.Once);
     } // end method
 
     [Theory]
@@ -73,11 +73,11 @@ public class PageViewServiceTests
             CookieId = Guid.NewGuid(),
             VisitId = Ulid.NewUlid(),
             UtcTimestamp = _clockService.Now,
-            Url = "https://test.com",
+            Url = url,
             Referer = "https://test.com"
         };
 
-        await _service.RecordAsync(pageView).ConfigureAwait(false);
+        await _service.RecordAsync(pageView);
 
         _storage.Verify(x => x.InsertAsync(pageView, It.IsAny<CancellationToken>()), Times.Once);
         _piiService.Verify(x => x.RecordAsync(It.IsAny<CollectedPii>(), It.IsAny<CancellationToken>()), Times.Never);

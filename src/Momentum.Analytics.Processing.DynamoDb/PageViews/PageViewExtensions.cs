@@ -55,7 +55,7 @@ public static class PageViewExtensions
             throw new ArgumentNullException(PageViewConstants.UTC_TIMESTAMP);
         } // end if
 
-        result.Domain = fields.ReadString(PageViewConstants.DOMAIN);
+        result.Domain = fields.ReadString(PageViewConstants.DOMAIN, string.Empty)!;
         result.Path = fields.ReadString(PageViewConstants.PATH);
         result.FunnelStep = fields.ReadInteger(PageViewConstants.FUNNEL_STEP);
         result.Referer = fields.ReadString(PageViewConstants.REFERER);

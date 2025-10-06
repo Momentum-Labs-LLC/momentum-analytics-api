@@ -19,7 +19,6 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
         protected readonly ICookieWriter _cookieWriter;
         protected readonly IClockService _clockService;
         protected readonly IVisitWindowCalculator _visitWindowCalculator;
-        protected readonly IHttpContextAccessor _httpContextAccessor;
         protected readonly ILogger _logger;
 
         public PageViewsController(
@@ -44,7 +43,7 @@ namespace Momentum.Analytics.Lambda.Api.PageViews
         {
             IActionResult result = File(ApiConstants.GIF_BYTES, "image/gif");
 
-            PageViewViewModel viewModel;
+            PageViewViewModel? viewModel;
             var pageViewBytes = Convert.FromBase64String(base64PageView);
             using (var stream = new MemoryStream(pageViewBytes))
             {

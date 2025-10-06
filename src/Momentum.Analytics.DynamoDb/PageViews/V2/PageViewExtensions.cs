@@ -19,11 +19,11 @@ namespace Momentum.Analytics.DynamoDb.PageViews.V2
         {
             return new PageView()
             {
-                CookieId = fields.ReadGuid(PageViewConstants.COOKIE_ID, true).Value,
+                CookieId = fields.ReadGuid(PageViewConstants.COOKIE_ID, true)!.Value,
                 VisitId = fields.ReadUlid(PageViewConstants.VISIT_ID),
-                UtcTimestamp = fields.ReadDateTime(PageViewConstants.UTC_TIMESTAMP, true).Value,
-                Url = fields.ReadString(PageViewConstants.URL),
-                Referer = fields.ReadString(PageViewConstants.REFERER)
+                UtcTimestamp = fields.ReadDateTime(PageViewConstants.UTC_TIMESTAMP, true)!.Value,
+                Url = fields.ReadString(PageViewConstants.URL) ?? string.Empty,
+                Referer = fields.ReadString(PageViewConstants.REFERER) ?? string.Empty
             };
         }
     }

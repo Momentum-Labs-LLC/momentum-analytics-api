@@ -28,7 +28,7 @@ services:
     entrypoint:
       - bash
     command:
-      #'-c "for f in PageViews PiiValues CollectedPii Visits; do aws dynamodb delete-table --endpoint-url "http://odddc-dynamodb:8000" --table-name $${f}; done"'
+      #'-c "for f in PageViews PiiValues CollectedPii Visits FieldChanges; do aws dynamodb delete-table --endpoint-url "http://odddc-dynamodb:8000" --table-name $${f}; done"'
       '-c "for f in /tmp/dynamo/*.json; do aws dynamodb create-table --endpoint-url "http://dddc-dynamodb:8000" --cli-input-json file://"$${f#./}"; done"'
 
     

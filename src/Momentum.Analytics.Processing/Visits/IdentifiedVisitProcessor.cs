@@ -27,8 +27,8 @@ namespace Momentum.Analytics.Processing.Visits
         public async Task ReportAsync(ITimeRange timeRange, CancellationToken token = default)
         {
             var identifiedVisits = new List<Visit>();
-            TSearchResponse searchResponse = default;
-            var nextPage = default(TPage);
+            TSearchResponse? searchResponse;
+            TPage? nextPage = default;
             do 
             {
                 searchResponse = await _visitService.GetIdentifiedAsync(timeRange, nextPage, token).ConfigureAwait(false);

@@ -16,7 +16,7 @@ namespace Momentum.Analytics.Core.Visits
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
-        public virtual async Task<Instant> GetExpirationAsync(Instant activityTimestamp, CancellationToken token = default)
+        public virtual Task<Instant> GetExpirationAsync(Instant activityTimestamp, CancellationToken token = default)
         {
             Instant result;
             if(_visitConfiguration.IsSliding)
@@ -27,7 +27,7 @@ namespace Momentum.Analytics.Core.Visits
             else
             {
                 // visits are configured to be fixed windows
-                var zonedActivityTimestamp = activityTimestamp.InZone(_visitConfiguration.TimeZone);
+                var zonedActivityTimestamp = activityTimestamp.InZone(_visitConfiguration.TimeZone!);
 
                 var localDate = new LocalDate(
                         zonedActivityTimestamp.Year, 
@@ -35,7 +35,7 @@ namespace Momentum.Analytics.Core.Visits
                         zonedActivityTimestamp.Day);
 
                 var zonedMidnight = zonedActivityTimestamp.Zone.AtStartOfDay(localDate);
-                var firstWindowStart = Duration.FromMinutes(_visitConfiguration.FixedWindowStart.Value.Hour * 60 + _visitConfiguration.FixedWindowStart.Value.Minute);
+                var firstWindowStart = Duration.FromMinutes(_visitConfiguration.FixedWindowStart!.Value.Hour * 60 + _visitConfiguration.FixedWindowStart!.Value.Minute);
                 var zonedFirstWindow = zonedMidnight.Plus(firstWindowStart);
 
                 result = zonedFirstWindow.ToInstant();
@@ -45,7 +45,7 @@ namespace Momentum.Analytics.Core.Visits
                 } // end while
             } // end if
 
-            return result;
+            return Task.FromResult(result);
         } // end method
     } // end class
 } // end namespace

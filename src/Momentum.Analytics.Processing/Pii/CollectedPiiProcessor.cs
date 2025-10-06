@@ -45,19 +45,19 @@ namespace Momentum.Analytics.Processing.Pii
             {
                 // there is already an active visit
                 if(!activeVisit.UtcIdentifiedTimestamp.HasValue
-                    || (activeVisit.PiiType.HasValue && activeVisit.PiiType > collectedPii.Pii.PiiType))
+                    || (activeVisit.PiiType.HasValue && activeVisit.PiiType > collectedPii.Pii!.PiiType))
                 {
                     // this visit is either unidentified or we have just collected a better form of identification
-                    activeVisit.PiiType = collectedPii.Pii.PiiType;
-                    activeVisit.PiiValue = collectedPii.Pii.Value;
+                    activeVisit.PiiType = collectedPii.Pii!.PiiType;
+                    activeVisit.PiiValue = collectedPii.Pii!.Value;
                     activeVisit.UtcIdentifiedTimestamp = collectedPii.UtcTimestamp;
                     
                     await _visitService.UpsertAsync(activeVisit, token).ConfigureAwait(false);
                 }                
                 else if(activeVisit.PiiType != null 
                     && activeVisit.PiiType == PiiTypeEnum.UserId 
-                    && collectedPii.Pii.PiiType == PiiTypeEnum.UserId
-                    && !activeVisit.PiiValue.Equals(collectedPii.Pii.Value))
+                    && collectedPii.Pii!.PiiType == PiiTypeEnum.UserId
+                    && !activeVisit.PiiValue!.Equals(collectedPii.Pii!.Value))
                 {
                     // the active visit is already identified with a user id
                     // this is a different user id
@@ -85,8 +85,8 @@ namespace Momentum.Analytics.Processing.Pii
                     CookieId = collectedPii.CookieId,
                     UtcStart = collectedPii.UtcTimestamp,
                     UtcExpiration = visitExpiration,
-                    PiiType = collectedPii.Pii.PiiType,
-                    PiiValue = collectedPii.Pii.Value,
+                    PiiType = collectedPii.Pii!.PiiType,
+                    PiiValue = collectedPii.Pii!.Value,
                     UtcIdentifiedTimestamp = collectedPii.UtcTimestamp,
                 };
 
@@ -111,7 +111,7 @@ namespace Momentum.Analytics.Processing.Pii
         protected async Task<int> HandleUnidentifiedVisitsAsync(CollectedPii collectedPii, CancellationToken token = default)
         {
             var result = 0;
-            TPage page = default;
+            TPage? page = default;
             TVisitSearchResponse visits;
             do
             {
@@ -122,8 +122,8 @@ namespace Momentum.Analytics.Processing.Pii
                 {
                     foreach(var visit in visits.Data.Where(x => string.IsNullOrWhiteSpace(x.PiiValue)))
                     {
-                        visit.PiiValue = collectedPii.Pii.Value;
-                        visit.PiiType = collectedPii.Pii.PiiType;
+                        visit.PiiValue = collectedPii.Pii!.Value;
+                        visit.PiiType = collectedPii.Pii!.PiiType;
                         visit.UtcIdentifiedTimestamp = _clockService.Now;
 
                         // TODO: move to a batch upsert?
@@ -133,8 +133,15 @@ namespace Momentum.Analytics.Processing.Pii
                 } // end if
 
                 // increment visitsearch page before next loop.
-                page = visits.NextPage;
-            } while(visits.HasMore);
+                if(visits != null && visits.NextPage != null)
+                {
+                    page = visits.NextPage;
+                }
+                else
+                {
+                    page = default;
+                } // end if
+            } while(visits?.HasMore ?? false);
 
             return result;
         } // end method

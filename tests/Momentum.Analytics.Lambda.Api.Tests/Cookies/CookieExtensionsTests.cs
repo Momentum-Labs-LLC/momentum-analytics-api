@@ -8,14 +8,14 @@ public class CookieExtensionsTests
 {
     [Theory]
     [InlineData("")]
-    [InlineData(null)]    
-    public void ToCookieModel_NoInput(string cookieValue)
+    [InlineData((string?)null)]    
+    public void ToCookieModel_NoInput(string? cookieValue)
     {
         var visitExpirationDefault = Instant.FromUnixTimeMilliseconds(1000);
         var cookieModel = cookieValue.ToCookieModel(visitExpirationDefault);
 
-        Assert.NotNull(cookieModel.Id);
-        Assert.NotNull(cookieModel.VisitId);
+        Assert.True(cookieModel.Id != Guid.Empty);
+        Assert.True(cookieModel.VisitId != Ulid.Empty);
         Assert.Equal(visitExpirationDefault, cookieModel.VisitExpiration);
         Assert.Equal(PiiTypeEnum.None, cookieModel.CollectedPii);
         Assert.Equal(0, cookieModel.MaxFunnelStep);

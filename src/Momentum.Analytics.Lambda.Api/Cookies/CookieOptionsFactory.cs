@@ -32,9 +32,9 @@ namespace Momentum.Analytics.Lambda.Api.Cookies
             _sameSiteMode = (SameSiteMode)sameSiteValue;
         } // end method
 
-        public virtual async Task<CookieOptions> GetAsync(CancellationToken token = default)
+        public virtual Task<CookieOptions> GetAsync(CancellationToken token = default)
         {
-            return new CookieOptions()
+            return Task.FromResult(new CookieOptions()
                 {
                     Expires = DateTime.UtcNow.Add(_expiration),
                     Domain = _domain,
@@ -42,7 +42,7 @@ namespace Momentum.Analytics.Lambda.Api.Cookies
                     SameSite = _sameSiteMode, // Default
                     Secure = _isSecure,
                     HttpOnly = false, // let javascript access the cookie
-                };      
+                });      
         } // end method
     } // end class
 } // end namespace

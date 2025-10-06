@@ -68,7 +68,10 @@ namespace Momentum.Analytics.PageViews.Lambda
                     try
                     {
                         var pageView = BuildPageView(record.Dynamodb);
-                        await pageViewProcessor.ProcessAsync(pageView).ConfigureAwait(false);
+                        if(pageView != null)
+                        {
+                            await pageViewProcessor.ProcessAsync(pageView).ConfigureAwait(false);
+                        } // end if
                     }
                     catch(Exception ex)
                     {

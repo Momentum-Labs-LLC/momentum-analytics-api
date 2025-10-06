@@ -24,7 +24,7 @@ namespace Momentum.Analytics.Core.PII
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         } // end method
 
-        public virtual async Task<string> HashEmailAsync(string email, CancellationToken token = default)
+        public virtual Task<string> HashEmailAsync(string email, CancellationToken token = default)
         {
             // Convert byte array to a string
             var result = new StringBuilder();
@@ -50,7 +50,7 @@ namespace Momentum.Analytics.Core.PII
                 } // end for                
             } // end using
 
-            return result.ToString();
+            return Task.FromResult(result.ToString());
         } // end method
     } // end class
 } // end namespace

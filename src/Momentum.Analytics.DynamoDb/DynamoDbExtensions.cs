@@ -8,7 +8,7 @@ namespace Momentum.Analytics.DynamoDb
         public static Dictionary<string, AttributeValue> AddField(
             this Dictionary<string, AttributeValue> fields, 
             string name, 
-            string value)
+            string? value)
         {
             if(fields == null)
             {
@@ -23,14 +23,25 @@ namespace Momentum.Analytics.DynamoDb
             return fields;
         } // end method
 
-        public static string ReadString(
+        public static string ReadRequiredString(this Dictionary<string, AttributeValue> fields, string name)
+        {
+            var result = fields.ReadString(name);
+            if(string.IsNullOrWhiteSpace(result))
+            {
+                throw new ArgumentNullException(name);
+            }
+
+            return result;
+        }
+
+        public static string? ReadString(
             this Dictionary<string, AttributeValue> fields,
             string name,
-            string defaultValue = null)
+            string? defaultValue = null)
         {
             var result = defaultValue;
             if(fields != null 
-                && fields.TryGetValue(name, out AttributeValue attr)
+                && fields.TryGetValue(name, out AttributeValue? attr)
                 && attr != null)
             {
                 result = attr.S;
@@ -128,7 +139,7 @@ namespace Momentum.Analytics.DynamoDb
         {
             var result = defaultValue;
             if(fields != null 
-                && fields.TryGetValue(name, out AttributeValue attr)
+                && fields.TryGetValue(name, out AttributeValue? attr)
                 && attr != null)
             {
                 result = int.Parse(attr.N);
@@ -143,7 +154,7 @@ namespace Momentum.Analytics.DynamoDb
         {
             int? result = null;
             if(fields != null 
-                && fields.TryGetValue(name, out AttributeValue attr)
+                && fields.TryGetValue(name, out AttributeValue? attr)
                 && attr != null
                 && attr.N != null)
             {
@@ -178,7 +189,7 @@ namespace Momentum.Analytics.DynamoDb
         {
             var result = defaultValue;
             if(fields != null 
-                && fields.TryGetValue(name, out AttributeValue attr)
+                && fields.TryGetValue(name, out AttributeValue? attr)
                 && attr != null)
             {
                 result = long.Parse(attr.N);
@@ -245,7 +256,7 @@ namespace Momentum.Analytics.DynamoDb
         {
             var result = defaultValue;
             if(fields != null 
-                && fields.TryGetValue(name, out AttributeValue attr)
+                && fields.TryGetValue(name, out AttributeValue? attr)
                 && attr != null)
             {
                 if(attr.N == "1")

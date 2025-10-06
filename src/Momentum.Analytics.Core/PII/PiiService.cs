@@ -42,8 +42,8 @@ namespace Momentum.Analytics.Core.PII
 
             if(maximum > 0)
             {
-                TPage nextPage = default;
-                TCollectedPiiSearchResponse searchResponse = default;
+                TPage? nextPage = default;
+                TCollectedPiiSearchResponse? searchResponse = default;
                 do
                 {
                     searchResponse = await _collectedPiiStorage
@@ -82,7 +82,7 @@ namespace Momentum.Analytics.Core.PII
 
                 foreach(var collectedPii in result)
                 {
-                    var piiValue = await _piiValueStorage.GetByIdAsync(collectedPii.PiiId.Value, token).ConfigureAwait(false);
+                    var piiValue = await _piiValueStorage.GetByIdAsync(collectedPii.PiiId!.Value, token).ConfigureAwait(false);
                     collectedPii.Pii = piiValue;
                 } // end foreach
             } // end if            
@@ -92,13 +92,13 @@ namespace Momentum.Analytics.Core.PII
 
         public async Task RecordAsync(CollectedPii collectedPii, CancellationToken token = default)
         {
-            if(collectedPii.Pii.PiiType == PiiTypeEnum.Email)
+            if(collectedPii.Pii!.PiiType == PiiTypeEnum.Email)
             {
                 _logger.LogDebug("Hashing email provided as pii.");
-                collectedPii.Pii.Value = await _emailHasher.HashEmailAsync(collectedPii.Pii.Value, token).ConfigureAwait(false);
+                collectedPii.Pii.Value = await _emailHasher.HashEmailAsync(collectedPii.Pii!.Value, token).ConfigureAwait(false);
             } // end if
 
-            var pii = await _piiValueStorage.GetByValueAsync(collectedPii.Pii.Value, token).ConfigureAwait(false);
+            var pii = await _piiValueStorage.GetByValueAsync(collectedPii.Pii!.Value, token).ConfigureAwait(false);
             if(pii != null)
             {
                 _logger.LogDebug("Pii value already exists in the dataset.");

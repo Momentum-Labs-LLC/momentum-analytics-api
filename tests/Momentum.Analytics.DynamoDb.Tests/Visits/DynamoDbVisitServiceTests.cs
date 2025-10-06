@@ -47,7 +47,7 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
             _visitStorage.SetupSequence(x => x.GetIdentifiedAsync(It.IsAny<Instant>(), It.IsAny<Dictionary<string, AttributeValue>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new DynamoSearchResponse<Visit>()
                 {
-                    NextPage = null,
+                    NextPage = new Dictionary<string, AttributeValue>(),
                     Data = new List<Visit>()
                     {
                         new Visit()
@@ -60,7 +60,7 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
                 })
                 .ReturnsAsync(new DynamoSearchResponse<Visit>()
                 {
-                    NextPage = null,
+                    NextPage = new Dictionary<string, AttributeValue>(),
                     Data = new List<Visit>()
                     {
                         
@@ -68,7 +68,7 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
                 })
                 .ReturnsAsync(new DynamoSearchResponse<Visit>()
                 {
-                    NextPage = null,
+                    NextPage = new Dictionary<string, AttributeValue>(),
                     Data = new List<Visit>()
                     {
                         
@@ -81,11 +81,11 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
                 UtcStart = now.Minus(Duration.FromHours(2)),
                 UtcEnd = now
             };
-            var visits = await _service.GetIdentifiedAsync(timeRange, null).ConfigureAwait(false);
+            var visits = await _service.GetIdentifiedAsync(timeRange, new Dictionary<string, AttributeValue>());
 
             Assert.NotNull(visits.Data);
             Assert.NotEmpty(visits.Data);
-            Assert.Equal(1, visits.Data.Count());
+            Assert.Single(visits.Data);
 
             _visitStorage.Verify(x => x.GetIdentifiedAsync(It.IsAny<Instant>(), It.IsAny<Dictionary<string, AttributeValue>>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
         } // end method
@@ -96,7 +96,7 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
             _visitStorage.SetupSequence(x => x.GetUnidentifiedAsync(It.IsAny<Instant>(), It.IsAny<Dictionary<string, AttributeValue>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new DynamoSearchResponse<Visit>()
                 {
-                    NextPage = null,
+                    NextPage = new Dictionary<string, AttributeValue>(),
                     Data = new List<Visit>()
                     {
                         new Visit()
@@ -109,7 +109,7 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
                 })
                 .ReturnsAsync(new DynamoSearchResponse<Visit>()
                 {
-                    NextPage = null,
+                    NextPage = new Dictionary<string, AttributeValue>(),
                     Data = new List<Visit>()
                     {
                         
@@ -117,7 +117,7 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
                 })
                 .ReturnsAsync(new DynamoSearchResponse<Visit>()
                 {
-                    NextPage = null,
+                    NextPage = new Dictionary<string, AttributeValue>(),
                     Data = new List<Visit>()
                     {
                         
@@ -130,11 +130,11 @@ namespace Momentum.Analytics.DynamoDb.Tests.Visits
                 UtcStart = now.Minus(Duration.FromHours(2)),
                 UtcEnd = now
             };
-            var visits = await _service.GetUnidentifiedAsync(timeRange, null).ConfigureAwait(false);
+            var visits = await _service.GetUnidentifiedAsync(timeRange, new Dictionary<string, AttributeValue>());
 
             Assert.NotNull(visits.Data);
             Assert.NotEmpty(visits.Data);
-            Assert.Equal(1, visits.Data.Count());
+            Assert.Single(visits.Data);
 
             _visitStorage.Verify(x => x.GetUnidentifiedAsync(It.IsAny<Instant>(), It.IsAny<Dictionary<string, AttributeValue>>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
         } // end method

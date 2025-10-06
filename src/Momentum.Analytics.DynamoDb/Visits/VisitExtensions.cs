@@ -19,10 +19,10 @@ namespace Momentum.Analytics.DynamoDb.Visits
                 .AddField(VisitConstants.UTC_START_HOUR, visit.UtcStart.TrimToHour())
                 .AddField(VisitConstants.UTC_EXPIRATION, visit.UtcExpiration)
                 .AddField(VisitConstants.FUNNEL_STEP, visit.FunnelStep)
-                .AddField(VisitConstants.REFERER, visit.Referer)
-                .AddField(VisitConstants.SOURCE, visit.Source)
-                .AddField(VisitConstants.MEDIUM, visit.Medium)
-                .AddField(VisitConstants.PII_VALUE, visit.PiiValue)
+                .AddField(VisitConstants.REFERER, visit.Referer ?? string.Empty)
+                .AddField(VisitConstants.SOURCE, visit.Source ?? string.Empty)
+                .AddField(VisitConstants.MEDIUM, visit.Medium ?? string.Empty)
+                .AddField(VisitConstants.PII_VALUE, visit.PiiValue ?? string.Empty)
                 .AddField(VisitConstants.PII_TYPE, (int?)visit.PiiType)
                 .AddField(VisitConstants.IS_IDENTIFIED, visit.UtcIdentifiedTimestamp.HasValue)
                 .AddField(VisitConstants.UTC_IDENTIFIED_TIMESTAMP, visit.UtcIdentifiedTimestamp)
@@ -33,9 +33,9 @@ namespace Momentum.Analytics.DynamoDb.Visits
         public static Visit ToVisit(this Dictionary<string, AttributeValue> fields)
         {
             var result = new Visit();
-            result.Id = fields.ReadGuid(VisitConstants.ID, true).Value;
-            result.CookieId = fields.ReadGuid(VisitConstants.COOKIE_ID, true).Value;
-            result.UtcStart = fields.ReadDateTime(VisitConstants.UTC_START, true).Value;
+            result.Id = fields.ReadGuid(VisitConstants.ID, true)!.Value;
+            result.CookieId = fields.ReadGuid(VisitConstants.COOKIE_ID, true)!.Value;
+            result.UtcStart = fields.ReadDateTime(VisitConstants.UTC_START, true)!.Value;
             result.UtcExpiration = fields.ReadDateTime(VisitConstants.UTC_EXPIRATION);
             result.FunnelStep = fields.ReadInteger(VisitConstants.FUNNEL_STEP);
             result.Referer = fields.ReadString(VisitConstants.REFERER);

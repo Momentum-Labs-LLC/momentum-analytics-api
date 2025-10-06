@@ -36,7 +36,7 @@ namespace Momentum.Analytics.Core.Tests.Visits
 
             var activityTimestamp = SystemClock.Instance.GetCurrentInstant();
 
-            var expiration = await _expirationProvider.GetExpirationAsync(activityTimestamp).ConfigureAwait(false);
+            var expiration = await _expirationProvider.GetExpirationAsync(activityTimestamp);
 
             var expectedExpiration = activityTimestamp.Plus(visitWindowLength);
 
@@ -46,7 +46,12 @@ namespace Momentum.Analytics.Core.Tests.Visits
         [Fact]
         public async Task CalculateVisitExpirationAsync_Fixed_EndofDay_EST()
         {
-            var estTimeZone = NodaTime.DateTimeZoneProviders.Tzdb.GetZoneOrNull("America/New_York");
+            var estTimeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull("America/New_York");
+            if(estTimeZone == null)
+            {
+                throw new Exception("America/New_York time zone not found");
+            }
+
             var visitWindowLength = Duration.FromHours(24);
             _visitConfiguration.Setup(x => x.IsSliding).Returns(false);
             _visitConfiguration.Setup(x => x.WindowLength).Returns(visitWindowLength);
@@ -55,7 +60,7 @@ namespace Momentum.Analytics.Core.Tests.Visits
 
             var activityTimestamp = SystemClock.Instance.GetCurrentInstant();
 
-            var expiration = await _expirationProvider.GetExpirationAsync(activityTimestamp).ConfigureAwait(false);
+            var expiration = await _expirationProvider.GetExpirationAsync(activityTimestamp);
             var zonedTimestamp = activityTimestamp.InZone(estTimeZone);
 
             var localDate = new LocalDate(
@@ -76,7 +81,12 @@ namespace Momentum.Analytics.Core.Tests.Visits
         [Fact]
         public async Task CalculateVisitExpirationAsync_Fixed_EndofDay_EST_Midnight()
         {
-            var estTimeZone = NodaTime.DateTimeZoneProviders.Tzdb.GetZoneOrNull("America/New_York");
+            var estTimeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull("America/New_York");
+            if(estTimeZone == null)
+            {
+                throw new Exception("America/New_York time zone not found");
+            }
+
             var visitWindowLength = Duration.FromHours(24);
             _visitConfiguration.Setup(x => x.IsSliding).Returns(false);
             _visitConfiguration.Setup(x => x.WindowLength).Returns(visitWindowLength);
@@ -103,7 +113,7 @@ namespace Momentum.Analytics.Core.Tests.Visits
             //     estTimeZone.GetUtcOffset(now));
             var midnightTimestamp = zonedMidnight.ToInstant();
 
-            var expiration = await _expirationProvider.GetExpirationAsync(midnightTimestamp).ConfigureAwait(false);
+            var expiration = await _expirationProvider.GetExpirationAsync(midnightTimestamp);
 
             var zonedExpiration = zonedMidnight.Plus(visitWindowLength);
             var expectedExpiration = zonedExpiration.ToInstant();

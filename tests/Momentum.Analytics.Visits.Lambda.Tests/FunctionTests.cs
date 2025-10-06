@@ -9,7 +9,7 @@ namespace Momentum.Analytics.Visits.Lambda.Tests
 {
     public class FunctionTests
     {
-        private TestFunction _function;
+        private TestFunction? _function;
         [Fact]
         public void DI_VisitTimeRangeProvider()
         {

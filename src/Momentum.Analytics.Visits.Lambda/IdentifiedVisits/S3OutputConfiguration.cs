@@ -22,7 +22,7 @@ namespace Momentum.Analytics.Visits.Lambda.IdentifiedVisits
             _visitConfiguration = visitConfiguration ?? throw new ArgumentNullException(nameof(visitConfiguration));
         } // end method
 
-        public virtual async Task<string> BuildKeyAsync(ITimeRange timeRange, CancellationToken token = default)
+        public virtual Task<string> BuildKeyAsync(ITimeRange timeRange, CancellationToken token = default)
         {
             var startZoned = timeRange.UtcStart.InUtc();
             var endZoned = timeRange.UtcEnd.InUtc();
@@ -33,7 +33,7 @@ namespace Momentum.Analytics.Visits.Lambda.IdentifiedVisits
                 endZoned = timeRange.UtcEnd.InZone(_visitConfiguration.TimeZone);
             } // end if
             
-            return $"{startZoned.ToString("yyyyMM", null)}/{startZoned.ToString("yyyyMMddHH", null)}_{endZoned.ToString("yyyyMMddHH", null)}.csv";
+            return Task.FromResult($"{startZoned.ToString("yyyyMM", null)}/{startZoned.ToString("yyyyMMddHH", null)}_{endZoned.ToString("yyyyMMddHH", null)}.csv");
         } // end method
     } // end class
 } // end namespace

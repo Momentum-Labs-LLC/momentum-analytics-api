@@ -98,7 +98,7 @@ namespace Momentum.Analytics.Processing.Tests.Pii
             var collectedPii = BuildCollectedPii(userId);
             
             _visitService.Setup(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Visit)null);
+                .ReturnsAsync((Visit?)null);
 
             _visitService.Setup(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
@@ -109,7 +109,7 @@ namespace Momentum.Analytics.Processing.Tests.Pii
             _visitService.Setup(x => x.GetUnidentifiedAsync(collectedPii.CookieId, collectedPii.UtcTimestamp, It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new SearchResponse<Visit>() { Total = 0, Data = null });            
 
-            await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
+            await _processor.ProcessAsync(collectedPii);
             
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -136,7 +136,7 @@ namespace Momentum.Analytics.Processing.Tests.Pii
             _visitService.Setup(x => x.GetUnidentifiedAsync(collectedPii.CookieId, collectedPii.UtcTimestamp, It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new SearchResponse<Visit>() { Total = 0, Data = null });            
 
-            await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
+            await _processor.ProcessAsync(collectedPii);
             
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -168,7 +168,7 @@ namespace Momentum.Analytics.Processing.Tests.Pii
                     Data = new List<Visit>() { BuildVisit(collectedPii.CookieId, now.Minus(Duration.FromDays(2))) } 
                 });
 
-            await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
+            await _processor.ProcessAsync(collectedPii);
             
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
@@ -195,7 +195,7 @@ namespace Momentum.Analytics.Processing.Tests.Pii
             _visitService.Setup(x => x.GetUnidentifiedAsync(collectedPii.CookieId, collectedPii.UtcTimestamp, It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new SearchResponse<Visit>() { Total = 0, Data = null });            
 
-            await _processor.ProcessAsync(collectedPii).ConfigureAwait(false);
+            await _processor.ProcessAsync(collectedPii);
             
             _visitService.Verify(x => x.GetByActivityAsync(It.IsAny<IUserActivity>(), It.IsAny<CancellationToken>()), Times.Once);
             _visitService.Verify(x => x.UpsertAsync(It.IsAny<Visit>(), It.IsAny<CancellationToken>()), Times.Never);

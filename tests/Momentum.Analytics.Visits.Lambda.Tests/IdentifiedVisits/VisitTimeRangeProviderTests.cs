@@ -14,7 +14,7 @@ namespace Momentum.Analytics.Visits.Lambda.Tests.IdentifiedVisits
         protected readonly Mock<IVisitConfiguration> _visitConfiguration;
         protected readonly IClockService _clockService;
 
-        private IdentifiedVisitTimeRangeProvider _timeRangeProvider;
+        private IdentifiedVisitTimeRangeProvider? _timeRangeProvider;
 
         public VisitTimeRangeProviderTests()
         {
@@ -50,7 +50,7 @@ namespace Momentum.Analytics.Visits.Lambda.Tests.IdentifiedVisits
         } // end method
 
         [Fact]
-        public async Task GetAsync()
+        public void Get()
         {
             SetupHoursLookback();
             SetupTrimToHour();
@@ -66,7 +66,7 @@ namespace Momentum.Analytics.Visits.Lambda.Tests.IdentifiedVisits
         } // end method
 
         [Fact]
-        public async Task GetAsync_TrimToHour_False()
+        public void Get_TrimToHour_False()
         {
             SetupHoursLookback(1);
             SetupTrimToHour(false);

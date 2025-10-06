@@ -4,7 +4,7 @@ namespace Momentum.Analytics.Core.Models
 {
     public class SearchRequest<TPage> : ISearchRequest<TPage>
     {
-        public TPage Page { get; set; }
+        public required TPage Page { get; set; }
         public int Size { get; set; } = 10;
     } // end class
 

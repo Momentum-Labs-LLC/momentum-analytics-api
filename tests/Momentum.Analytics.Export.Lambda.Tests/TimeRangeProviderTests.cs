@@ -13,7 +13,7 @@ public class TimeRangeProviderTests
     private Mock<IConfiguration> _configuration;
     private IDateTimeZoneProvider _timezoneProvider;
     private IClockService _clockService;
-    private TimeRangeProvider _timeRangeProvider;
+    private TimeRangeProvider? _timeRangeProvider;
 
     public TimeRangeProviderTests()
     {

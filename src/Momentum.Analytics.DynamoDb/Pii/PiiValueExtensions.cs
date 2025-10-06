@@ -32,7 +32,7 @@ namespace Momentum.Analytics.DynamoDb.Pii
                 throw new ArgumentNullException(PiiValueConstants.PII_ID);
             } // end if
 
-            result.Value = fields.ReadString(PiiValueConstants.VALUE);
+            result.Value = fields.ReadString(PiiValueConstants.VALUE) ?? string.Empty;
             result.PiiType = (PiiTypeEnum)fields.ReadInteger(PiiValueConstants.PII_TYPE);
             var timestamp = fields.ReadDateTime(PiiValueConstants.UTC_TIMESTAMP);
             if(timestamp.HasValue)

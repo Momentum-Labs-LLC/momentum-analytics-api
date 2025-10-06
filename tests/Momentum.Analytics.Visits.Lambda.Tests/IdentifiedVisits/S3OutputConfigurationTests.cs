@@ -50,19 +50,19 @@ namespace Momentum.Analytics.Visits.Lambda.Tests.IdentifiedVisits
                 .Trim(TimeSpan.FromHours(1).Ticks)
                 .ToInstant();
             var hourStart = endWindow
-                .Minus(Duration.FromHours(24));
+                .Minus(Duration.FromHours(hoursLookback));
             
             var timeRange = new TimeRange()
             {
                 UtcStart = hourStart,
                 UtcEnd = endWindow
             };
-            var key = await _outputConfig.BuildKeyAsync(timeRange).ConfigureAwait(false);
+            var key = await _outputConfig.BuildKeyAsync(timeRange);
 
             var timeZone = _visitConfiguration.Object.TimeZone;
-            var prefix = hourStart.InZone(timeZone).ToString("yyyyMM", null);
-            var start = timeRange.UtcStart.InZone(timeZone).ToString("yyyyMMddHH", null);
-            var end = timeRange.UtcEnd.InZone(timeZone).ToString("yyyyMMddHH", null);
+            var prefix = hourStart.InZone(timeZone!).ToString("yyyyMM", null);
+            var start = timeRange.UtcStart.InZone(timeZone!).ToString("yyyyMMddHH", null);
+            var end = timeRange.UtcEnd.InZone(timeZone!).ToString("yyyyMMddHH", null);
             var expected = $"{prefix}/{start}_{end}.csv";
 
             Assert.Equal(expected, key);

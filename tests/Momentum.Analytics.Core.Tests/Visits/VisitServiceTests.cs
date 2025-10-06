@@ -22,7 +22,6 @@ namespace Momentum.Analytics.Core.Tests.Visits
     {
         private Mock<IVisitWindowCalculator> _visitWindowCalculator;
         private Mock<IVisitStorage<int, ISearchResponse<Visit>>> _visitStorage;
-        private Mock<IMemoryCache> _memoryCache;
         private Mock<ILogger<TestVisitService>> _logger;
 
         private TestVisitService _visitService;
@@ -49,9 +48,9 @@ namespace Momentum.Analytics.Core.Tests.Visits
             };
 
             _visitStorage.Setup(x => x.GetLatestAysnc(userActivity.CookieId, userActivity.UtcTimestamp, It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Visit)null);
+                .ReturnsAsync((Visit?)null);
 
-            var visit = await _visitService.GetByActivityAsync(userActivity).ConfigureAwait(false);
+            var visit = await _visitService.GetByActivityAsync(userActivity);
 
             Assert.Null(visit);
 
@@ -74,7 +73,7 @@ namespace Momentum.Analytics.Core.Tests.Visits
                     UtcExpiration = DateTime.UtcNow.ToInstant().Minus(Duration.FromHours(24))
                 });
 
-            var visit = await _visitService.GetByActivityAsync(userActivity).ConfigureAwait(false);
+            var visit = await _visitService.GetByActivityAsync(userActivity);
 
             Assert.Null(visit);
 
@@ -97,7 +96,7 @@ namespace Momentum.Analytics.Core.Tests.Visits
                     UtcExpiration = DateTime.UtcNow.ToInstant().Plus(Duration.FromHours(12))
                 });
 
-            var visit = await _visitService.GetByActivityAsync(userActivity).ConfigureAwait(false);
+            var visit = await _visitService.GetByActivityAsync(userActivity);
 
             Assert.NotNull(visit);
 

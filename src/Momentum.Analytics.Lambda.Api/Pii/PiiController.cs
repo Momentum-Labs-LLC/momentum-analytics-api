@@ -41,7 +41,7 @@ namespace Momentum.Analytics.Lambda.Api.Pii
         {
             IActionResult result = File(ApiConstants.GIF_BYTES, "image/gif");
 
-            PiiViewModel viewModel;
+            PiiViewModel? viewModel;
             var pageViewBytes = Convert.FromBase64String(base64Pii);
             using (var stream = new MemoryStream(pageViewBytes))
             {

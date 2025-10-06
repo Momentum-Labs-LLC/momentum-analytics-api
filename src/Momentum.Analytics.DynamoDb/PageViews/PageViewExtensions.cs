@@ -59,10 +59,10 @@ namespace Momentum.Analytics.DynamoDb.PageViews
                 throw new ArgumentNullException(PageViewConstants.UTC_TIMESTAMP);
             } // end if
 
-            result.Domain = fields.ReadString(PageViewConstants.DOMAIN);
+            result.Domain = fields.ReadString(PageViewConstants.DOMAIN) ?? string.Empty;
             result.Path = fields.ReadString(PageViewConstants.PATH);
             result.FunnelStep = fields.ReadInteger(PageViewConstants.FUNNEL_STEP);
-            result.Referer = fields.ReadString(PageViewConstants.REFERER);
+            result.Referer = fields.ReadString(PageViewConstants.REFERER) ?? string.Empty;
             
             var utmParameters = new List<UrchinTrackingParameter>();            
             var sourceValue = fields.ReadString(PageViewConstants.SOURCE);

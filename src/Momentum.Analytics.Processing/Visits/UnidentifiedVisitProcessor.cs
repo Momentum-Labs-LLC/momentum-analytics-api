@@ -33,8 +33,8 @@ namespace Momentum.Analytics.Processing.Visits
         public virtual async Task ProcessAsync(ITimeRange timeRange, CancellationToken token = default)
         {
             var unidentifiedVisits = new List<Visit>();
-            TSearchResponse searchResponse = default;
-            TPage nextPage = default;
+            TSearchResponse? searchResponse = default;
+            TPage? nextPage = default;
             do 
             {
                 _logger.LogDebug("Retrieving unidentified visits for time range.");
@@ -90,7 +90,7 @@ namespace Momentum.Analytics.Processing.Visits
                     Referer = visit.Referer,
                     Source = visit.Source,
                     Medium = visit.Medium,
-                    PiiValue = x.Pii.Value,
+                    PiiValue = x.Pii!.Value,
                     PiiType = PiiTypeEnum.UserId,
                     UtcIdentifiedTimestamp = visit.UtcExpiration
                 });
